@@ -55,7 +55,10 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
     private function getClasses(){
         return array(
-          //$this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\ExampleEntity'),
+          $this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\Announcement'),
+          $this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\Category'),
+          $this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\Image'),
+          $this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\User'),
         );
     }
 }

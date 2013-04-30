@@ -1,2 +1,15 @@
+{{extends file="ahs_adverts.tpl"}}
 
-<h1>hello !</h1>
+{{ block title }}Ogłoszenia - {{ $gimme->publication->name }} {{ /block }}
+
+{{ block facebook_ogg }}
+	<meta property="og:type" content="article" />
+{{ /block }}
+
+{{block content}}
+asdasd
+{{/block}}
+
+{{ block sidebar }}
+asdas
+{{ /block}}

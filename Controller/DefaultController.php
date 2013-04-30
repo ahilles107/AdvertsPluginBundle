@@ -13,6 +13,10 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
+    	$this->get('dispatcher')->notify('plugin.install', new \Newscoop\EventDispatcher\Events\GenericEvent($this, array(
+           'plugin_name' => ''
+        )));
+
         return $this->render('AHSAdvertsPluginBundle:Default:index.html.smarty');
     }
 }
