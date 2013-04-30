@@ -1,0 +1,7 @@
+services:
+    ahs_adverts_plugin.lifecyclesubscriber:
+        class: AHS\AdvertsPluginBundle\EventListener\LifecycleSubscriber
+        arguments:
+            - @em
+        tags:
+            - { name: kernel.event_subscriber}

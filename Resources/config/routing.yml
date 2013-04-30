@@ -1,0 +1,4 @@
+ahs_adverts_plugin:
+    resource: "@AHSAdvertsPluginBundle/Controller/"
+    type:     annotation
+    prefix:   /

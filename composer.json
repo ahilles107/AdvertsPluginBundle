@@ -1,0 +1,23 @@
+{
+    "name": "ahs/adverts-plugin-bundle",
+    "description": "Adverts plugin bundle for Newscoop",
+    "keywords": ["newscoop", "adverts", "cms", "integration"],
+    "version": "0.1",
+    "type": "newscoop-plugin",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Pawel Mikolajczuk",
+            "email": "mikolajczuk.private@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "newscoop/plugins-installer": "*"
+    },
+    "autoload": {
+        "psr-0": { "AHS\\AdvertsPluginBundle\\AHSAdvertsPluginBundle": "" }
+    },
+    "target-dir": "AHS/AdvertsPluginBundle",
+    "minimum-stability": "dev"
+}
