@@ -15,6 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Entity()
  * @ORM\Table(name="plugin_adverts_image")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Image 
 {
@@ -27,16 +28,16 @@ class Image
     private $id;
 
     /**
-     * @ORM\Column(type="string", name="filepath")
+     * @ORM\Column(type="string", name="newscoop_image_id")
      * @var string
      */
-    private $filepath;
+    private $newscoopImageId;
 
     /**
-     * @ORM\Column(type="text", name="description")
-     * @var string
-     */
-    private $description;
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="announcement")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */    
+    private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", inversedBy="images")
@@ -54,6 +55,14 @@ class Image
         $this->setCreatedAt(new \DateTime());
     }
 
+    /** 
+     * @ORM\PreRemove 
+     */
+    public function preRemoveHandler() {
+        $newscoopImage = new \Image($this->getNewscoopImageId());
+        $newscoopImage->delete();
+    }
+
     /**
      * Get id
      *
@@ -64,26 +73,14 @@ class Image
         return $this->id;
     }
 
-    public function getFilepath()
+    public function getNewscoopImageId()
     {
-        return $this->filepath;
+        return $this->newscoopImageId;
     }
 
-    public function setFilepath($filepath)
+    public function setNewscoopImageId($newscoopImageId)
     {
-        $this->filepath = $filepath;
-        
-        return $this;
-    }
-
-    public function getDescription()
-    {
-        return $this->description;
-    }
-
-    public function setDescription($description)
-    {
-        $this->description = $description;
+        $this->newscoopImageId = $newscoopImageId;
         
         return $this;
     }
@@ -108,6 +105,18 @@ class Image
     public function setCreatedAt(\DateTime $created_at)
     {
         $this->created_at = $created_at;
+        
+        return $this;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
         
         return $this;
     }

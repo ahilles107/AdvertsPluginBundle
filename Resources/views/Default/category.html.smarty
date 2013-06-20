@@ -1,6 +1,6 @@
 {{extends file="ahs_adverts.tpl"}}
 
-{{ block title }}Ogłoszenia - {{ $gimme->publication->name }} {{ /block }}
+{{ block title }} {{ $currentCategory->getName()}} - {{ $gimme->publication->name }} {{ /block }}
 
 {{ block facebook_ogg }}
 	<meta property="og:type" content="article" />
@@ -12,7 +12,7 @@
 
 {{block content}}
 	<ul id="announcements-list">
-	{{ foreach from=$latestAnnouncements item=announcement }}
+	{{ foreach from=$categoryAnnouncements item=announcement }}
 		<li>
 			{{ $firstImage = $announcement->getFirstImage() }}
 			<img src="{{ $firstImage['thumbnailUrl'] }}" alt="{{$announcement->getName()}}"/>
@@ -34,7 +34,7 @@
 {{ block sidebar }}
 <div class="aside">
 	<a class="add_announcement" href="{{ 'ahs_advertsplugin_default_add'|smarty_path }}">Dodaj ogłoszenie</a>
-	
+
 	<div id="categories">
 		<h4>Kategorie:</h4>
 		<ul>

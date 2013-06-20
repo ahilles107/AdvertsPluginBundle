@@ -45,6 +45,7 @@ class Category
 
     public function __construct() {
         $this->setCreatedAt(new \DateTime());
+        $this->announcements = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -62,6 +63,12 @@ class Category
         return $this->name;
     }
 
+    public function getSlug()
+    {
+        return $this->slugify($this->name);
+    }
+
+
     public function setName($name)
     {
         $this->name = $name;
@@ -69,14 +76,14 @@ class Category
         return $this;
     }
 
-    public function getAnnouncement()
+    public function getAnnouncements()
     {
-        return $this->announcement;
+        return $this->announcements;
     }
 
     public function setAnnouncement(\AHS\AdvertsPluginBundle\Entity\Announcement $announcement)
     {
-        $this->announcement = $announcement;
+        $this->announcements[] = $announcement;
         
         return $this;
     }
@@ -91,6 +98,41 @@ class Category
         $this->created_at = $created_at;
         
         return $this;
+    }
+
+    /**
+     * Modifies a string to remove all non ASCII characters and spaces.
+     */
+    public function slugify($text)
+    {
+        $char_map = array(
+            // Latin symbols
+            '©' => '(c)',
+            // Polish
+            'Ą' => 'A', 'Ć' => 'C', 'Ę' => 'e', 'Ł' => 'L', 'Ń' => 'N', 'Ó' => 'o', 'Ś' => 'S', 'Ź' => 'Z', 
+            'Ż' => 'Z', 
+            'ą' => 'a', 'ć' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'ó' => 'o', 'ś' => 's', 'ź' => 'z',
+            'ż' => 'z',
+        );
+        // Make custom replacements
+        $text = str_replace(array_keys($char_map), $char_map, $text);
+        // replace non letter or digits by -
+        $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
+        // trim
+        $text = trim($text, '-');
+        // transliterate
+        if (function_exists('iconv')) {
+            $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+        }
+        // lowercase
+        $text = strtolower($text);
+        // remove unwanted characters
+        $text = preg_replace('~[^-\w]+~', '', $text);
+        if (empty($text)) {
+            return 'n-a';
+        }
+     
+        return $text;
     }
 }
 

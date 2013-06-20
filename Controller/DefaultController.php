@@ -5,7 +5,26 @@ namespace AHS\AdvertsPluginBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use AHS\AdvertsPluginBundle\Entity\Announcement;
+use AHS\AdvertsPluginBundle\Form\AnnouncementType;
+use AHS\AdvertsPluginBundle\Entity\User;
+use AHS\AdvertsPluginBundle\Entity\Image;
 
+/**
+ * TODO:
+ * * views counter
+ * * photos limit
+ * * translations
+ * * blocks
+ * * * announcements list
+ * * * announcements categories list
+ * * * add announcement form
+ * * * edit announcement form
+ * * documentation
+ * * move routes to yaml - allow to change them 
+ */
 class DefaultController extends Controller
 {
     /**
@@ -13,10 +32,395 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-    	$this->get('dispatcher')->notify('plugin.install', new \Newscoop\EventDispatcher\Events\GenericEvent($this, array(
+        $em = $this->container->get('em');
+    	$this->get('dispatcher')->dispatch('plugin.install', new \Newscoop\EventDispatcher\Events\GenericEvent($this, array(
            'plugin_name' => ''
         )));
 
-        return $this->render('AHSAdvertsPluginBundle:Default:index.html.smarty');
+        $validDate = new \DateTime();
+        $validDate->modify('-7 days');
+
+        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+        $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->createQueryBuilder('a')
+            ->andWhere('a.is_active = true')
+            ->andWhere('a.created_at >= :validDate')
+            ->orderBy('a.created_at', 'DESC')
+            ->setParameters(array('validDate' => $validDate))
+            ->getQuery();
+
+        $paginatorService = $this->container->get('newscoop.paginator.paginator_service');
+
+        $paginator  = $this->container->get('knp_paginator');
+        $latestAnnouncements = $paginator->paginate(
+            $latestAnnouncements,
+            $this->get('request')->get('knp_page', 1),
+            10
+        );
+        $latestAnnouncements->setTemplate('AHSAdvertsPluginBundle:Pagination:polish_pagination.html.twig');
+
+        return $this->render('AHSAdvertsPluginBundle:Default:index.html.smarty', array(
+            'categories' => $categories,
+            'latestAnnouncements' => $latestAnnouncements,
+            'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:Default:announcementsPagination.html.twig', array(
+                'paginator' => $latestAnnouncements
+            ))
+        ));
+    }
+
+    /**
+     * @Route("/ogloszenia/dodaj")
+     */
+    public function addAction(Request $request)
+    {
+        $auth = \Zend_Auth::getInstance();
+        if (!$auth->hasIdentity()) {
+            return new RedirectResponse($this->container->get('zend_router')->assemble(array(
+                'controller' => '',
+                'action' => 'auth'
+            ), 'default'));
+        }
+
+        $announcement = new Announcement();
+        $em = $this->container->get('em');
+
+        $form = $this->createForm(new AnnouncementType(), $announcement);
+        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+
+        $errors = array();
+        if ($request->isMethod('POST')) {
+            $form->bind($request);
+            if ($form->isValid()) {
+                // create announcment user
+                $newscoopUserId = $auth->getIdentity();
+
+                $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+                    'newscoopUserId' => $newscoopUserId
+                ));
+
+                if (!$user) {
+                    $user = new User();
+                    $user->setNewscoopUserId($newscoopUserId);
+                    $em->persist($user);
+                }                
+
+                $announcement->setUser($user);
+
+                $em->persist($announcement);
+                $em->flush();
+
+                $this->savePhotosInAnnouncement($announcement, $request);
+
+                return new RedirectResponse($this->generateUrl('ahs_advertsplugin_default_show', array(
+                    'id' => $announcement->getId(),
+                )));
+            } else {
+                foreach ($form->getErrors() as $error) {
+                    $errors[]['message'] = $error->getMessage();
+                }
+            }
+        }
+
+        return $this->render('AHSAdvertsPluginBundle:Default:add.html.smarty', array(
+            'announcement' => $announcement,
+            'categories' => $categories,
+            'form' => $form->createView(),
+            'form_path' => $this->generateUrl('ahs_advertsplugin_default_add'),
+            'type' => 'add',
+            'errors' => $errors
+        ));
+    }
+
+    /**
+     * @Route("/ogloszenia/kategoria/{id}/{slug}")
+     */
+    public function categoryAction(Request $request, $id, $slug = null)
+    {
+        $em = $this->container->get('em');
+        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+        $currentCategory = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findOneById($id);
+        
+        $validDate = new \DateTime();
+        $validDate->modify('-7 days');
+        $categoryAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->createQueryBuilder('a')
+            ->andWhere('a.category = :category')
+            ->andWhere('a.is_active = true')
+            ->andWhere('a.created_at >= :validDate')
+            ->setParameters(array('category' => $currentCategory->getId(), 'validDate' => $validDate))
+            ->orderBy('a.created_at', 'DESC')
+            ->getQuery();
+
+        $paginatorService = $this->container->get('newscoop.paginator.paginator_service');
+        $paginatorService->setUsedRouteParams(array('id' => $currentCategory->getId(), 'slug' => $currentCategory->getSlug()));
+
+        $paginator  = $this->container->get('knp_paginator');
+        $categoryAnnouncements = $paginator->paginate(
+            $categoryAnnouncements,
+            $this->get('request')->get('knp_page', 1),
+            10
+        );
+        $categoryAnnouncements->setTemplate('AHSAdvertsPluginBundle:Pagination:polish_pagination.html.twig');
+
+        return $this->render('AHSAdvertsPluginBundle:Default:category.html.smarty', array(
+            'categories' => $categories,
+            'currentCategory' => $currentCategory,
+            'categoryAnnouncements' => $categoryAnnouncements,
+            'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:Default:announcementsPagination.html.twig', array(
+                'paginator' => $categoryAnnouncements
+            ))
+        ));
+    }
+
+    /**
+     * @Route("/ogloszenia/pokaz/{id}/{slug}", requirements={"id" = "\d+"})
+     */
+    public function showAction(Request $request, $id = null, $slug = null)
+    {
+        $em = $this->container->get('em');
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
+
+        $userSevice = $this->container->get('user.list');
+        $user = $userSevice->findOneBy(array(
+            'id' => $announcement->getUser()->getNewscoopUserId()
+        ));
+        $newscoopUser = new \MetaUser($user);
+        error_log('add');
+        error_log(print_r($request->server, true));
+        $announcement->addRead();
+        $em->flush();
+
+        return $this->render('AHSAdvertsPluginBundle:Default:show.html.smarty', array(
+            'announcement' => $announcement,
+            'announcementPhotos' => $this->processPhotos($request, $announcement),
+            'newscoopUser' => $newscoopUser
+        ));
+    }
+
+    /**
+     * @Route("/ogloszenia/edytuj/{id}", requirements={"id" = "\d+"})
+     */
+    public function editAction(Request $request, $id = null)
+    {
+        $auth = \Zend_Auth::getInstance();
+        if (!$auth->hasIdentity()) { // ignore for logged user
+            return new RedirectResponse($this->container->get('zend_router')->assemble(array(
+                'controller' => '',
+                'action' => 'auth'
+            ), 'default'));
+        }
+
+        $em = $this->container->get('em');
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
+
+        $form = $this->createForm(new AnnouncementType(), $announcement);
+        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+
+        $this->restoreSessionFromDatabase($request, $announcement->getId());
+
+        $errors = array();
+        if ($request->isMethod('POST')) {
+            $form->bind($request);
+            if ($form->isValid()) {
+                $em->persist($announcement);
+                $em->flush();
+
+                $this->savePhotosInAnnouncement($announcement, $request);
+
+                return new RedirectResponse($this->generateUrl('ahs_advertsplugin_default_show', array(
+                    'id' => $announcement->getId(),
+                )));
+            } else {
+                foreach ($form->getErrors() as $error) {
+                    $errors[]['message'] = $error->getMessage();
+                }
+            }
+        }
+
+        return $this->render('AHSAdvertsPluginBundle:Default:add.html.smarty', array(
+            'announcement' => $announcement,
+            'categories' => $categories,
+            'form' => $form->createView(),
+            'form_path' => $this->generateUrl('ahs_advertsplugin_default_edit', array('id' => $announcement->getId())),
+            'type' => 'edit',
+            'errors' => array()
+        ));
+    }
+
+    /**
+     * @Route("/ogloszenia/upload_photo")
+     */
+    public function uploadPhotoAction(Request $request)
+    {
+        $em = $this->container->get('em');
+        global $Campsite;
+
+        $auth = \Zend_Auth::getInstance();
+        $userId = $auth->getIdentity();
+        $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+            'newscoopUserId' => $userId
+        ));
+
+        $_FILES['file']['name'] = preg_replace('/[^\w\._]+/', '', $_FILES['file']['name']);
+        $file = \Plupload::OnMultiFileUploadCustom($Campsite['IMAGE_DIRECTORY']);
+        $photo = \Image::ProcessFile($_FILES['file']['name'], $_FILES['file']['name'], $userId, array('Source' => 'ogłoszenia', 'Status' => 'Unapproved', 'Date' => date('Y-m-d')));        
+
+        $image = new Image();
+        $image->setNewscoopImageId($photo->getImageId());
+        $image->setUser($user);
+
+        $em->persist($image);
+        $em->flush();
+
+        if (!$request->getSession()->has('announcement_photos')) {
+            $request->getSession()->set('announcement_photos', array(array('id' => $image->getId())));
+        } else {
+            $photos = $request->getSession()->get('announcement_photos', array());
+            $photos[] = array('id' => $image->getId());
+            $request->getSession()->set('announcement_photos', $photos);
+        }
+
+        return $this->render('AHSAdvertsPluginBundle:Default:renderPhotos.html.smarty', array(
+            'announcementPhotos' => $this->processPhotos($request)
+        ));
+    }
+
+    /**
+     * @Route("/ogloszenia/remove_photo")
+     */
+    public function removePhotoAction(Request $request)
+    {
+        $em = $this->container->get('em');
+        $announcementPhotos = $request->getSession()->get('announcement_photos', array());
+        $photoIdToRemove = $request->request->get('id');
+
+        foreach($announcementPhotos as $key => $photo) {
+            if($photo['id'] == $photoIdToRemove) {
+                unset($announcementPhotos[$key]);
+                $request->getSession()->set('announcement_photos', $announcementPhotos);
+
+                // remove image from newscoop
+                $photoEntityToRemove = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+                    ->createQueryBuilder('i')
+                    ->andWhere('i.id = (:id)')
+                    ->setParameter('id', $photoIdToRemove)
+                    ->getQuery()
+                    ->getSingleResult();
+
+                $em->remove($photoEntityToRemove);
+                $em->flush();
+                
+                return $this->render('AHSAdvertsPluginBundle:Default:renderPhotos.html.smarty', array(
+                    'announcementPhotos' => $this->processPhotos($request)
+                ));
+            }
+        }
+    }
+
+    /**
+     * @Route("/ogloszenia/render_photos")
+     */
+    public function renderPhotosAction(Request $request)
+    {
+        $em = $this->container->get('em');
+
+        return $this->render('AHSAdvertsPluginBundle:Default:renderPhotos.html.smarty', array(
+            'announcementPhotos' => $this->processPhotos($request)
+        ));
+    }
+
+    private function savePhotosInAnnouncement($announcement, $request) 
+    {
+        $em = $this->container->get('em');
+        $photosFromSession = $request->getSession()->get('announcement_photos', array());
+
+        $ids = array();
+        foreach($photosFromSession as $photo) {
+            $ids[] = $photo['id'];
+        }
+
+        if (count($ids) == 0) {
+            return array();
+        }
+
+        $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+            ->createQueryBuilder('i')
+            ->andWhere('i.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($photos as $key => $photo) {
+            $photo->setAnnouncement($announcement);
+        }
+
+        $em->flush();
+        $request->getSession()->remove('announcement_photos');
+    }
+
+    private function restoreSessionFromDatabase($request, $announcementId) {
+        $em = $this->container->get('em');
+
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($announcementId);
+        $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+            ->createQueryBuilder('i')
+            ->andWhere('i.announcement =:announcement')
+            ->setParameter('announcement', $announcement)
+            ->getQuery()
+            ->getResult();
+
+        if (count($photos) == 0) {
+            return false;
+        }
+
+        $sessionPhotos = array();
+        foreach ($photos as $image) {
+            $sessionPhotos[] = array('id' => $image->getId());
+        }
+        
+        $request->getSession()->set('announcement_photos', $sessionPhotos);
+    }
+
+    private function processPhotos($request, $announcement = null) 
+    {
+        $em = $this->container->get('em');
+        if (!$announcement) { 
+            $photosFromSession = $request->getSession()->get('announcement_photos', array());
+            $ids = array();
+            foreach($photosFromSession as $photo) {
+                $ids[] = $photo['id'];
+            }
+
+            if (count($ids) == 0) {
+                return array();
+            }
+
+            $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+                ->createQueryBuilder('i')
+                ->andWhere('i.id IN (:ids)')
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->getResult();
+        } else {
+            $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+                ->createQueryBuilder('i')
+                ->andWhere('i.announcement =:announcement')
+                ->setParameter('announcement', $announcement)
+                ->getQuery()
+                ->getResult();
+        }
+
+        $processedPhotos = array();
+        foreach($photos as $photo) {
+            $newscoopImage = new \Image($photo->getNewscoopImageId());
+            $processedPhotos[] = array(
+                'id' => $newscoopImage->getImageId(),
+                'announcementPhotoId' => $photo->getId(),
+                'imageUrl' => $newscoopImage->getImageUrl(),
+                'thumbnailUrl' => $newscoopImage->getThumbnailUrl()
+            );
+        }
+
+        return $processedPhotos;
     }
 }

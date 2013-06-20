@@ -13,7 +13,8 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "newscoop/plugins-installer": "*"
+        "newscoop/plugins-installer": "*",
+        "knplabs/knp-paginator-bundle": "v2.3.2",
     },
     "autoload": {
         "psr-0": { "AHS\\AdvertsPluginBundle\\AHSAdvertsPluginBundle": "" }
