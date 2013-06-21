@@ -3,7 +3,9 @@
 {{ block title }} {{ $currentCategory->getName()}} - {{ $gimme->publication->name }} {{ /block }}
 
 {{ block facebook_ogg }}
-	<meta property="og:type" content="article" />
+  <meta property="og:title" content="{{ $currentCategory->getName()}} - Ogłoszenia w Międzyrzec Się Dzieje!" />
+  <meta property="og:url" content="{{ 'ahs_advertsplugin_default_category'|smarty_url:['id'=>$currentCategory->getId(), 'slug'=>$currentCategory->getSlug()] }}" />
+  <meta property="og:description" content="Ogłoszenia z kategorii '{{ $currentCategory->getName()}}' - Międzyrzec Się Dzieje, najlepsze ogłoszenia w mieście!" />
 {{ /block }}
 
 {{ block css_styles }}

@@ -2,10 +2,6 @@
 
 {{ block title }}Ogłoszenia - {{ $gimme->publication->name }} {{ /block }}
 
-{{ block facebook_ogg }}
-	<meta property="og:type" content="article" />
-{{ /block }}
-
 {{ block css_styles }}
 	<link rel="stylesheet" href="{{asset}}/public/bundles/ahsadvertsplugin/css/main.css{{/asset}}" />
 {{ /block }}
