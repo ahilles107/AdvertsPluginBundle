@@ -160,6 +160,11 @@ class Announcement
         return $this;
     }
 
+    public function getImages()
+    {
+        return $this->images;
+    }
+
     public function getFirstImage()
     {
         if (!count($this->images)) {

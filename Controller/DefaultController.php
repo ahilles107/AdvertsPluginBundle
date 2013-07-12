@@ -60,7 +60,7 @@ class DefaultController extends Controller
 
         return $this->render('AHSAdvertsPluginBundle:Default:index.html.smarty', array(
             'categories' => $categories,
-            'latestAnnouncements' => $latestAnnouncements,
+            'announcementsList' => $latestAnnouncements,
             'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:Default:announcementsPagination.html.twig', array(
                 'paginator' => $latestAnnouncements
             ))
@@ -164,7 +164,7 @@ class DefaultController extends Controller
         return $this->render('AHSAdvertsPluginBundle:Default:category.html.smarty', array(
             'categories' => $categories,
             'currentCategory' => $currentCategory,
-            'categoryAnnouncements' => $categoryAnnouncements,
+            'announcementsList' => $categoryAnnouncements,
             'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:Default:announcementsPagination.html.twig', array(
                 'paginator' => $categoryAnnouncements
             ))
