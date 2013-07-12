@@ -88,13 +88,6 @@ $(document).ready(function(){
         ]
     });
 
-    uploader.bind('Init', function(up) {
-        var is_firefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-        if (is_firefox) {
-            uploader.refresh();
-        }
-    });
-
     uploader.init();
 
     uploader.bind('FilesAdded', function(up, files) {

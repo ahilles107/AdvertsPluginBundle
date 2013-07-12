@@ -24,6 +24,7 @@
 			<div class="meta">
 				<div class="meta-info">Cena: <span>{{  $announcement->getPrice() }} zł</span></div>
 				<div class="meta-info">Ważne do: <span>{{ $announcement->getValidDate()|date_format:"Y-m-d" }}</span></div>
+				<div class="meta-info">Wyświetleń: <span>{{ $announcement->getReads() }}</span></div>
 				<div style="clear:both"></div>
 			</div>
 		</li>

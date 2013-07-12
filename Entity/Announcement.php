@@ -119,7 +119,7 @@ class Announcement
     public function getValidDate()
     {
         $date = clone $this->created_at;
-        $date->modify('+7 days');
+        $date->modify('+14 days');
 
         return $date;
     }

@@ -14,7 +14,6 @@ use AHS\AdvertsPluginBundle\Entity\Image;
 
 /**
  * TODO:
- * * views counter
  * * photos limit
  * * translations
  * * blocks
@@ -38,7 +37,7 @@ class DefaultController extends Controller
         )));
 
         $validDate = new \DateTime();
-        $validDate->modify('-7 days');
+        $validDate->modify('-14 days');
 
         $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
         $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
@@ -91,7 +90,7 @@ class DefaultController extends Controller
         if ($request->isMethod('POST')) {
             $form->bind($request);
             if ($form->isValid()) {
-                // create announcment user
+                // create announcement user
                 $newscoopUserId = $auth->getIdentity();
 
                 $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
@@ -141,7 +140,7 @@ class DefaultController extends Controller
         $currentCategory = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findOneById($id);
         
         $validDate = new \DateTime();
-        $validDate->modify('-7 days');
+        $validDate->modify('-14 days');
         $categoryAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->createQueryBuilder('a')
             ->andWhere('a.category = :category')
