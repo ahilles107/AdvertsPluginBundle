@@ -1,0 +1,8 @@
+<div id="categories">
+	<h4>Kategorie:</h4>
+	<ul>
+		{{ foreach from=$categories item=category }}
+			<li><a href="{{ 'ahs_advertsplugin_default_category'|smarty_path:['id'=>$category->getId(), 'slug'=>$category->getSlug()] }}">{{ $category->getName() }}</a></li>
+		{{ /foreach }}
+	</ul>
+</div>

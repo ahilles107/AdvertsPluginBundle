@@ -17,13 +17,6 @@
 <div class="aside">
 	<a class="add_announcement" href="{{ 'ahs_advertsplugin_default_add'|smarty_path }}">Dodaj ogłoszenie</a>
 	
-	<div id="categories">
-		<h4>Kategorie:</h4>
-		<ul>
-			{{ foreach from=$categories item=category }}
-				<li><a href="{{ 'ahs_advertsplugin_default_category'|smarty_path:['id'=>$category->getId(), 'slug'=>$category->getSlug()] }}">{{ $category->getName() }}</a></li>
-			{{ /foreach }}
-		</ul>
-	</div>
+	{{ include "file:AHSAdvertsPluginBundle:Default:_tpl/categories_list.html.smarty" }}
 </div>
 {{ /block}}

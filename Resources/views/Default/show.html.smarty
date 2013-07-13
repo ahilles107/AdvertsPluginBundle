@@ -30,6 +30,7 @@
 </ul>
 {{ /if }}
 <div class="announcement-meta">
+    <div class="fb-like" style="float:left; margin-right: 10px; min-width: 80px;" data-href="{{ 'ahs_advertsplugin_default_show'|smarty_url:['id'=>$announcement->getId(), 'slug'=>$announcement->getSlug()] }}" data-send="false" data-layout="button_count" data-width="150" data-show-faces="false"></div>
     <div class="reads">Liczba wyświetleń: <span>{{ $announcement->getReads() }}</span></div>
 </div>
 

@@ -246,18 +246,18 @@ a.category-name{
 #categories h4{margin-bottom: 5px;}
 #categories ul{margin-bottom: 5px;}
 #categories ul li{list-style-type: none}
-#categories ul li a{color: #e3004f; text-decoration: none; font-weight: bold; font-size: 15px; 	margin-bottom: 5px; display: block;}
+#categories ul li a{color: #000; text-decoration: none; font-weight: bold; font-size: 15px; 	margin-bottom: 5px; display: block;}
 
 ul#announcements-list{margin-bottom: 15px;}
-ul#announcements-list li{list-style-type: none; margin-bottom: 10px;}
+ul#announcements-list li{list-style-type: none; margin-bottom: 5px; border: 1px solid #ccc; padding: 10px;}
 ul#announcements-list li a{color: #e3004f; text-decoration: none;}
-ul#announcements-list li a.announcement-name {font-weight: bold; font-size: 14px;}
+ul#announcements-list li a.announcement-name {font-weight: bold; font-size: 16px;}
 ul#announcements-list li img {
-	width: 64px;
+	width: 100px;
 	margin: 7px;
 	padding: 5px;
 }
-ul#announcements-list li .meta{padding-bottom: 5px; border-bottom: 1px solid #CCC;}
+ul#announcements-list li .meta{margin-top: 5px; padding-top: 5px; border-top: 1px solid #CCC;}
 ul#announcements-list li .meta .meta-info {float: left; margin: 0px 10px 0px 0px; font-weight: bold;}
 ul#announcements-list li .meta .meta-info span {color: #e3004f;}
 
