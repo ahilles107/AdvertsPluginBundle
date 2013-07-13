@@ -248,7 +248,7 @@ a.category-name{
 #categories ul li{list-style-type: none}
 #categories ul li a{color: #000; text-decoration: none; font-weight: bold; font-size: 15px; 	margin-bottom: 5px; display: block;}
 
-ul#announcements-list{margin-bottom: 15px;}
+ul#announcements-list{margin-bottom: 15px; margin-left: 0px;}
 ul#announcements-list li{list-style-type: none; margin-bottom: 5px; border: 1px solid #ccc; padding: 10px;}
 ul#announcements-list li a{color: #e3004f; text-decoration: none;}
 ul#announcements-list li a.announcement-name {font-weight: bold; font-size: 16px;}
