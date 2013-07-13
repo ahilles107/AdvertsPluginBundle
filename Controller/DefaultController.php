@@ -39,7 +39,7 @@ class DefaultController extends Controller
         $validDate = new \DateTime();
         $validDate->modify('-14 days');
 
-        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+        $categories = $this->getCategories();
         $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->createQueryBuilder('a')
             ->andWhere('a.is_active = true')
@@ -84,7 +84,7 @@ class DefaultController extends Controller
         $em = $this->container->get('em');
 
         $form = $this->createForm(new AnnouncementType(), $announcement);
-        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+        $categories = $this->getCategories();
 
         $errors = array();
         if ($request->isMethod('POST')) {
@@ -136,7 +136,7 @@ class DefaultController extends Controller
     public function categoryAction(Request $request, $id, $slug = null)
     {
         $em = $this->container->get('em');
-        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+        $categories = $this->getCategories();
         $currentCategory = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findOneById($id);
         
         $validDate = new \DateTime();
@@ -213,7 +213,7 @@ class DefaultController extends Controller
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
         $form = $this->createForm(new AnnouncementType(), $announcement);
-        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
+        $categories = $this->getCategories();
 
         $this->restoreSessionFromDatabase($request, $announcement->getId());
 
@@ -421,5 +421,16 @@ class DefaultController extends Controller
         }
 
         return $processedPhotos;
+    }
+
+    private function getCategories()
+    {
+        $em = $this->container->get('em');
+
+        return $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+            ->createQueryBuilder('c')
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }
