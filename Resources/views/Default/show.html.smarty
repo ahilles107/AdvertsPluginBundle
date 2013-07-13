@@ -3,9 +3,12 @@
 {{ block title }}{{ $announcement->getName() }} - Ogłoszenia {{ $gimme->publication->name }} {{ /block }}
 
 {{ block facebook_ogg }}
-  <meta property="og:title" content="{{ $announcement->getName() }} - Ogłoszenia w Międzyrzec Się Dzieje!" />
-  <meta property="og:url" content="{{ 'ahs_advertsplugin_default_show'|smarty_url:['id'=>$announcement->getId(), 'slug'=>$announcement->getSlug()] }}" />
-  <meta property="og:description" content="{{ $announcement->getDescription()|truncate_utf8:120 }}" />
+    <meta property="og:title" content="{{ $announcement->getName() }} - Ogłoszenia w Międzyrzec Się Dzieje!" />
+    <meta property="og:url" content="{{ 'ahs_advertsplugin_default_show'|smarty_url:['id'=>$announcement->getId(), 'slug'=>$announcement->getSlug()] }}" />
+    <meta property="og:description" content="{{ $announcement->getDescription()|truncate_utf8:120 }}" />
+    {{ foreach from=$announcementPhotos item=photo }}
+    <meta property="og:image" content="{{$photo['imageUrl']}}" />
+    {{ /foreach }}
 {{ /block }}
 
 {{ block css_styles }}
