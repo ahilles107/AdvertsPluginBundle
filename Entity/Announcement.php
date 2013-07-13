@@ -165,15 +165,17 @@ class Announcement
         return $this->images;
     }
 
-    public function getFirstImage()
+    public function getFirstImage($showEmpty = null)
     {
-        if (!count($this->images)) {
+        if (!count($this->images) && $showEmpty) {
             return array(
                 'id' => null,
                 'announcementPhotoId' => null,
                 'imageUrl' => '/public/bundles/ahsadvertsplugin/images/small_empty.jpg',
                 'thumbnailUrl' => '/public/bundles/ahsadvertsplugin/images/empty.jpg'
             );
+        } else if (!count($this->images)) {
+            return null;
         }
 
         return $this->processImage($this->images[0]);

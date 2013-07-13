@@ -3,8 +3,10 @@
 	<li>
 		{{ $firstImage = $announcement->getFirstImage() }}
 		<div style="float:left">
+			{{ if $announcement->getImages()|count > 0 }}
 			<img src="{{ $firstImage['thumbnailUrl'] }}" alt="{{$announcement->getName()}}"/>
-			{{ if $announcement->getImages()|count }}<div style="text-align: center; margin-top: -12px; margin-bottom: 5px; font-size: 12px;">Zdjęć: <span> {{ $announcement->getImages()|count }}</span></div>{{ /if }}
+			{{ /if }}
+			{{ if $announcement->getImages()|count > 1 }}<div style="text-align: center; margin-top: -12px; margin-bottom: 5px; font-size: 12px;">Zdjęć: <span> {{ $announcement->getImages()|count }}</span></div>{{ /if }}
 		</div>
 		<a href="{{ 'ahs_advertsplugin_default_show'|smarty_path:['id'=>$announcement->getId(), 'slug'=>$announcement->getSlug()] }}" class="announcement-name">{{ $announcement->getName() }}</a> 
 		<p>{{ $announcement->getDescription()|truncate_utf8:120 }}</p>
