@@ -32,9 +32,9 @@ class DefaultController extends Controller
     public function indexAction(Request $request)
     {
         $em = $this->container->get('em');
-    	$this->get('dispatcher')->dispatch('plugin.install', new \Newscoop\EventDispatcher\Events\GenericEvent($this, array(
+/*    	$this->get('dispatcher')->dispatch('plugin.install', new \Newscoop\EventDispatcher\Events\GenericEvent($this, array(
            'plugin_name' => ''
-        )));
+        )));*/
 
         $validDate = new \DateTime();
         $validDate->modify('-14 days');

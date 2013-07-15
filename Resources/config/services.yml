@@ -5,3 +5,7 @@ services:
             - @em
         tags:
             - { name: kernel.event_subscriber}
+    ahs_adverts_plugin.configure_menu_listener:
+        class: AHS\AdvertsPluginBundle\EventListener\ConfigureMenuListener
+        tags:
+          - { name: kernel.event_listener, event: newscoop_newscoop.menu_configure, method: onMenuConfigure }
