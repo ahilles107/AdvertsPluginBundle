@@ -4,7 +4,7 @@
 		{{ foreach from=$categories item=category }}
 			<li>
                 <a href="{{ 'ahs_advertsplugin_default_category'|smarty_path:['id'=>$category->getId(), 'slug'=>$category->getSlug()] }}">
-                    <img src="{{asset}}/public/bundles/ahsadvertsplugin/images/icons/{{ $category->getSlug() }}.png{{/asset}}" alt="{{ $category->getName() }}" />
+                    <img src="{{asset}}/public/bundles/ahsadvertsplugin/images/icons/{{ $category->getId() }}.png{{/asset}}" alt="{{ $category->getName() }}" />
                     <span>{{ $category->getName() }}</span>
                 </a>
                 <div style="clear:both"></div>

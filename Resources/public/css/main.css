@@ -246,9 +246,17 @@ a.category-name{
 #categories h4{margin-bottom: 5px;}
 #categories ul{margin-bottom: 5px; margin-left: 0px;}
 #categories ul li{list-style-type: none}
-#categories ul li a img{float: left; margin: 5px;}
+#categories ul li a img{float: left; margin: 5px; width: 40px;}
 #categories ul li a{color: #000; text-decoration: none; font-weight: bold; font-size: 15px; 	margin-bottom: 5px; display: block;}
 #categories ul li a span {display: block; padding-top: 15px;}
+
+ul#announcements-list li.number-1 {border-left: 4px solid #366689;}
+ul#announcements-list li.number-2 {border-left: 4px solid #009970;}
+ul#announcements-list li.number-3 {border-left: 4px solid #FF9C00;}
+ul#announcements-list li.number-4 {border-left: 4px solid #FF0027;}
+ul#announcements-list li.number-5 {border-left: 4px solid #B63609;}
+ul#announcements-list li.number-6 {border-left: 4px solid #7C3333;}
+ul#announcements-list li.number-7 {border-left: 4px solid #0084D0;}
 
 ul#announcements-list{margin-bottom: 15px; margin-left: 0px;}
 ul#announcements-list li{list-style-type: none; margin-bottom: 5px; border: 1px solid #ccc; padding: 10px;}

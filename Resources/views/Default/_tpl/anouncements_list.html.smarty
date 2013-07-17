@@ -1,6 +1,6 @@
 <ul id="announcements-list">
 {{ foreach from=$announcementsList item=announcement }}
-	<li>
+	<li class="number-{{ $announcement->getCategory()->getId() }}">
 		{{ $firstImage = $announcement->getFirstImage() }}
 		<div style="float:left">
 			{{ if $announcement->getImages()|count > 0 }}
