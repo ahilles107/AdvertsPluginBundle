@@ -9,9 +9,20 @@
 namespace AHS\AdvertsPluginBundle\EventListener;
 
 use Newscoop\NewscoopBundle\Event\ConfigureMenuEvent;
+use Symfony\Component\Translation\Translator;
 
 class ConfigureMenuListener
 {
+    private $translator;
+
+    /**
+     * @param Translator $translator
+     */
+    public function __construct(Translator $translator)
+    {
+        $this->translator = $translator;
+    }
+
     /**
      * @param \Newscoop\NewscoopBundle\Event\ConfigureMenuEvent $event
      */
@@ -19,8 +30,8 @@ class ConfigureMenuListener
     {
         $menu = $event->getMenu();
 
-        $menu[getGS('Plugins')]->addChild(
-            getGS('Anouncements'), 
+        $menu[$this->translator->trans('Plugins')]->addChild(
+            'Anouncements', 
             array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_index'))
         );
     }

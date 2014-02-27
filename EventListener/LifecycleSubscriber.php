@@ -47,9 +47,9 @@ class LifecycleSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            'plugin.install' => array('install', 1),
-            'plugin.update' => array('update', 1),
-            'plugin.remove' => array('remove', 1),
+            'plugin.install.ahs_adverts_plugin' => array('install', 1),
+            'plugin.update.ahs_adverts_plugin' => array('update', 1),
+            'plugin.remove.ahs_adverts_plugin' => array('remove', 1),
         );
     }
 

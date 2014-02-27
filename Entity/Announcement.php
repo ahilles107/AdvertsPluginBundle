@@ -13,10 +13,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Announcement entity
  *
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="AHS\AdvertsPluginBundle\Repository\AnnouncementRepository")
  * @ORM\Table(name="plugin_adverts_announcement")
  */
-class Announcement 
+class Announcement
 {
     /**
      * @ORM\Id()
@@ -41,20 +41,27 @@ class Announcement
 
     /**
      * @ORM\OneToMany(targetEntity="Image", mappedBy="announcement")
-     */ 
+     */
     private $images;
 
     /**
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="announcement")
      * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
-     */  
+     */
     private $category;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="announcement")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-     */    
+     */
     private $user;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Newscoop\Entity\Publication")
+     * @ORM\JoinColumn(name="IdPublication", referencedColumnName="Id")
+     * @var \Newscoop\Entity\Publication
+     */
+    private $publication;
 
     /**
      * @ORM\Column(type="float", name="price")
@@ -107,7 +114,7 @@ class Announcement
     public function setName($name)
     {
         $this->name = $name;
-        
+
         return $this;
     }
 
@@ -132,7 +139,7 @@ class Announcement
     public function setDescription($description)
     {
         $this->description = $description;
-        
+
         return $this;
     }
 
@@ -144,7 +151,7 @@ class Announcement
     public function setPrice($price)
     {
         $this->price = $price;
-        
+
         return $this;
     }
 
@@ -156,7 +163,7 @@ class Announcement
     public function setCategory($category)
     {
         $this->category = $category;
-        
+
         return $this;
     }
 
@@ -174,7 +181,7 @@ class Announcement
                 'imageUrl' => '/public/bundles/ahsadvertsplugin/images/small_empty.jpg',
                 'thumbnailUrl' => '/public/bundles/ahsadvertsplugin/images/empty.jpg'
             );
-        } else if (!count($this->images)) {
+        } elseif (!count($this->images)) {
             return null;
         }
 
@@ -203,14 +210,14 @@ class Announcement
     public function setUser($user)
     {
         $this->user = $user;
-        
+
         return $this;
     }
 
     public function setCreatedAt(\DateTime $created_at)
     {
         $this->created_at = $created_at;
-        
+
         return $this;
     }
 
@@ -239,17 +246,17 @@ class Announcement
      */
     public function slugify($text)
     {
-        $char_map = array(
+        $charMap = array(
             // Latin symbols
             '©' => '(c)',
             // Polish
-            'Ą' => 'A', 'Ć' => 'C', 'Ę' => 'e', 'Ł' => 'L', 'Ń' => 'N', 'Ó' => 'o', 'Ś' => 'S', 'Ź' => 'Z', 
-            'Ż' => 'Z', 
+            'Ą' => 'A', 'Ć' => 'C', 'Ę' => 'e', 'Ł' => 'L', 'Ń' => 'N', 'Ó' => 'o', 'Ś' => 'S', 'Ź' => 'Z',
+            'Ż' => 'Z',
             'ą' => 'a', 'ć' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'ó' => 'o', 'ś' => 's', 'ź' => 'z',
             'ż' => 'z',
         );
         // Make custom replacements
-        $text = str_replace(array_keys($char_map), $char_map, $text);
+        $text = str_replace(array_keys($charMap), $charMap, $text);
         // replace non letter or digits by -
         $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
         // trim
@@ -265,8 +272,31 @@ class Announcement
         if (empty($text)) {
             return 'n-a';
         }
-     
+
         return $text;
     }
-}
 
+    /**
+     * Gets the publication.
+     *
+     * @return \Newscoop\Entity\Publication
+     */
+    public function getPublication()
+    {
+        return $this->publication;
+    }
+
+    /**
+     * Sets the publication.
+     *
+     * @param \Newscoop\Entity\Publication $publication
+     *
+     * @return self
+     */
+    public function setPublication(\Newscoop\Entity\Publication $publication)
+    {
+        $this->publication = $publication;
+
+        return $this;
+    }
+}

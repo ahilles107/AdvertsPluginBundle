@@ -1,8 +1,8 @@
 {
-    "name": "ahs/adverts-plugin-bundle",
+    "name": "ahs/adverts-plugin",
     "description": "Adverts plugin bundle for Newscoop",
     "keywords": ["newscoop", "adverts", "cms", "integration"],
-    "version": "0.1",
+    "version": "0.1.1",
     "type": "newscoop-plugin",
     "license": "GPL-3.0",
     "authors": [
@@ -14,7 +14,7 @@
     "require": {
         "php": ">=5.3.3",
         "newscoop/plugins-installer": "*",
-        "knplabs/knp-paginator-bundle": "v2.3.2",
+        "knplabs/knp-paginator-bundle": "v2.3.2"
     },
     "autoload": {
         "psr-0": { "AHS\\AdvertsPluginBundle\\AHSAdvertsPluginBundle": "" }

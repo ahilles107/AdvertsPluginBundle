@@ -12,18 +12,6 @@ use AHS\AdvertsPluginBundle\Form\AnnouncementType;
 use AHS\AdvertsPluginBundle\Entity\User;
 use AHS\AdvertsPluginBundle\Entity\Image;
 
-/**
- * TODO:
- * * photos limit
- * * translations
- * * blocks
- * * * announcements list
- * * * announcements categories list
- * * * add announcement form
- * * * edit announcement form
- * * documentation
- * * move routes to yaml - allow to change them 
- */
 class DefaultController extends Controller
 {
     /**
@@ -31,40 +19,14 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        $em = $this->container->get('em');
-/*    	$this->get('dispatcher')->dispatch('plugin.install', new \Newscoop\EventDispatcher\Events\GenericEvent($this, array(
-           'plugin_name' => ''
-        )));*/
-
-        $validDate = new \DateTime();
-        $validDate->modify('-14 days');
-
+        $templatesService = $this->get('newscoop.templates.service');
+        $smarty = $templatesService->getSmarty();
+        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
         $categories = $this->getCategories();
-        $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->createQueryBuilder('a')
-            ->andWhere('a.is_active = true')
-            ->andWhere('a.created_at >= :validDate')
-            ->orderBy('a.created_at', 'DESC')
-            ->setParameters(array('validDate' => $validDate))
-            ->getQuery();
 
-        $paginatorService = $this->container->get('newscoop.paginator.paginator_service');
-
-        $paginator  = $this->container->get('knp_paginator');
-        $latestAnnouncements = $paginator->paginate(
-            $latestAnnouncements,
-            $this->get('request')->get('knp_page', 1),
-            10
-        );
-        $latestAnnouncements->setTemplate('AHSAdvertsPluginBundle:Pagination:polish_pagination.html.twig');
-
-        return $this->render('AHSAdvertsPluginBundle:Default:index.html.smarty', array(
+        return new Response($templatesService->fetchTemplate('_ahs_adverts/main.tpl', array(
             'categories' => $categories,
-            'announcementsList' => $latestAnnouncements,
-            'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:Default:announcementsPagination.html.twig', array(
-                'paginator' => $latestAnnouncements
-            ))
-        ));
+        )));
     }
 
     /**
@@ -73,6 +35,10 @@ class DefaultController extends Controller
     public function addAction(Request $request)
     {
         $auth = \Zend_Auth::getInstance();
+        $templatesService = $this->get('newscoop.templates.service');
+        $smarty = $templatesService->getSmarty();
+        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
+
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                 'controller' => '',
@@ -82,6 +48,7 @@ class DefaultController extends Controller
 
         $announcement = new Announcement();
         $em = $this->container->get('em');
+        $publicationService = $this->container->get('newscoop_newscoop.publication_service');
 
         $form = $this->createForm(new AnnouncementType(), $announcement);
         $categories = $this->getCategories();
@@ -101,9 +68,10 @@ class DefaultController extends Controller
                     $user = new User();
                     $user->setNewscoopUserId($newscoopUserId);
                     $em->persist($user);
-                }                
+                }
 
                 $announcement->setUser($user);
+                $announcement->setPublication($publicationService->getPublication());
 
                 $em->persist($announcement);
                 $em->flush();
@@ -120,14 +88,14 @@ class DefaultController extends Controller
             }
         }
 
-        return $this->render('AHSAdvertsPluginBundle:Default:add.html.smarty', array(
+        return new Response($templatesService->fetchTemplate('_ahs_adverts/add.tpl', array(
             'announcement' => $announcement,
             'categories' => $categories,
             'form' => $form->createView(),
             'form_path' => $this->generateUrl('ahs_advertsplugin_default_add'),
             'type' => 'add',
             'errors' => $errors
-        ));
+        )));
     }
 
     /**
@@ -138,6 +106,9 @@ class DefaultController extends Controller
         $em = $this->container->get('em');
         $categories = $this->getCategories();
         $currentCategory = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findOneById($id);
+        $templatesService = $this->get('newscoop.templates.service');
+        $smarty = $templatesService->getSmarty();
+        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
         
         $validDate = new \DateTime();
         $validDate->modify('-14 days');
@@ -161,14 +132,14 @@ class DefaultController extends Controller
         );
         $categoryAnnouncements->setTemplate('AHSAdvertsPluginBundle:Pagination:polish_pagination.html.twig');
 
-        return $this->render('AHSAdvertsPluginBundle:Default:category.html.smarty', array(
+        return new Response($templatesService->fetchTemplate('_ahs_adverts/category.tpl', array(
             'categories' => $categories,
             'currentCategory' => $currentCategory,
             'announcementsList' => $categoryAnnouncements,
-            'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:Default:announcementsPagination.html.twig', array(
+            'announcementsPagination' => $this->renderView('AHSAdvertsPluginBundle:_ahs_adverts/_tpl:announcementsPagination.html.twig', array(
                 'paginator' => $categoryAnnouncements
             ))
-        ));
+        )));
     }
 
     /**
@@ -177,6 +148,10 @@ class DefaultController extends Controller
     public function showAction(Request $request, $id = null, $slug = null)
     {
         $em = $this->container->get('em');
+        $templatesService = $this->get('newscoop.templates.service');
+        $smarty = $templatesService->getSmarty();
+        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
+
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
         $userSevice = $this->container->get('user.list');
@@ -184,16 +159,14 @@ class DefaultController extends Controller
             'id' => $announcement->getUser()->getNewscoopUserId()
         ));
         $newscoopUser = new \MetaUser($user);
-        error_log('add');
-        error_log(print_r($request->server, true));
         $announcement->addRead();
         $em->flush();
 
-        return $this->render('AHSAdvertsPluginBundle:Default:show.html.smarty', array(
+        return new Response($templatesService->fetchTemplate('_ahs_adverts/show.tpl', array(
             'announcement' => $announcement,
             'announcementPhotos' => $this->processPhotos($request, $announcement),
             'newscoopUser' => $newscoopUser
-        ));
+        )));
     }
 
     /**
@@ -201,6 +174,10 @@ class DefaultController extends Controller
      */
     public function editAction(Request $request, $id = null)
     {
+        $templatesService = $this->get('newscoop.templates.service');
+        $smarty = $templatesService->getSmarty();
+        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
+
         $auth = \Zend_Auth::getInstance();
         if (!$auth->hasIdentity()) { // ignore for logged user
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -236,14 +213,14 @@ class DefaultController extends Controller
             }
         }
 
-        return $this->render('AHSAdvertsPluginBundle:Default:add.html.smarty', array(
+        return new Response($templatesService->fetchTemplate('_ahs_adverts/add.tpl', array(
             'announcement' => $announcement,
             'categories' => $categories,
             'form' => $form->createView(),
             'form_path' => $this->generateUrl('ahs_advertsplugin_default_edit', array('id' => $announcement->getId())),
             'type' => 'edit',
             'errors' => array()
-        ));
+        )));
     }
 
     /**
@@ -279,7 +256,7 @@ class DefaultController extends Controller
             $request->getSession()->set('announcement_photos', $photos);
         }
 
-        return $this->render('AHSAdvertsPluginBundle:Default:renderPhotos.html.smarty', array(
+        return $this->render('AHSAdvertsPluginBundle:_ahs_adverts/_tpl:renderPhotos.html.smarty', array(
             'announcementPhotos' => $this->processPhotos($request)
         ));
     }
@@ -309,7 +286,7 @@ class DefaultController extends Controller
                 $em->remove($photoEntityToRemove);
                 $em->flush();
                 
-                return $this->render('AHSAdvertsPluginBundle:Default:renderPhotos.html.smarty', array(
+                return $this->render('AHSAdvertsPluginBundle:_ahs_adverts/_tpl:renderPhotos.html.smarty', array(
                     'announcementPhotos' => $this->processPhotos($request)
                 ));
             }
@@ -323,7 +300,7 @@ class DefaultController extends Controller
     {
         $em = $this->container->get('em');
 
-        return $this->render('AHSAdvertsPluginBundle:Default:renderPhotos.html.smarty', array(
+        return $this->render('AHSAdvertsPluginBundle:_ahs_adverts/_tpl:renderPhotos.html.smarty', array(
             'announcementPhotos' => $this->processPhotos($request)
         ));
     }
@@ -376,14 +353,14 @@ class DefaultController extends Controller
         foreach ($photos as $image) {
             $sessionPhotos[] = array('id' => $image->getId());
         }
-        
+
         $request->getSession()->set('announcement_photos', $sessionPhotos);
     }
 
-    private function processPhotos($request, $announcement = null) 
+    private function processPhotos($request, $announcement = null)
     {
         $em = $this->container->get('em');
-        if (!$announcement) { 
+        if (!$announcement) {
             $photosFromSession = $request->getSession()->get('announcement_photos', array());
             $ids = array();
             foreach($photosFromSession as $photo) {
@@ -410,7 +387,7 @@ class DefaultController extends Controller
         }
 
         $processedPhotos = array();
-        foreach($photos as $photo) {
+        foreach ($photos as $photo) {
             $newscoopImage = new \Image($photo->getNewscoopImageId());
             $processedPhotos[] = array(
                 'id' => $newscoopImage->getImageId(),
@@ -426,11 +403,21 @@ class DefaultController extends Controller
     private function getCategories()
     {
         $em = $this->container->get('em');
+        $cacheService = $this->container->get('newscoop.cache');
 
-        return $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+        if ($cacheService->contains('ahs_anounncements_comments')) {
+            $categories = $cacheService->fetch('ahs_anounncements_comments');
+        }
+
+        $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
             ->createQueryBuilder('c')
             ->orderBy('c.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        $cacheService->save('ahs_anounncements_comments', $categories);
+
+
+        return $categories;
     }
 }
