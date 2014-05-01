@@ -1,7 +1,7 @@
 <?php
 /**
  * @package AHS\AdvertsPluginBundle
- * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
+ * @author Paweł Mikołajczuk <mikolajczuk.protected@gmail.com>
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
@@ -25,31 +25,31 @@ class Image
      * @ORM\Column(type="integer", name="id")
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", name="newscoop_image_id")
      * @var string
      */
-    private $newscoopImageId;
+    protected $newscoopImageId;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="announcement")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */    
-    private $user;
+    protected $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", inversedBy="images")
      * @ORM\JoinColumn(name="announcement_id", referencedColumnName="id")
      */
-    private $announcement;
+    protected $announcement;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
      * @var string
      */
-    private $created_at;
+    protected $created_at;
 
     public function __construct() {
         $this->setCreatedAt(new \DateTime());

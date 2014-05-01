@@ -20,8 +20,6 @@ class DefaultController extends Controller
     public function indexAction(Request $request)
     {
         $templatesService = $this->get('newscoop.templates.service');
-        $smarty = $templatesService->getSmarty();
-        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
         $categories = $this->getCategories();
 
         return new Response($templatesService->fetchTemplate('_ahs_adverts/main.tpl', array(
@@ -36,14 +34,13 @@ class DefaultController extends Controller
     {
         $auth = \Zend_Auth::getInstance();
         $templatesService = $this->get('newscoop.templates.service');
-        $smarty = $templatesService->getSmarty();
-        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
+        $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
 
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                 'controller' => '',
                 'action' => 'auth'
-            ), 'default'));
+            ), 'default').'?_target_path='.$this->generateUrl('ahs_advertsplugin_default_add'));
         }
 
         $announcement = new Announcement();
@@ -74,6 +71,7 @@ class DefaultController extends Controller
                 $announcement->setPublication($publicationService->getPublication());
 
                 $em->persist($announcement);
+                $cacheService->clearNamespace('announcements');
                 $em->flush();
 
                 $this->savePhotosInAnnouncement($announcement, $request);
@@ -107,9 +105,7 @@ class DefaultController extends Controller
         $categories = $this->getCategories();
         $currentCategory = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findOneById($id);
         $templatesService = $this->get('newscoop.templates.service');
-        $smarty = $templatesService->getSmarty();
-        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
-        
+
         $validDate = new \DateTime();
         $validDate->modify('-14 days');
         $categoryAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
@@ -149,8 +145,6 @@ class DefaultController extends Controller
     {
         $em = $this->container->get('em');
         $templatesService = $this->get('newscoop.templates.service');
-        $smarty = $templatesService->getSmarty();
-        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
 
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
@@ -175,9 +169,8 @@ class DefaultController extends Controller
     public function editAction(Request $request, $id = null)
     {
         $templatesService = $this->get('newscoop.templates.service');
-        $smarty = $templatesService->getSmarty();
-        $smarty->addTemplateDir(realpath(__DIR__.'/../Resources/views'));
-
+        $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
+        
         $auth = \Zend_Auth::getInstance();
         if (!$auth->hasIdentity()) { // ignore for logged user
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -199,6 +192,7 @@ class DefaultController extends Controller
             $form->bind($request);
             if ($form->isValid()) {
                 $em->persist($announcement);
+                $cacheService->clearNamespace('announcements');
                 $em->flush();
 
                 $this->savePhotosInAnnouncement($announcement, $request);
@@ -270,8 +264,8 @@ class DefaultController extends Controller
         $announcementPhotos = $request->getSession()->get('announcement_photos', array());
         $photoIdToRemove = $request->request->get('id');
 
-        foreach($announcementPhotos as $key => $photo) {
-            if($photo['id'] == $photoIdToRemove) {
+        foreach ($announcementPhotos as $key => $photo) {
+            if ($photo['id'] == $photoIdToRemove) {
                 unset($announcementPhotos[$key]);
                 $request->getSession()->set('announcement_photos', $announcementPhotos);
 
@@ -285,7 +279,7 @@ class DefaultController extends Controller
 
                 $em->remove($photoEntityToRemove);
                 $em->flush();
-                
+
                 return $this->render('AHSAdvertsPluginBundle:_ahs_adverts/_tpl:renderPhotos.html.smarty', array(
                     'announcementPhotos' => $this->processPhotos($request)
                 ));
@@ -305,7 +299,7 @@ class DefaultController extends Controller
         ));
     }
 
-    private function savePhotosInAnnouncement($announcement, $request) 
+    private function savePhotosInAnnouncement($announcement, $request)
     {
         $em = $this->container->get('em');
         $photosFromSession = $request->getSession()->get('announcement_photos', array());
@@ -363,7 +357,7 @@ class DefaultController extends Controller
         if (!$announcement) {
             $photosFromSession = $request->getSession()->get('announcement_photos', array());
             $ids = array();
-            foreach($photosFromSession as $photo) {
+            foreach ($photosFromSession as $photo) {
                 $ids[] = $photo['id'];
             }
 

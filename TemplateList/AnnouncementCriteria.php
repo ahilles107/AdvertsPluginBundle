@@ -59,4 +59,9 @@ class AnnouncementCriteria extends Criteria
      * @var array
      */
     public $orderBy = array('created_at' => 'desc');
+
+    /**
+     * @var boolean
+     */
+    public $withImages;
 }

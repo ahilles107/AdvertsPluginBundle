@@ -1,7 +1,7 @@
 <?php
 /**
  * @package AHS\AdvertsPluginBundle
- * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
+ * @author Paweł Mikołajczuk <mikolajczuk.protected@gmail.com>
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
@@ -24,24 +24,24 @@ class Category
      * @ORM\Column(type="integer", name="id")
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", name="name")
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * @ORM\OneToMany(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", mappedBy="category")
      */ 
-    private $announcements;
+    protected $announcements;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
      * @var string
      */
-    private $created_at;
+    protected $created_at;
 
     public function __construct() {
         $this->setCreatedAt(new \DateTime());

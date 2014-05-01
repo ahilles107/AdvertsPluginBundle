@@ -1,0 +1,45 @@
+AHS\AdvertsPluginBundle\Entity\Announcement:
+    exclusion_policy: ALL
+    properties:
+        id:
+            expose: true
+            read_only: true
+            type: string
+            groups: ["list", "details"]
+            serialized_name: id
+        name:
+            expose: true
+            read_only: true
+            type: string
+            groups: ["list", "details"]
+            serialized_name: name
+        description:
+            expose: true
+            read_only: true
+            type: string
+            groups: ["list", "details"]
+            serialized_name: description
+        images:
+            expose: true
+            read_only: true
+            groups: ["list", "details"]
+            serialized_name: images
+        price:
+            expose: true
+            read_only: true
+            groups: ["list", "details"]
+            serialized_name: price
+        category:
+            expose: true
+            read_only: true
+            type: array
+            groups: ["list", "details"]
+            serialized_name: category
+            access_type: public_method
+            accessor:
+                getter: getCategoryView
+        user:
+            expose: true
+            read_only: true
+            groups: ["list", "details"]
+            serialized_name: user

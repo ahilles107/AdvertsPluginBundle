@@ -1,7 +1,7 @@
 <?php
 /**
  * @package AHS\AdvertsPluginBundle
- * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
+ * @author Paweł Mikołajczuk <mikolajczuk.protected@gmail.com>
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
@@ -24,44 +24,44 @@ class Announcement
      * @ORM\Column(type="integer", name="id")
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", name="name")
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * @ORM\Column(type="text", name="description")
      * @Assert\NotBlank(message="Musisz podac opis")
      * @var string
      */
-    private $description;
+    protected $description;
 
     /**
      * @ORM\OneToMany(targetEntity="Image", mappedBy="announcement")
      */
-    private $images;
+    protected $images;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Category", inversedBy="announcement")
+     * @ORM\ManyToOne(targetEntity="Category", inversedBy="announcements")
      * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
      */
-    private $category;
+    protected $category;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="announcement")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="announcements")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
-    private $user;
+    protected $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="Newscoop\Entity\Publication")
      * @ORM\JoinColumn(name="IdPublication", referencedColumnName="Id")
      * @var \Newscoop\Entity\Publication
      */
-    private $publication;
+    protected $publication;
 
     /**
      * @ORM\Column(type="float", name="price")
@@ -70,25 +70,25 @@ class Announcement
      * @Assert\Type(type="float", message = "Cena musi być liczbą")
      * @var string
      */
-    private $price;
+    protected $price;
 
     /**
      * @ORM\Column(type="integer", name="reads_number", nullable=true)
      * @var integer
      */
-    private $reads;
+    protected $reads;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
      * @var string
      */
-    private $created_at;
+    protected $created_at;
 
     /**
      * @ORM\Column(type="boolean", name="is_active", nullable=true)
      * @var string
      */
-    private $is_active;
+    protected $is_active;
 
     public function __construct() {
         $this->setCreatedAt(new \DateTime());
@@ -188,7 +188,7 @@ class Announcement
         return $this->processImage($this->images[0]);
     }
 
-    private function processImage($image)
+    protected function processImage($image)
     {
         $newscoopImage = new \Image($image->getNewscoopImageId());
         $processedPhoto = array(
@@ -298,5 +298,21 @@ class Announcement
         $this->publication = $publication;
 
         return $this;
+    }
+
+    public function getCategoryView()
+    {
+        return array(
+            'id' => $this->category->getId(),
+            'name' => $this->category->getName()
+        );
+    }
+
+    public function getUserView()
+    {
+        return array(
+            'id' => $this->user->getId(),
+            //'name' => $this->user->getName()
+        );
     }
 }

@@ -1,0 +1,18 @@
+AHS\AdvertsPluginBundle\Entity\User:
+    exclusion_policy: ALL
+    properties:
+        id:
+            expose: true
+            read_only: true
+            groups: ["list", "details"]
+            serialized_name: id
+        newscoopUserId:
+            expose: true
+            read_only: true
+            groups: ["list", "details"]
+            serialized_name: newscoopUserId
+        created_at:
+            expose: true
+            read_only: true
+            groups: ["list", "details"]
+            serialized_name: created

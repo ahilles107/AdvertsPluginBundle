@@ -26,13 +26,24 @@ class AnnouncementRepository extends EntityRepository
     public function getListByCriteria(AnnouncementCriteria $criteria)
     {
         $qb = $this->createQueryBuilder('a');
-        $qb->select('a, c, i')
+        $qb->select('a, c')
             ->andWhere('a.is_active = true')
-            ->leftJoin('a.category', 'c')
-            ->leftJoin('a.images', 'i');
+            ->leftJoin('a.category', 'c');
+
+        if ($criteria->withImages !== null) {
+            if ($criteria->withImages == true) {
+                $qb->select('a, c, i');
+                $qb->join('a.images', 'i');
+            } else {
+                $qb->andWhere('a.images IS NULL');
+            }
+        } else {
+            $qb->select('a, c, i');
+            $qb->leftJoin('a.images', 'i');
+        }
 
         foreach ($criteria->perametersOperators as $key => $operator) {
-            $qb->andWhere('a.'.$key.' = :'.$key)
+            $qb->andWhere('a.'.$key.' '.$operator.' :'.$key)
                 ->setParameter($key, $criteria->$key);
         }
 

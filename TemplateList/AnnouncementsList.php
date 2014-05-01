@@ -29,5 +29,19 @@ class AnnouncementsList extends PaginatedBaseList
     protected function convertParameters($firstResult, $parameters)
     {
         parent::convertParameters($firstResult, $parameters);
+
+        // show only announcements from last x days
+        if (array_key_exists('lastDays', $parameters)) {
+            if (is_numeric($parameters['lastDays'])) {
+                $date = new \DateTime();
+                $date->modify('- '.$parameters['lastDays'].' days');
+                $this->criteria->perametersOperators['created_at'] = '>=';
+                $this->criteria->created_at = $date->format('Y-m-d').' 00:00:00';
+            }
+        }
+
+        if (array_key_exists('withImages', $parameters)) {
+            $this->criteria->withImages = $parameters['withImages'];
+        }
     }
 }
