@@ -131,6 +131,12 @@ class Announcement
         return $date;
     }
 
+    public function isStillValid()
+    {
+        $date = new \DateTime();
+        return $date <= $this->getValidDate();
+    }
+
     public function getDescription()
     {
         return $this->description;
@@ -178,14 +184,19 @@ class Announcement
             return array(
                 'id' => null,
                 'announcementPhotoId' => null,
-                'imageUrl' => '/public/bundles/ahsadvertsplugin/images/small_empty.jpg',
-                'thumbnailUrl' => '/public/bundles/ahsadvertsplugin/images/empty.jpg'
+                'imageUrl' => '/public/bundles/ahsadvertsplugin/images/empty.jpg',
+                'thumbnailUrl' => '/public/bundles/ahsadvertsplugin/images/small_empty.jpg'
             );
         } elseif (!count($this->images)) {
             return null;
         }
 
         return $this->processImage($this->images[0]);
+    }
+
+    public function getFirstImageWithEmpty()
+    {
+        return $this->getFirstImage(true);
     }
 
     protected function processImage($image)
@@ -308,11 +319,8 @@ class Announcement
         );
     }
 
-    public function getUserView()
+    public function getUrl()
     {
-        return array(
-            'id' => $this->user->getId(),
-            //'name' => $this->user->getName()
-        );
+        return clone $this;
     }
 }

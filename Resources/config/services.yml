@@ -17,3 +17,9 @@ services:
         class: AHS\AdvertsPluginBundle\EventListener\ListObjectsListener
         tags:
           - { name: kernel.event_listener, event: newscoop.listobjects.register, method: registerObjects }
+
+    ahs_adverts_plugin.serializer.announcement_url_handler:
+        class: AHS\AdvertsPluginBundle\Serializer\AnnouncementUrlHandler
+        arguments:  [ "@router"]
+        tags:
+            - { name: jms_serializer.handler, type: announcement_url, direction: serialization, format:json, method:serializeToJson }

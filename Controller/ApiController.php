@@ -32,7 +32,6 @@ class ApiController extends FOSRestController
             $publicationId = $request->query->get('publication');
         }
 
-        $categories = $this->getCategories();
         $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->createQueryBuilder('a')
             ->andWhere('a.is_active = true')

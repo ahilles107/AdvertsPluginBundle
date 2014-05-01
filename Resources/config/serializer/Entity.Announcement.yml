@@ -43,3 +43,18 @@ AHS\AdvertsPluginBundle\Entity\Announcement:
             read_only: true
             groups: ["list", "details"]
             serialized_name: user
+    virtual_properties:
+        getValidDate:
+            serialized_name: valid_date
+            groups: ["details", "list"]
+        isStillValid:
+            serialized_name: is_still_valid
+            groups: ["details", "list"]
+        getUrl:
+            type: announcement_url
+            serialized_name: url
+            groups: ["details", "list"]
+        getFirstImageWithEmpty:
+            type: array
+            serialized_name: first_image
+            groups: ["details", "list"]
