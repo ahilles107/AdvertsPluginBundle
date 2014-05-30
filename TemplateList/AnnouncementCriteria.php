@@ -64,4 +64,14 @@ class AnnouncementCriteria extends Criteria
      * @var boolean
      */
     public $withImages;
+
+    /**
+     * @var string
+     */
+    public $query;
+
+    /**
+     * @var array
+     */
+    public $status = array();
 }

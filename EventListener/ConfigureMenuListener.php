@@ -31,7 +31,7 @@ class ConfigureMenuListener
         $menu = $event->getMenu();
 
         $menu[$this->translator->trans('Plugins')]->addChild(
-            'Anouncements', 
+            $this->translator->trans('ads.menu.name'),
             array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_index'))
         );
     }

@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 class ApiController extends FOSRestController
 {
     /**
-     * @Route("/api/anouncements.{_format}", defaults={"_format"="json"}, name="newscoop_gimme_get_latest_anouncements")
+     * @Route("/api/announcements.{_format}", defaults={"_format"="json"}, name="newscoop_gimme_get_latest_anouncements")
      * @Method("GET")
      * @View()
      */
@@ -38,16 +38,21 @@ class ApiController extends FOSRestController
             ->andWhere('a.created_at >= :validDate')
             ->andWhere('a.publication >= :publicationId')
             ->orderBy('a.created_at', 'DESC')
-            ->setParameters(array(
-                'validDate' => $validDate,
-                'publicationId' => $publicationId
-            ))
+            ->setParameters(
+                array(
+                    'validDate' => $validDate,
+                    'publicationId' => $publicationId
+                )
+            )
             ->getQuery();
 
         $paginator = $this->get('newscoop.paginator.paginator_service');
-        $latestAnnouncements = $paginator->paginate($latestAnnouncements, array(
-            'distinct' => false
-        ));
+        $latestAnnouncements = $paginator->paginate(
+            $latestAnnouncements,
+            array(
+                'distinct' => false
+            )
+        );
 
         return $latestAnnouncements;
     }

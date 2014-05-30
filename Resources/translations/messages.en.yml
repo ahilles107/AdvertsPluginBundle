@@ -1,0 +1,50 @@
+ads:
+    label:
+        title: "Announcements search"
+        name: "Name"
+        description: "Description"
+        category: "Category"
+        username: "Username"
+        publication: "Publication"
+        price: "Price"
+        reads: "Reads"
+        sure: "Are you sure ?"
+        suremsg: "Are you sure you want to remove this classified?"
+    btn:
+        cancel: "Cancel"
+        delete: "Delete"
+    filter:
+        category: "Categories"
+        filters: "Filters"
+    status:
+        active: "Active"
+        inactive: "Inactive"
+    error:
+        cantdelete: "Can not delete classified!"
+    success:
+        deleted: "Classified successfully deleted."
+    menu:
+        manage: "Manage announcements"
+        name: "Announcements"
+    created: "Created"
+    updated: "Updated"
+    table:
+        actions:
+            actions: "Actions"
+            edit: Edit
+            resend_email: "Resend activation email"
+            rename: "Rename"
+            remove: "Delete"
+        confirm_remove: "Do you really want to remove this announcement?"
+        table_messages:
+            page: "Page"
+            perPageText: "Show: "
+            pageText: "Pages: "
+            recordCountPageBoundTemplate: "{pageLowerBound} to {pageUpperBound} of"
+            recordCountPageUnboundedTemplate: "{recordsShown} of"
+            recordCountTotalTemplate: "{recordsQueryCount} {collectionName}"
+            recordCountFilteredTemplate: " (filtered from {recordsTotal} total records)"
+            recordCountText: "Showing "
+            recordCountTextTemplate: "{text} {pageTemplate} {totalTemplate} {filteredTemplate}"
+            recordCountTemplate: "<span id='dynatable-record-count-{elementId}' class='dynatable-record-count'>{textTemplate}</span>"
+            processingText: "Processing..."

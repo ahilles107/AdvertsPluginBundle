@@ -23,3 +23,8 @@ services:
         arguments:  [ "@router"]
         tags:
             - { name: jms_serializer.handler, type: announcement_url, direction: serialization, format:json, method:serializeToJson }
+
+    ahs_adverts_plugin.ads_service:
+        class: AHS\AdvertsPluginBundle\Service\AnnouncementsService
+        arguments:
+            - @em

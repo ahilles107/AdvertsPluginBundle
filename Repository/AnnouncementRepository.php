@@ -2,6 +2,7 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
@@ -23,12 +24,22 @@ class AnnouncementRepository extends EntityRepository
      *
      * @return Newscoop\ListResult
      */
-    public function getListByCriteria(AnnouncementCriteria $criteria)
+    public function getListByCriteria(AnnouncementCriteria $criteria, $showResults = false)
     {
         $qb = $this->createQueryBuilder('a');
+        $list = new ListResult();
+
         $qb->select('a, c')
-            ->andWhere('a.is_active = true')
             ->leftJoin('a.category', 'c');
+
+        if (!empty($criteria->status)) {
+            if (count($criteria->status) > 1) {
+                $qb->andWhere($qb->expr()->orX('a.is_active = true', 'a.is_active = false'));
+            } else {
+                $qb->andWhere('a.is_active = :status');
+                $qb->setParameter('status', $criteria->status[0] == 'true' ? true : false);
+            }
+        }
 
         if ($criteria->withImages !== null) {
             if ($criteria->withImages == true) {
@@ -42,10 +53,23 @@ class AnnouncementRepository extends EntityRepository
             $qb->leftJoin('a.images', 'i');
         }
 
+        if ($criteria->query) {
+            $qb->andWhere($qb->expr()->orX("(a.name LIKE :query)", "(a.description LIKE :query)"));
+            $qb->setParameter('query', '%' . trim($criteria->query, '%') . '%');
+        }
+
+        if ($criteria->category != 'all') {
+            $qb->andWhere('c.id = :category');
+            $qb->setParameter('category', $criteria->category);
+        }
+
         foreach ($criteria->perametersOperators as $key => $operator) {
             $qb->andWhere('a.'.$key.' '.$operator.' :'.$key)
                 ->setParameter($key, $criteria->$key);
         }
+
+        $countQb = clone $qb;
+        $list->count = (int) $countQb->select('COUNT(DISTINCT a)')->getQuery()->getSingleScalarResult();
 
         $metadata = $this->getClassMetadata();
         foreach ($criteria->orderBy as $key => $order) {
@@ -55,8 +79,41 @@ class AnnouncementRepository extends EntityRepository
 
             $qb->orderBy($key, $order);
         }
-        $query = $qb->getQuery();
 
-        return $query;
+        if ($showResults) {
+            return $qb->getQuery()->getResult();
+        }
+
+        $list->items = $qb->getQuery()->getResult();
+
+        return $list;
+    }
+
+    /**
+     * Get ads count for given criteria
+     *
+     * @param array $criteria
+     * @return int
+     */
+    public function countBy(array $criteria = array())
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder()
+            ->select('COUNT(a)')
+            ->from($this->getEntityName(), 'a');
+
+        foreach ($criteria as $property => $value) {
+            if (!is_array($value)) {
+                $queryBuilder->andWhere("a.$property = :$property");
+            }
+        }
+
+        $query = $queryBuilder->getQuery();
+        foreach ($criteria as $property => $value) {
+            if (!is_array($value)) {
+                $query->setParameter($property, $value);
+            }
+        }
+
+        return (int) $query->getSingleScalarResult();
     }
 }
