@@ -1,4 +1,10 @@
 <?php
+/**
+ * @package AHS\AdvertsPluginBundle
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
+ * @copyright 2014 Sourcefabric o.p.s.
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ */
 
 namespace AHS\AdvertsPluginBundle\Controller;
 
@@ -9,9 +15,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AHS\AdvertsPluginBundle\TemplateList\AnnouncementCriteria;
 use AHS\AdvertsPluginBundle\Entity\Announcement;
+use AHS\AdvertsPluginBundle\Form\AnnouncementType;
+use AHS\AdvertsPluginBundle\Form\SettingsType;
 
 /**
- * TODO:
+ * Admin controller
  */
 class AdminController extends Controller
 {
@@ -82,6 +90,62 @@ class AdminController extends Controller
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
         return new JsonResponse(array('status' => $adsService->deleteClassified($id)));
+    }
+
+    /**
+     * @Route("admin/announcements/edit/{id}", options={"expose"=true})
+     * @Template()
+     */
+    public function editAdAction(Request $request, $id = null)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $translator = $this->get('translator');
+        $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->findOneById($id);
+
+        $form = $this->createForm(new AnnouncementType(), $classified);
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $em->flush();
+
+                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+            }
+        }
+
+        return array(
+            'form' => $form->createView(),
+        );
+    }
+
+    /**
+     * @Route("admin/announcements/settings", options={"expose"=true})
+     * @Template()
+     */
+    public function settingsAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $translator = $this->get('translator');
+        $systemPreferences = $this->get('system_preferences_service');
+        $form = $this->createForm(new SettingsType(), array(
+            'notificationEmail' => $systemPreferences->AdvertsNotificationEmail
+        ));
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $systemPreferences->AdvertsNotificationEmail = $data['notificationEmail'];
+
+                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+            }
+        }
+
+        return array(
+            'form' => $form->createView(),
+        );
     }
 
     /**

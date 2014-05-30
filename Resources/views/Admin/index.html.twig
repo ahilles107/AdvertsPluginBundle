@@ -7,7 +7,6 @@
 <link rel="stylesheet" type="text/css" href="{{ asset('/js/select2/select2.css') }}" />
 <link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/bootstrap.css') }}">
 <link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/jquery.dynatable.css') }}">
-<link rel="stylesheet" href="{{ asset('/admin-style/action_buttons.css') }}">
 <style type="text/css">
     .form-control {
         margin: 0px 0px 10px 0px;
@@ -38,6 +37,10 @@
     .active {
     	font-weight: bolder;
     }
+
+    .plugin-placeholder {
+    	margin-top:	30px;
+    }
 </style>
 {% endblock %}
 
@@ -48,7 +51,8 @@
 
 {% block admin_content %}
 <div class="plugin-container">
-<div class="row">
+{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 1} %}
+<div class="row plugin-placeholder">
 	<div class="col-md-2">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -192,7 +196,7 @@
                             var el = record['links'][index];
 
                             if (el['rel'] == 'edit') {
-                                html += "<a class='btn btn-xs btn-success action-btn' href="+el['href']+">{{ 'ads.table.actions.edit'|trans }}</a>";
+                                html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_admin_editad', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a>";
                             }
 
                             if (el['rel'] == 'token' && record['status'] == "Inactive") {
@@ -204,7 +208,7 @@
                             }
 
                             if (el['rel'] == 'delete' && record['status'] != "Deleted") {
-                                html += "<a class='btn btn-xs btn-danger action-btn js-remove-ad' data-ad-id='"+record.id+"'>{{ 'ads.table.actions.remove'|trans }}</a>";
+                                html += "<a class='btn btn-xs btn-danger action-btn js-remove-ad' data-ad-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
                             }
                         }
                         return html;
@@ -278,7 +282,7 @@
                 	return true;
 			  	}
 
-			  	flashMessage('{{ 'ads.error.cantdeleted'|trans }}');
+			  	flashMessage('{{ 'ads.error.cantdelete'|trans }}');
 			 });
         });
     });

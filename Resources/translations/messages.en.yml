@@ -9,10 +9,11 @@ ads:
         price: "Price"
         reads: "Reads"
         sure: "Are you sure ?"
-        suremsg: "Are you sure you want to remove this classified?"
+        suremsg: "Are you sure you want to remove this classified? This operation can not be undone."
     btn:
         cancel: "Cancel"
         delete: "Delete"
+        save: "Save"
     filter:
         category: "Categories"
         filters: "Filters"
@@ -23,9 +24,15 @@ ads:
         cantdelete: "Can not delete classified!"
     success:
         deleted: "Classified successfully deleted."
+        saved: "Successfully saved."
+    help:
+        notify: "Notifications about new classifieds will be sent to this email."
     menu:
         manage: "Manage announcements"
         name: "Announcements"
+        settings: "Settings"
+        classifieds: "Classifieds"
+        edit: "Edit classified"
     created: "Created"
     updated: "Updated"
     table:

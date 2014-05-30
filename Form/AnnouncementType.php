@@ -6,20 +6,43 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
+/**
+ * Announcement form type
+ */
 class AnnouncementType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name', null, array('error_bubbling' => true));
-        $builder->add('description', 'text', array('error_bubbling' => true));
-        $builder->add('category', 'entity', array(
-            'error_bubbling' => true,
-            'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
-            'property' => 'name',
-        ));
-        $builder->add('price', null, array(
-            'error_bubbling' => true,
-            'invalid_message' => 'Cena musi być liczbą'
+        $builder
+            ->add('name', null, array(
+                'error_bubbling' => true
+            ))
+            ->add('description', 'textarea', array(
+                'error_bubbling' => true
+            ))
+            ->add('category', 'entity', array(
+                'error_bubbling' => true,
+                'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
+                'property' => 'name',
+            ))
+            ->add('reads', null, array(
+                'error_bubbling' => true,
+                'required' => false,
+            ))
+            ->add('publication', 'entity', array(
+                'error_bubbling' => true,
+                'class' => 'Newscoop\Entity\Publication',
+                'property' => 'name',
+                'required' => false,
+            ))
+            ->add('user', 'entity', array(
+                'error_bubbling' => true,
+                'class' => 'Newscoop\Entity\User',
+                'property' => 'username',
+            ))
+            ->add('price', null, array(
+                'error_bubbling' => true,
+                'invalid_message' => 'Cena musi być liczbą'
         ));
     }
 
@@ -34,6 +57,9 @@ class AnnouncementType extends AbstractType
         ));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getName()
     {
         return 'announcement';

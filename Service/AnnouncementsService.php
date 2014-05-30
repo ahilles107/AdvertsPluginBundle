@@ -10,6 +10,7 @@ namespace AHS\AdvertsPluginBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManager;
+use Newscoop\Services\EmailService;
 
 /**
  * Announcements Service
@@ -21,14 +22,20 @@ class AnnouncementsService
 	 */
 	protected $em;
 
+    /**
+     * @var EmailService
+     */
+    protected $emailService;
+
 	/**
 	 * Announcements construct
 	 *
 	 * @param EntityManager $em Entity Manager
 	 */
-	public function __construct(EntityManager $em)
+	public function __construct(EntityManager $em, EmailService $emailService)
 	{
 		$this->em = $em;
+        $this->emailService = $emailService;
 	}
 
     /**

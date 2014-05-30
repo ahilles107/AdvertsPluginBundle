@@ -29,10 +29,17 @@ class ConfigureMenuListener
     public function onMenuConfigure(ConfigureMenuEvent $event)
     {
         $menu = $event->getMenu();
-
-        $menu[$this->translator->trans('Plugins')]->addChild(
+        $labelPlugins = $this->translator->trans('Plugins');
+        $labelPluginName = $this->translator->trans('ads.menu.name');
+        $menu[$labelPlugins]->addChild(
             $this->translator->trans('ads.menu.name'),
             array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_index'))
         );
+
+        $menu[$labelPlugins][$labelPluginName]->addChild(
+            $this->translator->trans('ads.menu.settings'),
+            array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_settings')
+        ));
+        $menu[$labelPlugins][$labelPluginName][$this->translator->trans('ads.menu.settings')]->setDisplay(false);
     }
 }
