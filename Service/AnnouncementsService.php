@@ -11,6 +11,10 @@ namespace AHS\AdvertsPluginBundle\Service;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManager;
 use Newscoop\Services\EmailService;
+use Newscoop\Entity\User;
+use Newscoop\NewscoopBundle\Services\SystemPreferencesService;
+use Newscoop\Services\TemplatesService;
+use Newscoop\Services\PlaceholdersService;
 
 /**
  * Announcements Service
@@ -27,15 +31,36 @@ class AnnouncementsService
      */
     protected $emailService;
 
+    /**
+     * @var TemplatesService
+     */
+    protected $templatesService;
+
+    /**
+     * @var PlaceholdersService
+     */
+    protected $placeholdersService;
+
+    /**
+     * @var SystemPreferencesService
+     */
+    protected $preferencesService;
+
 	/**
-	 * Announcements construct
-	 *
-	 * @param EntityManager $em Entity Manager
-	 */
-	public function __construct(EntityManager $em, EmailService $emailService)
+     * Announcements construct
+     *
+     * @param EntityManager            $em                 Entity Manager
+     * @param EmailService             $emailService       Email Service
+     * @param SystemPreferencesService $preferencesService System Preferences Service
+     */
+	public function __construct(EntityManager $em, EmailService $emailService, TemplatesService $templatesService,
+        PlaceholdersService $placeholdersService, SystemPreferencesService $preferencesService)
 	{
 		$this->em = $em;
         $this->emailService = $emailService;
+        $this->preferencesService = $preferencesService;
+        $this->templatesService = $templatesService;
+        $this->placeholdersService = $placeholdersService;
 	}
 
     /**
@@ -58,6 +83,37 @@ class AnnouncementsService
         }
 
         return false;
+    }
+
+    /**
+     * Delete category by given id
+     *
+     * @param  int|string $id Category id
+     *
+     * @return boolean
+     */
+    public function deleteCategory($id)
+    {
+        $category = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+            ->findOneById($id);
+
+        if ($category) {
+            $this->em->remove($category);
+            $this->em->flush();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function sendNotificationEmail(User $user)
+    {
+        $smarty = $this->templatesService->getSmarty();
+        $smarty->assign('user', new \MetaUser($user));
+
+        $message = $this->templatesService->fetchTemplate("email_membership_staff.tpl");
+        $this->emailService->send($this->placeholdersService->get('subject'), $message, array($this->preferencesService->AdvertsNotificationEmail));
     }
 
 	/**

@@ -15,7 +15,7 @@ use AHS\AdvertsPluginBundle\Entity\Image;
 class DefaultController extends Controller
 {
     /**
-     * @Route("/ogloszenia")
+     * @Route("/classifieds")
      */
     public function indexAction(Request $request)
     {
@@ -31,13 +31,14 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/dodaj")
+     * @Route("/classifieds/add")
      */
     public function addAction(Request $request)
     {
         $auth = \Zend_Auth::getInstance();
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(
@@ -83,6 +84,7 @@ class DefaultController extends Controller
                 $em->flush();
 
                 $this->savePhotosInAnnouncement($announcement, $request);
+                $adsService->sendNotificationEmail($user);
 
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',
@@ -111,7 +113,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/kategoria/{id}/{slug}")
+     * @Route("/classifieds/category/{id}/{slug}")
      */
     public function categoryAction(Request $request, $id, $slug = null)
     {
@@ -161,7 +163,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/pokaz/{id}/{slug}", requirements={"id" = "\d+"})
+     * @Route("/classifieds/view/{id}/{slug}", requirements={"id" = "\d+"})
      */
     public function showAction(Request $request, $id = null, $slug = null)
     {
@@ -191,7 +193,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/edytuj/{id}", requirements={"id" = "\d+"})
+     * @Route("/classifieds/edit/{id}", requirements={"id" = "\d+"})
      */
     public function editAction(Request $request, $id = null)
     {
@@ -257,7 +259,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/upload_photo")
+     * @Route("/classifieds/upload_photo")
      */
     public function uploadPhotoAction(Request $request)
     {
@@ -305,7 +307,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/remove_photo")
+     * @Route("/classifieds/remove_photo")
      */
     public function removePhotoAction(Request $request)
     {
@@ -340,7 +342,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/ogloszenia/render_photos")
+     * @Route("/classifieds/render_photos")
      */
     public function renderPhotosAction(Request $request)
     {

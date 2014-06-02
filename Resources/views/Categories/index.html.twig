@@ -25,17 +25,11 @@
         color: #fff;
     }
 
-    a.action-btn {margin-left: 5px; margin-bottom: 5px;}
-
     .plugin-container {
         padding: 10px 10px 30px 10px;
         border: 1px solid #ccc;
         background-color: #FFF;
         font-size: 12px;
-    }
-
-    .active {
-    	font-weight: bolder;
     }
 
     .plugin-placeholder {
@@ -45,88 +39,26 @@
 {% endblock %}
 
 {% block admin_scripts %}
-<script src="{{ asset('/js/select2/select2.js') }}"></script>
 <script src="{{ asset('/bundles/newscoopnewscoop/js/jquery.dynatable.js') }}"></script>
 {% endblock %}
 
 {% block admin_content %}
 <div class="plugin-container">
-{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 1} %}
+{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 2} %}
 <div class="row plugin-placeholder">
-	<div class="col-md-2">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="collapsed"><span class="glyphicon glyphicon-folder-close"></span> {{ 'ads.filter.category'|trans }}</a>
-                        </h4>
-                </div>
-                <div id="collapseOne" class="panel-collapse collapse in">
-                <div class="panel-body">
-                    <table class="table">
-                        <tbody>
-                        <tr>
-                            <td>
-                            <a href="#all" class="active dynatable-filter filter-all" data-filter="all"><span class="glyphicon glyphicon-tasks text-success"></span> All</a> <span class="label label-info">{{ allAdsCount }}</span>
-                            </td>
-                        </tr>
-                        {% for category in categories %}
-                        <tr>
-                            <td>
-                            <a href="#{{ category.id }}" class="dynatable-filter filter-{{ category.id }}" data-filter="{{ category.id }}"><span class="glyphicon glyphicon-tasks text-success"></span> {{ category.name }}</a> <span class="label label-info">{{ category.announcements|length }}</span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                 	</tbody>
-                 	</table>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" class="collapsed"><span class="glyphicon glyphicon-folder-close"></span> {{ 'ads.filter.filters'|trans }}</a>
-                        </h4>
-                </div>
-                <div id="collapseTwo" class="panel-collapse collapse in">
-                <div class="panel-body">
-                    <table class="table">
-                      <tbody>
-                        <tr>
-                            <td>
-                            <input type="checkbox" class="dynatable-ad-status" name="ad-status[]" value="true" /> {{ 'ads.status.active'|trans }} <span class="label label-info">{{ activeAdsCount }}</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                            <input type="checkbox" class="dynatable-ad-status" name="ad-status[]" value="false" /> {{ 'ads.status.inactive'|trans }} <span class="label label-info">{{ inactiveAdsCount }}</span>
-                            </td>
-                        </tr>
-                 	</tbody>
-                 	</table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-10">
-        <table id="ads-table" class="table table-bordered table-hover table-striped" style="word-wrap: break-word;table-layout: fixed;">
+</div>
+<table id="ads-table" class="table table-bordered table-hover table-striped" style="word-wrap: break-word;table-layout: fixed;">
         <thead>
           <tr>
             <th data-dynatable-column="name">{{ 'ads.label.name'|trans }}</th>
-            <th data-dynatable-column="description">{{ 'ads.label.description'|trans }}</th>
-            <th data-dynatable-column="publication">{{ 'ads.label.publication'|trans }}</th>
-            <th>{{ 'ads.label.price'|trans }}</th>
-            <th data-dynatable-column="reads">{{ 'ads.label.reads'|trans }}</th>
-            <th data-dynatable-column="username">{{ 'ads.label.username'|trans }}</th>
-            <th data-dynatable-column="created">{{ 'ads.created'|trans }}</th>
+            <th data-dynatable-column="announcements">{{ 'ads.label.classifieds'|trans }}</th>
+            <th data-dynatable-column="created_at">{{ 'ads.label.created'|trans }}</th>
             <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
           </tr>
         </thead>
         <tbody>
         </tbody>
         </table>
-    </div>
-    <div class="cleafix"></div>
-</div>
 </div>
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
 <div class="modal-dialog">
@@ -146,16 +78,7 @@
     </div>
   </div>
 <script type="text/javascript">
-   	var dynatable = $('#ads-table').bind('dynatable:init', function (e, dynatable) {
-        var hash = window.location.hash.substring(1);
-        if (hash != "") {
-            $('.dynatable-filter').removeClass('active');
-            $('.dynatable-filter.filter-'+hash).addClass('active');
-            dynatable.queries.add('filter', hash);
-        } else {
-            dynatable.queries.add('filter', 'all');
-        }
-    }).dynatable({
+    var dynatable = $('#ads-table').dynatable({
         inputs: {
             paginationClass: 'pagination',
             paginationActiveClass: 'current',
@@ -176,7 +99,7 @@
         },
         dataset: {
             ajax: true,
-            ajaxUrl: Routing.generate('ahs_advertsplugin_admin_loadads'),
+            ajaxUrl: Routing.generate('ahs_advertsplugin_categories_load'),
             ajaxOnLoad: false,
             records: [],
             perPageDefault: 10,
@@ -206,20 +129,14 @@
                             }
 
                             if (el['rel'] == 'delete' && record['status'] != "Deleted") {
-                                html += "<a class='btn btn-xs btn-danger action-btn js-remove-ad' data-ad-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
+                                html += "<a class='btn btn-xs btn-danger action-btn js-remove-category' data-category-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
                             }
                         }
                         return html;
                     }
                 }
 
-                if (column.id == 'username') {
-                    column.attributeWriter = function(record) {
-                    	return "<a href="+record.username.href+">"+record.username.username+"</a>";
-                    }
-                }
-
-                if (column.id == 'created') {
+                if (column.id == 'created_at') {
                     column.attributeWriter = function(record) {
                         return record.created.date;
                     }
@@ -249,42 +166,21 @@
         }
     }).data('dynatable');
 
-    $('.dynatable-filter').click(function(e){
-        $('.dynatable-filter').removeClass('active');
-        $(this).addClass('active');
-        dynatable.queries.add('filter', $(this).data('filter'));
-        dynatable.process();
-    });
-
-    $('.dynatable-ad-status').click(function(e){
-        var values = [];
-        $('.dynatable-ad-status').each(function(key, el){
-            if ($(el).is(':checked')) {
-                values.push($(el).val());
-            }
-        });
-
-        dynatable.queries.add('ad-status', values);
-        dynatable.process();
-    });
-
-    $('.js-remove-ad').live('click', function(event){
+$('.js-remove-category').live('click', function(event){
         event.preventDefault();
         var that = $(this);
          $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
-            $.post(Routing.generate('ahs_advertsplugin_admin_deletead', {id: that.attr('data-ad-id') }))
-			  .done(function(data) {
-			  	if (data.status) {
-                	flashMessage('{{ 'ads.success.deleted'|trans }}');
-                	dynatable.process();
-                	return true;
-			  	}
+            $.post(Routing.generate('ahs_advertsplugin_category_delete', {id: that.attr('data-category-id') }))
+              .done(function(data) {
+                if (data.status) {
+                    flashMessage('{{ 'ads.success.deleted'|trans }}');
+                    dynatable.process();
+                    return true;
+                }
 
-			  	flashMessage('{{ 'ads.error.cantdelete'|trans }}');
-			 });
+                flashMessage('{{ 'ads.error.cantdelete'|trans }}');
+             });
         });
     });
-
-
-</script>
+    </script>
 {% endblock %}

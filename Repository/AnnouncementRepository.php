@@ -24,7 +24,7 @@ class AnnouncementRepository extends EntityRepository
      *
      * @return Newscoop\ListResult
      */
-    public function getListByCriteria(AnnouncementCriteria $criteria, $showResults = false)
+    public function getListByCriteria(AnnouncementCriteria $criteria, $showResults = true)
     {
         $qb = $this->createQueryBuilder('a');
         $list = new ListResult();
@@ -58,7 +58,7 @@ class AnnouncementRepository extends EntityRepository
             $qb->setParameter('query', '%' . trim($criteria->query, '%') . '%');
         }
 
-        if ($criteria->category != 'all') {
+        if ($criteria->category != 'all' && $criteria->category != null) {
             $qb->andWhere('c.id = :category');
             $qb->setParameter('category', $criteria->category);
         }
@@ -80,8 +80,8 @@ class AnnouncementRepository extends EntityRepository
             $qb->orderBy($key, $order);
         }
 
-        if ($showResults) {
-            return $qb->getQuery()->getResult();
+        if (!$showResults) {
+            return $qb->getQuery();
         }
 
         $list->items = $qb->getQuery()->getResult();

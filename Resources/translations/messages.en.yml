@@ -9,7 +9,9 @@ ads:
         price: "Price"
         reads: "Reads"
         sure: "Are you sure ?"
-        suremsg: "Are you sure you want to remove this classified? This operation can not be undone."
+        suremsg: "Are you sure you want to delete? This operation can not be undone."
+        classifieds: "Total classifieds"
+        created: "Created"
     btn:
         cancel: "Cancel"
         delete: "Delete"
@@ -33,6 +35,8 @@ ads:
         settings: "Settings"
         classifieds: "Classifieds"
         edit: "Edit classified"
+        actions: "Quick actions"
+        categories: "Categories"
     created: "Created"
     updated: "Updated"
     table:

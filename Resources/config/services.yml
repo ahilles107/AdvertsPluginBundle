@@ -29,3 +29,6 @@ services:
         arguments:
             - @em
             - @email
+            - @newscoop.templates.service
+            - @newscoop.placeholders.service
+            - @system_preferences_service
