@@ -1,0 +1,209 @@
+{% extends 'NewscoopNewscoopBundle::admin_layout.html.twig' %}
+
+{% block admin_title %}{{ parent() }} - {{ 'ads.menu.manage'|trans }}{% endblock %}
+{% block admin_page_title_content %}{{ 'ads.menu.manage'|trans }}{% endblock %}
+
+{% block admin_stylesheets %}
+<link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/bootstrap.css') }}">
+<link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/jquery.dynatable.css') }}">
+<link rel="stylesheet" href="{{ asset('/bundles/ahsadvertsplugin/css/backend.css') }}">
+{% endblock %}
+
+{% block admin_scripts %}
+<script src="{{ asset('/bundles/newscoopnewscoop/js/jquery.dynatable.js') }}"></script>
+{% endblock %}
+
+{% block admin_content %}
+<div class="plugin-container">
+{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 2} %}
+<div class="actionbar">
+        <button type="button" class="btn btn-default add-new-category"><span class="glyphicon glyphicon-plus">{{ 'ads.btn.addnew'|trans }}</span></button>
+    </div><br><br><br><br>
+<table id="ads-table" class="table table-bordered table-hover table-striped" style="word-wrap: break-word;table-layout: fixed;">
+        <thead>
+          <tr>
+            <th data-dynatable-column="name">{{ 'ads.label.name'|trans }}</th>
+            <th data-dynatable-column="announcements">{{ 'ads.label.classifieds'|trans }}</th>
+            <th data-dynatable-column="created_at">{{ 'ads.label.created'|trans }}</th>
+            <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        </table>
+</div>
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ 'ads.label.sure'|trans }}</h4>
+        </div>
+        <div class="modal-body" style="font-size: 14px;">
+          {{ 'ads.label.suremsg'|trans }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'ads.btn.cancel'|trans }}</button>
+          <button type="button" class="btn btn-danger" id="delete-confirm" data-dismiss="modal">{{ 'ads.btn.delete'|trans }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="modal fade" id="addConfirmModal" tabindex="-1" role="dialog" aria-labelledby="addConfirmModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ 'ads.label.addingcategory'|trans }}</h4>
+        </div>
+        <div class="modal-body" style="font-size: 14px;">
+          <form class="form-horizontal" id="add-new-category" method="post" action="{{ path('ahs_advertsplugin_categories_add') }}">
+            <fieldset>
+            <div class="form-group">
+              <label class="col-md-3 control-label" for="textinput">{{ 'ads.label.name'|trans }}</label>
+              <div class="col-md-8">
+                <input type="text" id="category_name" name="category[name]" required="required" class="form-control input-md">
+              </div>
+            </div>
+            </fieldset>
+            <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'ads.btn.cancel'|trans }}</button>
+                  <input type="submit" class="btn btn-success" value="{{ 'ads.btn.addnew'|trans }}"/>
+                </div>
+              </div>
+            </form>
+        </div>
+    </div>
+  </div>
+<script type="text/javascript">
+    var dynatable = $('#ads-table').dynatable({
+        inputs: {
+            paginationClass: 'pagination',
+            paginationActiveClass: 'current',
+            paginationDisabledClass: 'unavailable',
+            paginationPrev: '&laquo;',
+            paginationNext: '&raquo;',
+            pageText: '{{ 'ads.table.table_messages.page'|trans }}',
+            perPageText: '{{ 'ads.table.table_messages.perPageText'|trans }}',
+            pageText: '{{ 'ads.table.table_messages.pageText'|trans }}',
+            recordCountPageBoundTemplate: '{{ 'ads.table.table_messages.recordCountPageBoundTemplate'|trans }}',
+            recordCountPageUnboundedTemplate: '{{ 'ads.table.table_messages.recordCountPageUnboundedTemplate'|trans }}',
+            recordCountTotalTemplate: '{{ 'ads.table.table_messages.recordCountTotalTemplate'|trans }}',
+            recordCountFilteredTemplate: '{{ 'ads.table.table_messages.recordCountFilteredTemplate'|trans }}',
+            recordCountText: '{{ 'ads.table.table_messages.recordCountText'|trans }}',
+            recordCountTextTemplate: '{{ 'ads.table.table_messages.recordCountTextTemplate'|trans }}',
+            recordCountTemplate: '{{ 'ads.table.table_messages.recordCountTemplate'|trans }}',
+            processingText: '{{ 'ads.table.table_messages.processingText'|trans }}'
+        },
+        dataset: {
+            ajax: true,
+            ajaxUrl: Routing.generate('ahs_advertsplugin_categories_load'),
+            ajaxOnLoad: false,
+            records: [],
+            perPageDefault: 10,
+            perPageOptions: [10,20,50,100],
+        },
+        features: {
+            paginate: true,
+        },
+        writers: {
+            _cellWriter: function (column, record) {
+                if (column.label == '{{ 'ads.table.actions.actions'|trans }}') {
+                    column.attributeWriter = function(record) {
+                        var html = "";
+                        for (index = 0; index < record['links'].length; ++index) {
+                            var el = record['links'][index];
+
+                            if (el['rel'] == 'edit') {
+                                html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_categories_edit', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a> ";
+                            }
+
+                            if (el['rel'] == 'delete' && record['status'] != "Deleted") {
+                                html += "<a class='btn btn-xs btn-danger action-btn js-remove-category' data-category-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
+                            }
+                        }
+                        return html;
+                    }
+                }
+
+                if (column.id == 'created_at') {
+                    column.attributeWriter = function(record) {
+                        return record.created.date;
+                    }
+                }
+
+                var html = column.attributeWriter(record),
+                    td = '<td';
+
+                if (column.hidden || column.textAlign) {
+                  td += ' style="';
+                  // keep cells for hidden column headers hidden
+                  if (column.hidden) {
+                    td += 'display: none;';
+                  }
+                  // keep cells aligned as their column headers are aligned
+                  if (column.textAlign) {
+                    td += 'text-align: ' + column.textAlign + ';';
+                  }
+                  td += '"';
+                }
+                if (column.cssClass) {
+                  td += ' class="' + column.cssClass + '"';
+                }
+
+                return td + '>' + html + '</td>';
+            }
+        }
+    }).data('dynatable');
+
+$('.js-remove-category').live('click', function(event){
+        event.preventDefault();
+        var that = $(this);
+         $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
+            $.post(Routing.generate('ahs_advertsplugin_categories_delete', {id: that.attr('data-category-id') }))
+              .done(function(data) {
+                if (data.status) {
+                    flashMessage('{{ 'ads.success.deleted'|trans }}');
+                    dynatable.process();
+                    return true;
+                }
+
+                flashMessage('{{ 'ads.error.cantdelete'|trans }}');
+             });
+        });
+    });
+$('.add-new-category').live('click', function(event){
+        event.preventDefault();
+         $('#addConfirmModal').modal();
+    });
+
+$('form#add-new-category').live('submit', function () {
+    var that = $(this);
+    callServer('ping', [], function(json) {
+        $.ajax({
+            type: 'POST',
+            url: that.attr('action'),
+            data: that.serialize(),
+            success: function (data) {
+                if (data.status) {
+                    flashMessage('{{ 'ads.success.add'|trans }}');
+                    dynatable.process();
+                    $('#addConfirmModal').modal('hide');
+                    return true;
+                }
+
+                flashMessage('{{ 'ads.error.cantadd'|trans }}', "error");
+            },
+            error: function (rq, status, error) {
+                if (status == 0 || status == -1) {
+                    flashMessage('{{ 'ads.error.cantadd'|trans }}', "error");
+                }
+            }
+        });
+    });
+
+    return false;
+});
+
+</script>
+{% endblock %}

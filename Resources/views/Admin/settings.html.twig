@@ -1,0 +1,51 @@
+{% extends 'NewscoopNewscoopBundle::admin_layout.html.twig' %}
+
+{% block admin_title %}{{ parent() }} - {{ 'ads.menu.settings'|trans }}{% endblock %}
+{% block admin_page_title_content %}{{ 'ads.menu.settings'|trans }}{% endblock %}
+
+{% block admin_stylesheets %}
+<link rel="stylesheet" href="{{ asset('/bundles/ahsadvertsplugin/css/backend.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+{% if form_errors(form) %}
+    <div class="alerts alert-danger">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
+{% for flashMessage in app.session.flashbag.get('success') %}
+        <div class="alerts alert-success">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ flashMessage }}
+        </div>
+{% endfor %}
+<div class="plugin-container">
+{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 3} %}
+<div class="row plugin-placeholder">
+{{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+<fieldset>
+<div class="form-group">
+  <label class="col-md-4 control-label" for="textinput">{{ form_label(form.notificationEmail) }}</label>
+  <div class="col-md-4">
+    {{ form_widget(form.notificationEmail, {'attr': {'class': 'form-control input-md'}}) }}
+    <span class="help-block">{{ 'ads.help.notify'|trans }}</span>
+  </div>
+</div>
+<div class="form-group">
+  <label class="col-md-4 control-label" for="textinput">{{ form_label(form.review) }}</label>
+  <div class="col-md-4">
+    {{ form_widget(form.review) }}
+    <span class="help-block">{{ 'ads.help.review'|trans }}</span>
+  </div>
+</div>
+<div class="form-group">
+  <label class="col-md-4 control-label" for="singlebutton"></label>
+  <div class="col-md-4">
+    <button id="singlebutton" name="singlebutton" class="btn btn-success pull-right">{{ 'ads.btn.save'|trans }}</button>
+  </div>
+</div>
+</fieldset>
+{{ form_end(form) }}
+</div>
+{% endblock %}

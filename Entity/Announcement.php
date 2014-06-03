@@ -332,4 +332,32 @@ class Announcement
     {
         return clone $this;
     }
+
+    /**
+     * Sets the value of is_active.
+     *
+     * @param string $is_active the is_active
+     *
+     * @return self
+     */
+    public function setIsActive($is_active)
+    {
+        $this->is_active = $is_active;
+
+        return $this;
+    }
+
+    /**
+     * Sets the value of reads.
+     *
+     * @param integer $reads the reads
+     *
+     * @return self
+     */
+    public function setReads($reads)
+    {
+        $this->reads = $reads;
+
+        return $this;
+    }
 }

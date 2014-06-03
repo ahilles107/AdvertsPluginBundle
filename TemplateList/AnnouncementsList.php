@@ -20,10 +20,9 @@ class AnnouncementsList extends PaginatedBaseList
     {
         $em = \Zend_Registry::get('container')->get('em');
         $queryBuilder = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->getListByCriteria($criteria);
-        $list = $this->paginateList($queryBuilder, null, $criteria->maxResults);
+            ->getListByCriteria($criteria, false);
 
-        return $list;
+        return $this->paginateList($queryBuilder, null, $criteria->maxResults);
     }
 
     protected function convertParameters($firstResult, $parameters)
