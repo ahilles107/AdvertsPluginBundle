@@ -15,6 +15,8 @@ use Newscoop\Entity\User;
 use Newscoop\NewscoopBundle\Services\SystemPreferencesService;
 use Newscoop\Services\TemplatesService;
 use Newscoop\Services\PlaceholdersService;
+use AHS\AdvertsPluginBundle\Entity\User as ClassifiedUser;
+use AHS\AdvertsPluginBundle\Entity\Announcement;
 
 /**
  * Announcements Service
@@ -107,12 +109,67 @@ class AnnouncementsService
         return false;
     }
 
-    public function sendNotificationEmail(User $user)
+    /**
+     * Activate classified by given id
+     *
+     * @param  int|string $id Classified id
+     *
+     * @return boolean
+     */
+    public function activateClassified($id)
+    {
+        $classified = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->findOneById($id);
+
+        if ($classified) {
+            $classified->setIsActive(true);
+            $this->em->flush();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Deactivate classified by given id
+     *
+     * @param  int|string $id Classified id
+     *
+     * @return boolean
+     */
+    public function deactivateClassified($id)
+    {
+        $classified = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->findOneById($id);
+
+        if ($classified) {
+            $classified->setIsActive(false);
+            $this->em->flush();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Send notification about new classified added
+     *
+     * @param  ClassifiedUser $user Classified user
+     *
+     * @return void
+     */
+    public function sendNotificationEmail(ClassifiedUser $user, Announcement $classified)
     {
         $smarty = $this->templatesService->getSmarty();
-        $smarty->assign('user', new \MetaUser($user));
+        $user = $this->em->getRepository('Newscoop\Entity\User')
+            ->findOneBy(array('id' => $user->getNewscoopUserId()));
 
-        $message = $this->templatesService->fetchTemplate("email_membership_staff.tpl");
+        $smarty->assign('user', new \MetaUser($user));
+        $smarty->assign('classified', $classified);
+
+        $message = $this->templatesService->fetchTemplate("_views/email_classified_notify.tpl");
         $this->emailService->send($this->placeholdersService->get('subject'), $message, array($this->preferencesService->AdvertsNotificationEmail));
     }
 

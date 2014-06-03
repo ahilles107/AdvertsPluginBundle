@@ -71,6 +71,14 @@ class AnnouncementRepository extends EntityRepository
         $countQb = clone $qb;
         $list->count = (int) $countQb->select('COUNT(DISTINCT a)')->getQuery()->getSingleScalarResult();
 
+        if ($criteria->firstResult != 0) {
+            $qb->setFirstResult($criteria->firstResult);
+        }
+
+        if ($criteria->maxResults != 0) {
+            $qb->setMaxResults($criteria->maxResults);
+        }
+
         $metadata = $this->getClassMetadata();
         foreach ($criteria->orderBy as $key => $order) {
             if (array_key_exists($key, $metadata->columnNames)) {

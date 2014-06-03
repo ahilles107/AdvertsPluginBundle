@@ -80,11 +80,18 @@ class DefaultController extends Controller
                 $announcement->setPublication($publicationService->getPublication());
 
                 $em->persist($announcement);
+
+                $systemPreferences = $this->get('system_preferences_service');
+
+                if ($systemPreferences->AdvertsReviewStatus == "1") {
+                    $announcement->setIsActive(false);
+                }
+
                 $cacheService->clearNamespace('announcements');
                 $em->flush();
 
                 $this->savePhotosInAnnouncement($announcement, $request);
-                $adsService->sendNotificationEmail($user);
+                $adsService->sendNotificationEmail($user, $announcement);
 
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',

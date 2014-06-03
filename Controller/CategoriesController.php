@@ -13,6 +13,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use AHS\AdvertsPluginBundle\Form\CategoryType;
+use AHS\AdvertsPluginBundle\Entity\Category;
 
 /**
  * Categories controller
@@ -26,6 +28,60 @@ class CategoriesController extends Controller
     public function indexAction(Request $request)
     {
         return array();
+    }
+
+    /**
+     * @Route("admin/announcements/category/edit/{id}", options={"expose"=true})
+     * @Template()
+     */
+    public function editAction(Request $request, $id = null)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $translator = $this->get('translator');
+        $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+            ->findOneById($id);
+
+        $form = $this->createForm(new CategoryType(), $category);
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $em->flush();
+
+                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+            }
+        }
+
+        return array(
+            'form' => $form->createView(),
+        );
+    }
+
+    /**
+     * @Route("admin/announcements/category/add", options={"expose"=true})
+     * @Template()
+     */
+    public function addAction(Request $request, $id = null)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $translator = $this->get('translator');
+
+        $form = $this->createForm(new CategoryType(), array());
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $category = new Category();
+                $category->setName($data['name']);
+                $em->persist($category);
+                $em->flush();
+
+                return new JsonResponse(array('status' => true));
+            }
+        }
+
+        return new JsonResponse(array('status' => false));
     }
 
     /**
@@ -104,7 +160,7 @@ class CategoriesController extends Controller
     /**
      * @Route("admin/announcements/category/delete/{id}", options={"expose"=true})
      */
-    public function deleteAdAction(Request $request, $id)
+    public function deleteAction(Request $request, $id)
     {
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 

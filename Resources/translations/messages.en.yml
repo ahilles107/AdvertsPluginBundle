@@ -12,10 +12,13 @@ ads:
         suremsg: "Are you sure you want to delete? This operation can not be undone."
         classifieds: "Total classifieds"
         created: "Created"
+        addingcategory: "Adding new category..."
     btn:
         cancel: "Cancel"
         delete: "Delete"
         save: "Save"
+        back: "Back"
+        addnew: "Add"
     filter:
         category: "Categories"
         filters: "Filters"
@@ -24,11 +27,18 @@ ads:
         inactive: "Inactive"
     error:
         cantdelete: "Can not delete classified!"
+        cantadd: "Can not add new category!"
+        cantactivate: "Can not activate"
+        cantdeactivate: "Can not deactivate"
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."
+        add: "Successfully added."
+        activated: "Successfully activated"
+        deactivated: "Successfully deactivated"
     help:
         notify: "Notifications about new classifieds will be sent to this email."
+        review: "When set, each new classified status will be set to deactivated by default."
     menu:
         manage: "Manage announcements"
         name: "Announcements"
@@ -37,14 +47,15 @@ ads:
         edit: "Edit classified"
         actions: "Quick actions"
         categories: "Categories"
+        editcategory: "Edit category"
     created: "Created"
     updated: "Updated"
     table:
         actions:
             actions: "Actions"
             edit: Edit
-            resend_email: "Resend activation email"
-            rename: "Rename"
+            activate: "Activate"
+            deactivate: "Deactivate"
             remove: "Delete"
         confirm_remove: "Do you really want to remove this announcement?"
         table_messages:

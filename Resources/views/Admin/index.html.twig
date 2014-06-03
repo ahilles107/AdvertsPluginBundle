@@ -4,44 +4,8 @@
 {% block admin_page_title_content %}{{ 'ads.menu.manage'|trans }}{% endblock %}
 
 {% block admin_stylesheets %}
-<link rel="stylesheet" type="text/css" href="{{ asset('/js/select2/select2.css') }}" />
-<link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/bootstrap.css') }}">
 <link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/jquery.dynatable.css') }}">
-<style type="text/css">
-    .form-control {
-        margin: 0px 0px 10px 0px;
-    }
-    .form-control input {
-        margin-right: 10px;
-    }
-
-    #ads-table {
-        padding: 10px;
-        border: 1px solid #ccc;
-    }
-
-    #ads-table th {
-        background: #007fb3;
-        color: #fff;
-    }
-
-    a.action-btn {margin-left: 5px; margin-bottom: 5px;}
-
-    .plugin-container {
-        padding: 10px 10px 30px 10px;
-        border: 1px solid #ccc;
-        background-color: #FFF;
-        font-size: 12px;
-    }
-
-    .active {
-    	font-weight: bolder;
-    }
-
-    .plugin-placeholder {
-    	margin-top:	30px;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('/bundles/ahsadvertsplugin/css/backend.css') }}">
 {% endblock %}
 
 {% block admin_scripts %}
@@ -197,16 +161,16 @@
                                 html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_admin_editad', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a>";
                             }
 
-                            if (el['rel'] == 'token' && record['status'] == "Inactive") {
-                                html += "<a class='btn btn-xs btn-success action-btn js-resend-mail' href="+el['href']+">{{ 'ads.table.actions.resend_email'|trans }}/a>";
-                            }
-
-                            if (el['rel'] == 'rename') {
-                                html += "<a class='btn btn-xs btn-success action-btn' href="+el['href']+">{{ 'ads.table.actions.rename'|trans }}</a>";
-                            }
-
-                            if (el['rel'] == 'delete' && record['status'] != "Deleted") {
+                            if (el['rel'] == 'delete') {
                                 html += "<a class='btn btn-xs btn-danger action-btn js-remove-ad' data-ad-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
+                            }
+
+                            if (el['rel'] == 'activate' && record['status'] == false) {
+                                html += "<a class='btn btn-xs btn-success action-btn js-activate' href="+el['href']+"><span class='glyphicon glyphicon-chevron-up'></span>{{ 'ads.table.actions.activate'|trans }}</a>";
+                            }
+
+                            if (el['rel'] == 'deactivate' && record['status'] == true) {
+                                html += "<a class='btn btn-xs btn-warning action-btn js-deactivate' href="+el['href']+"><span class='glyphicon glyphicon-chevron-down'></span>{{ 'ads.table.actions.deactivate'|trans }}</a>";
                             }
                         }
                         return html;
@@ -250,41 +214,73 @@
     }).data('dynatable');
 
     $('.dynatable-filter').click(function(e){
-        $('.dynatable-filter').removeClass('active');
-        $(this).addClass('active');
-        dynatable.queries.add('filter', $(this).data('filter'));
-        dynatable.process();
+    	callServer('ping', [], function(json) {
+	        $('.dynatable-filter').removeClass('active');
+	        $(this).addClass('active');
+	        dynatable.queries.add('filter', $(this).data('filter'));
+	        dynatable.process();
+        });
     });
 
     $('.dynatable-ad-status').click(function(e){
-        var values = [];
-        $('.dynatable-ad-status').each(function(key, el){
-            if ($(el).is(':checked')) {
-                values.push($(el).val());
-            }
-        });
+    	callServer('ping', [], function(json) {
+	        var values = [];
+	        $('.dynatable-ad-status').each(function(key, el){
+	            if ($(el).is(':checked')) {
+	                values.push($(el).val());
+	            }
+	        });
 
-        dynatable.queries.add('ad-status', values);
-        dynatable.process();
+	        dynatable.queries.add('ad-status', values);
+	        dynatable.process();
+        });
     });
 
     $('.js-remove-ad').live('click', function(event){
         event.preventDefault();
         var that = $(this);
          $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
-            $.post(Routing.generate('ahs_advertsplugin_admin_deletead', {id: that.attr('data-ad-id') }))
-			  .done(function(data) {
-			  	if (data.status) {
-                	flashMessage('{{ 'ads.success.deleted'|trans }}');
-                	dynatable.process();
-                	return true;
-			  	}
+         	callServer('ping', [], function(json) {
+	            $.post(Routing.generate('ahs_advertsplugin_admin_deletead', {id: that.attr('data-ad-id') }))
+				  .done(function(data) {
+				  	if (data.status) {
+	                	flashMessage('{{ 'ads.success.deleted'|trans }}');
+	                	dynatable.process();
+	                	return true;
+				  	}
 
-			  	flashMessage('{{ 'ads.error.cantdelete'|trans }}');
+				  	flashMessage('{{ 'ads.error.cantdelete'|trans }}', 'error');
+				 });
 			 });
         });
     });
 
+    $('.js-activate').live('click', function(event){
+        event.preventDefault();
+	       $.post($(this).attr('href'))
+				.done(function(data) {
+				  if (data.status) {
+	                flashMessage('{{ 'ads.success.activated'|trans }}');
+	               dynatable.process();
+	               return true;
+				}
 
+				flashMessage('{{ 'ads.error.cantactivate'|trans }}', 'error');
+			});
+    });
+
+    $('.js-deactivate').live('click', function(event){
+        event.preventDefault();
+	        $.post($(this).attr('href'))
+				.done(function(data) {
+				  if (data.status) {
+	                flashMessage('{{ 'ads.success.deactivated'|trans }}');
+	               dynatable.process();
+	               return true;
+				}
+
+				flashMessage('{{ 'ads.error.cantdeactivate'|trans }}', 'error');
+			});
+    });
 </script>
 {% endblock %}

@@ -59,7 +59,7 @@ class AdminController extends Controller
         $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount);
 
         if ($cacheService->contains($cacheKey)) {
-            $responseArray =  $cacheService->fetch($cacheKey);
+            $responseArray = $cacheService->fetch($cacheKey);
         } else {
             $ads = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->getListByCriteria($criteria);
 
@@ -121,6 +121,26 @@ class AdminController extends Controller
     }
 
     /**
+     * @Route("admin/announcements/activate/{id}", options={"expose"=true})
+     */
+    public function activateAction(Request $request, $id)
+    {
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->activateClassified($id)));
+    }
+
+    /**
+     * @Route("admin/announcements/deactivate/{id}", options={"expose"=true})
+     */
+    public function deactivateAction(Request $request, $id)
+    {
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->deactivateClassified($id)));
+    }
+
+    /**
      * @Route("admin/announcements/settings", options={"expose"=true})
      * @Template()
      */
@@ -130,7 +150,8 @@ class AdminController extends Controller
         $translator = $this->get('translator');
         $systemPreferences = $this->get('system_preferences_service');
         $form = $this->createForm(new SettingsType(), array(
-            'notificationEmail' => $systemPreferences->AdvertsNotificationEmail
+            'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
+            'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false
         ));
 
         if ($request->isMethod('POST')) {
@@ -138,6 +159,7 @@ class AdminController extends Controller
             if ($form->isValid()) {
                 $data = $form->getData();
                 $systemPreferences->AdvertsNotificationEmail = $data['notificationEmail'];
+                $systemPreferences->AdvertsReviewStatus = $data['review'];
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }
@@ -234,11 +256,11 @@ class AdminController extends Controller
                 ),
                 array(
                     'rel' => 'activate',
-                    'href' => ""
+                    'href' => $this->generateUrl('ahs_advertsplugin_admin_activate', array('id' => $ad->getId()))
                 ),
                 array(
                     'rel' => 'deactivate',
-                    'href' => ""
+                    'href' => $this->generateUrl('ahs_advertsplugin_admin_deactivate', array('id' => $ad->getId()))
                 ),
                 array(
                     'rel' => 'delete',
