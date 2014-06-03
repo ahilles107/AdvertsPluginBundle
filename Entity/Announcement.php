@@ -85,6 +85,15 @@ class Announcement
     protected $created_at;
 
     /**
+     * TODO: 
+     * * anonucement type looking/offering
+     * * valid date
+     * * anonucement status active/disactive
+     * * * anouncement result - succesful or notsuccesfull
+     * * * fix caching
+     */
+
+    /**
      * @ORM\Column(type="boolean", name="is_active", nullable=true)
      * @var string
      */
