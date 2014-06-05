@@ -26,6 +26,13 @@
 {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
 <fieldset>
 <div class="form-group">
+<div class="form-group">
+  <label class="col-md-4 control-label" for="textinput">{{ form_label(form.enableNotify) }}</label>
+  <div class="col-md-4">
+    {{ form_widget(form.enableNotify) }}
+    <span class="help-block">{{ 'ads.help.enablenotify'|trans }}</span>
+  </div>
+</div>
   <label class="col-md-4 control-label" for="textinput">{{ form_label(form.notificationEmail) }}</label>
   <div class="col-md-4">
     {{ form_widget(form.notificationEmail, {'attr': {'class': 'form-control input-md'}}) }}

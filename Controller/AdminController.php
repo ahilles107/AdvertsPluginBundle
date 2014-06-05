@@ -46,7 +46,6 @@ class AdminController extends Controller
      */
     public function loadAdsAction(Request $request)
     {
-        try {
         $em = $this->get('em');
         $cacheService = $this->get('newscoop.cache');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
@@ -77,8 +76,6 @@ class AdminController extends Controller
             $cacheService->save($cacheKey, $responseArray);
         }
 
-        } catch (\Exception $e) { ladybug_dump_die($e->getMessage());}
-
         return new JsonResponse($responseArray);
     }
 
@@ -90,6 +87,16 @@ class AdminController extends Controller
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
         return new JsonResponse(array('status' => $adsService->deleteClassified($id)));
+    }
+
+    /**
+     * @Route("admin/announcements/delete/image/{id}", options={"expose"=true})
+     */
+    public function deleteImageAction(Request $request, $id)
+    {
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->deleteClassifiedImage($id)));
     }
 
     /**
@@ -115,8 +122,16 @@ class AdminController extends Controller
             }
         }
 
+        $images = array();
+        $isEmpty = $classified->getImages()->isEmpty();
+        if ($isEmpty) {
+            $images[] = $classified->getFirstImage(true);
+        }
+
         return array(
             'form' => $form->createView(),
+            'images' => $images,
+            'isEmpty' => $isEmpty
         );
     }
 
@@ -151,7 +166,8 @@ class AdminController extends Controller
         $systemPreferences = $this->get('system_preferences_service');
         $form = $this->createForm(new SettingsType(), array(
             'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
-            'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false
+            'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false,
+            'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false
         ));
 
         if ($request->isMethod('POST')) {
@@ -160,6 +176,7 @@ class AdminController extends Controller
                 $data = $form->getData();
                 $systemPreferences->AdvertsNotificationEmail = $data['notificationEmail'];
                 $systemPreferences->AdvertsReviewStatus = $data['review'];
+                $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }
@@ -173,7 +190,7 @@ class AdminController extends Controller
     /**
      * Process request parameters
      *
-     * @param  Request $request Request object
+     * @param Request $request Request object
      *
      * @return AnnouncementCriteria
      */
@@ -220,8 +237,8 @@ class AdminController extends Controller
     /**
      * Process single ad
      *
-     * @param  Announcement $ad         Announcement
-     * @param  Zend_Router  $zendRouter Zend Router
+     * @param Announcement $ad         Announcement
+     * @param Zend_Router  $zendRouter Zend Router
      *
      * @return array
      */

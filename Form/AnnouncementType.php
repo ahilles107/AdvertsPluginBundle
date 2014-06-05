@@ -25,20 +25,11 @@ class AnnouncementType extends AbstractType
                 'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
                 'property' => 'name',
             ))
-            ->add('reads', null, array(
-                'error_bubbling' => true,
-                'required' => false,
-            ))
             ->add('publication', 'entity', array(
                 'error_bubbling' => true,
                 'class' => 'Newscoop\Entity\Publication',
                 'property' => 'name',
                 'required' => false,
-            ))
-            ->add('user', 'entity', array(
-                'error_bubbling' => true,
-                'class' => 'Newscoop\Entity\User',
-                'property' => 'username',
             ))
             ->add('price', null, array(
                 'error_bubbling' => true,

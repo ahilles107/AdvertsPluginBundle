@@ -20,6 +20,10 @@ class SettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('enableNotify', 'checkbox', array(
+                'error_bubbling' => true,
+                'required' => false
+            ))
             ->add('notificationEmail', 'email', array(
                 'error_bubbling' => true
             ))

@@ -166,11 +166,11 @@
                             }
 
                             if (el['rel'] == 'activate' && record['status'] == false) {
-                                html += "<a class='btn btn-xs btn-success action-btn js-activate' href="+el['href']+"><span class='glyphicon glyphicon-chevron-up'></span>{{ 'ads.table.actions.activate'|trans }}</a>";
+                                html += "<a class='btn btn-xs btn-success action-btn js-activate' href="+el['href']+"><span class='glyphicon glyphicon-thumbs-up'></span>{{ 'ads.table.actions.activate'|trans }}</a>";
                             }
 
                             if (el['rel'] == 'deactivate' && record['status'] == true) {
-                                html += "<a class='btn btn-xs btn-warning action-btn js-deactivate' href="+el['href']+"><span class='glyphicon glyphicon-chevron-down'></span>{{ 'ads.table.actions.deactivate'|trans }}</a>";
+                                html += "<a class='btn btn-xs btn-warning action-btn js-deactivate' href="+el['href']+"><span class='glyphicon glyphicon-thumbs-down'></span>{{ 'ads.table.actions.deactivate'|trans }}</a>";
                             }
                         }
                         return html;
@@ -214,16 +214,13 @@
     }).data('dynatable');
 
     $('.dynatable-filter').click(function(e){
-    	callServer('ping', [], function(json) {
 	        $('.dynatable-filter').removeClass('active');
 	        $(this).addClass('active');
 	        dynatable.queries.add('filter', $(this).data('filter'));
 	        dynatable.process();
-        });
     });
 
     $('.dynatable-ad-status').click(function(e){
-    	callServer('ping', [], function(json) {
 	        var values = [];
 	        $('.dynatable-ad-status').each(function(key, el){
 	            if ($(el).is(':checked')) {
@@ -233,14 +230,12 @@
 
 	        dynatable.queries.add('ad-status', values);
 	        dynatable.process();
-        });
     });
 
     $('.js-remove-ad').live('click', function(event){
         event.preventDefault();
         var that = $(this);
          $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
-         	callServer('ping', [], function(json) {
 	            $.post(Routing.generate('ahs_advertsplugin_admin_deletead', {id: that.attr('data-ad-id') }))
 				  .done(function(data) {
 				  	if (data.status) {
@@ -252,7 +247,6 @@
 				  	flashMessage('{{ 'ads.error.cantdelete'|trans }}', 'error');
 				 });
 			 });
-        });
     });
 
     $('.js-activate').live('click', function(event){

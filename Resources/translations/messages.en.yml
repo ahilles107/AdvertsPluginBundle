@@ -38,7 +38,8 @@ ads:
         deactivated: "Successfully deactivated"
     help:
         notify: "Notifications about new classifieds will be sent to this email."
-        review: "When set, each new classified status will be set to deactivated by default."
+        review: "When enabled, each new classified status will be set to deactivated by default."
+        enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."
     menu:
         manage: "Manage announcements"
         name: "Announcements"
@@ -50,6 +51,8 @@ ads:
         editcategory: "Edit category"
     created: "Created"
     updated: "Updated"
+    permissions:
+        edit: "Edit classifieds"
     table:
         actions:
             actions: "Actions"

@@ -41,5 +41,11 @@ class ConfigureMenuListener
             array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_settings')
         ));
         $menu[$labelPlugins][$labelPluginName][$this->translator->trans('ads.menu.settings')]->setDisplay(false);
+
+        $menu[$labelPlugins][$labelPluginName]->addChild(
+            $this->translator->trans('ads.menu.categories'),
+            array('uri' => $event->getRouter()->generate('ahs_advertsplugin_categories_index')
+        ));
+        $menu[$labelPlugins][$labelPluginName][$this->translator->trans('ads.menu.categories')]->setDisplay(false);
     }
 }

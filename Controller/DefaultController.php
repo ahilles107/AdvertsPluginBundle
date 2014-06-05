@@ -64,11 +64,9 @@ class DefaultController extends Controller
                 // create announcement user
                 $newscoopUserId = $auth->getIdentity();
 
-                $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
-                    array(
+                $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
                         'newscoopUserId' => $newscoopUserId
-                    )
-                );
+                ));
 
                 if (!$user) {
                     $user = new User();
@@ -91,7 +89,10 @@ class DefaultController extends Controller
                 $em->flush();
 
                 $this->savePhotosInAnnouncement($announcement, $request);
-                $adsService->sendNotificationEmail($user, $announcement);
+
+                if ($systemPreferences->AdvertsEnableNotify == "1") {
+                    $adsService->sendNotificationEmail($request, $user, $announcement);
+                }
 
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',
@@ -180,11 +181,10 @@ class DefaultController extends Controller
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
         $userSevice = $this->container->get('user.list');
-        $user = $userSevice->findOneBy(
-            array(
-                'id' => $announcement->getUser()->getNewscoopUserId()
-            )
-        );
+        $user = $userSevice->findOneBy(array(
+            'id' => $announcement->getUser()->getNewscoopUserId()
+        ));
+
         $newscoopUser = new \MetaUser($user);
         $announcement->addRead();
         $em->flush();
@@ -209,13 +209,10 @@ class DefaultController extends Controller
 
         $auth = \Zend_Auth::getInstance();
         if (!$auth->hasIdentity()) { // ignore for logged user
-            return new RedirectResponse($this->container->get('zend_router')->assemble(
-                array(
+            return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                     'controller' => '',
                     'action' => 'auth'
-                ),
-                'default'
-            ));
+            ), 'default'));
         }
 
         $em = $this->container->get('em');

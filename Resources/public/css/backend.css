@@ -12,10 +12,11 @@
 }
 
 #ads-table th {
-    background: #007fb3;
-    color: #fff;
+    background: #D1D1D1;
 }
-
+#ads-table th a {
+    color: #000;
+}
 .plugin-container {
     padding: 10px 10px 30px 10px;
     border: 1px solid #ccc;
@@ -40,4 +41,16 @@ a.action-btn {margin-left: 5px; margin-bottom: 5px;}
 
 .active {
     font-weight: bolder;
+}
+
+.selected img {
+    opacity:0.5;
+}
+
+#slider-thumbs {
+    margin-top: 20px;
+}
+
+.carousel-control {
+    padding-top: 30%;
 }
