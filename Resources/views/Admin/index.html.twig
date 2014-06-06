@@ -82,7 +82,9 @@
             <th data-dynatable-column="reads">{{ 'ads.label.reads'|trans }}</th>
             <th data-dynatable-column="username">{{ 'ads.label.username'|trans }}</th>
             <th data-dynatable-column="created">{{ 'ads.created'|trans }}</th>
+            {% if canEdit or canDelete or canActivate or canDeactivate %}
             <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -157,21 +159,27 @@
                         for (index = 0; index < record['links'].length; ++index) {
                             var el = record['links'][index];
 
+                            {% if canEdit %}
                             if (el['rel'] == 'edit') {
                                 html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_admin_editad', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a>";
                             }
+                            {% endif %}
 
+                            {% if canDelete %}
                             if (el['rel'] == 'delete') {
                                 html += "<a class='btn btn-xs btn-danger action-btn js-remove-ad' data-ad-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
                             }
-
+                            {% endif %}
+                            {% if canActivate %}
                             if (el['rel'] == 'activate' && record['status'] == false) {
                                 html += "<a class='btn btn-xs btn-success action-btn js-activate' href="+el['href']+"><span class='glyphicon glyphicon-thumbs-up'></span>{{ 'ads.table.actions.activate'|trans }}</a>";
                             }
-
+                            {% endif %}
+                            {% if canDeactivate %}
                             if (el['rel'] == 'deactivate' && record['status'] == true) {
                                 html += "<a class='btn btn-xs btn-warning action-btn js-deactivate' href="+el['href']+"><span class='glyphicon glyphicon-thumbs-down'></span>{{ 'ads.table.actions.deactivate'|trans }}</a>";
                             }
+                            {% endif %}
                         }
                         return html;
                     }

@@ -52,7 +52,13 @@ ads:
     created: "Created"
     updated: "Updated"
     permissions:
-        edit: "Edit classifieds"
+        edit: "Edit"
+        activate: "Activate"
+        deactivate: "Deactivate"
+        settings: "Manage settings"
+        delete: "Delete"
+        add: "Add"
+        access: "Access plugin"
     table:
         actions:
             actions: "Actions"

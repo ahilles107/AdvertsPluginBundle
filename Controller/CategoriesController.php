@@ -27,7 +27,15 @@ class CategoriesController extends Controller
      */
     public function indexAction(Request $request)
     {
-        return array();
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+
+        return array(
+            'canEdit' => $user->hasPermission('plugin_classifieds_edit'),
+            'canDelete' => $user->hasPermission('plugin_classifieds_delete'),
+            'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
+            'canAdd' => $user->hasPermission('plugin_classifieds_add'),
+        );
     }
 
     /**
@@ -38,23 +46,30 @@ class CategoriesController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $translator = $this->get('translator');
-        $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
-            ->findOneById($id);
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if ($user->hasPermission('plugin_classifieds_edit')) {
+            $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+                ->findOneById($id);
 
-        $form = $this->createForm(new CategoryType(), $category);
+            $form = $this->createForm(new CategoryType(), $category);
 
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-            if ($form->isValid()) {
-                $em->flush();
+            if ($request->isMethod('POST')) {
+                $form->handleRequest($request);
+                if ($form->isValid()) {
+                    $em->flush();
 
-                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+                    $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+                }
             }
+
+            return array(
+                'form' => $form->createView(),
+                'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
+            );
         }
 
-        return array(
-            'form' => $form->createView(),
-        );
+        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
     }
 
     /**
@@ -65,29 +80,34 @@ class CategoriesController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if ($user->hasPermission('plugin_classifieds_add')) {
+            $form = $this->createForm(new CategoryType(), array());
 
-        $form = $this->createForm(new CategoryType(), array());
+            if ($request->isMethod('POST')) {
+                $form->handleRequest($request);
+                if ($form->isValid()) {
+                    $data = $form->getData();
+                    $category = new Category();
+                    $category->setName($data['name']);
+                    $em->persist($category);
+                    $em->flush();
 
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-            if ($form->isValid()) {
-                $data = $form->getData();
-                $category = new Category();
-                $category->setName($data['name']);
-                $em->persist($category);
-                $em->flush();
-
-                return new JsonResponse(array('status' => true));
+                    return new JsonResponse(array('status' => true));
+                }
             }
+
+            return new JsonResponse(array('status' => false));
         }
 
-        return new JsonResponse(array('status' => false));
+        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
     }
 
     /**
      * Process request parameters
      *
-     * @param  Request $request Request object
+     * @param Request $request Request object
      *
      * @return array
      */
@@ -162,16 +182,22 @@ class CategoriesController extends Controller
      */
     public function deleteAction(Request $request, $id)
     {
-        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if ($user->hasPermission('plugin_classifieds_delete')) {
+            $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
-        return new JsonResponse(array('status' => $adsService->deleteCategory($id)));
+            return new JsonResponse(array('status' => $adsService->deleteCategory($id)));
+        }
+
+        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
     }
 
     /**
      * Process single category
      *
-     * @param  Category     $category        Category
-     * @param  Zend_Router  $zendRouter Zend Router
+     * @param Category    $category   Category
+     * @param Zend_Router $zendRouter Zend Router
      *
      * @return array
      */
