@@ -1,0 +1,6 @@
+{% extends 'NewscoopNewscoopBundle::admin_layout.html.twig' %}
+
+{% block admin_title %}{{ parent() }} - {{ 'ads.menu.nopermissions'|trans }}{% endblock %}
+{% block admin_content %}
+<div class="alert alert-danger" style="font-size: 14px"><center>{{ 'ads.menu.nopermissions'|trans }}</center></div>
+{% endblock %}

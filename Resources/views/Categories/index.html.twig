@@ -16,7 +16,7 @@
 <div class="plugin-container">
 {% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 2} %}
 <div class="actionbar">
-    {% if canAdd %}
+    {% if hasPermission('plugin_classifieds_add') %}
         <button type="button" class="btn btn-default add-new-category"><span class="glyphicon glyphicon-plus">{{ 'ads.btn.addnew'|trans }}</span></button>
     {% endif %}
     </div><br><br><br><br>
@@ -26,7 +26,7 @@
             <th data-dynatable-column="name">{{ 'ads.label.name'|trans }}</th>
             <th data-dynatable-column="announcements">{{ 'ads.label.classifieds'|trans }}</th>
             <th data-dynatable-column="created_at">{{ 'ads.label.created'|trans }}</th>
-            {% if canEdit or canDelete %}
+            {% if hasPermission('plugin_classifieds_edit') or hasPermission('plugin_classifieds_delete') %}
                 <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
             {% endif %}
           </tr>
@@ -116,12 +116,12 @@
                         var html = "";
                         for (index = 0; index < record['links'].length; ++index) {
                             var el = record['links'][index];
-                            {% if canEdit %}
+                            {% if hasPermission('plugin_classifieds_edit') %}
                             if (el['rel'] == 'edit') {
                                 html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_categories_edit', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a> ";
                             }
                             {% endif %}
-                            {% if canDelete %}
+                            {% if hasPermission('plugin_classifieds_delete') %}
                             if (el['rel'] == 'delete' && record['status'] != "Deleted") {
                                 html += "<a class='btn btn-xs btn-danger action-btn js-remove-category' data-category-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
                             }
@@ -160,7 +160,7 @@
             }
         }
     }).data('dynatable');
-{% if canDelete %}
+{% if hasPermission('plugin_classifieds_delete') %}
 $('.js-remove-category').live('click', function(event){
         event.preventDefault();
         var that = $(this);
@@ -178,7 +178,7 @@ $('.js-remove-category').live('click', function(event){
         });
     });
 {% endif %}
-{% if canAdd %}
+{% if hasPermission('plugin_classifieds_add') %}
 $('.add-new-category').live('click', function(event){
         event.preventDefault();
          $('#addConfirmModal').modal();

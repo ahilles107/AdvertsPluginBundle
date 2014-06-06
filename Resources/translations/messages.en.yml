@@ -49,6 +49,7 @@ ads:
         actions: "Quick actions"
         categories: "Categories"
         editcategory: "Edit category"
+        nopermissions: "You don't have permissions to access this resource."
     created: "Created"
     updated: "Updated"
     permissions:

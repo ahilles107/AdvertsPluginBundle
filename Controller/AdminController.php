@@ -32,19 +32,12 @@ class AdminController extends Controller
         $em = $this->container->get('em');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $categories = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')->findAll();
-        $userService = $this->get('user');
-        $user = $userService->getCurrentUser();
 
         return array(
             'categories' => $categories,
             'allAdsCount' => $adsService->countBy(),
             'activeAdsCount' => $adsService->countBy(array('is_active' => true)),
             'inactiveAdsCount' => $adsService->countBy(array('is_active' => false)),
-            'canEdit' => $user->hasPermission('plugin_classifieds_edit'),
-            'canDelete' => $user->hasPermission('plugin_classifieds_delete'),
-            'canActivate' => $user->hasPermission('plugin_classifieds_activate'),
-            'canDeactivate' => $user->hasPermission('plugin_classifieds_deactivate'),
-            'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
         );
     }
 
@@ -155,11 +148,10 @@ class AdminController extends Controller
                 'form' => $form->createView(),
                 'images' => $images,
                 'isEmpty' => $isEmpty,
-                'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
             );
         }
 
-        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
+        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
     }
 
     /**
@@ -229,11 +221,10 @@ class AdminController extends Controller
 
             return array(
                 'form' => $form->createView(),
-                'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
             );
         }
 
-        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
+        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
     }
 
     /**

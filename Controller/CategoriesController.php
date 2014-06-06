@@ -27,15 +27,7 @@ class CategoriesController extends Controller
      */
     public function indexAction(Request $request)
     {
-        $userService = $this->get('user');
-        $user = $userService->getCurrentUser();
-
-        return array(
-            'canEdit' => $user->hasPermission('plugin_classifieds_edit'),
-            'canDelete' => $user->hasPermission('plugin_classifieds_delete'),
-            'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
-            'canAdd' => $user->hasPermission('plugin_classifieds_add'),
-        );
+        return array();
     }
 
     /**
@@ -65,7 +57,6 @@ class CategoriesController extends Controller
 
             return array(
                 'form' => $form->createView(),
-                'canAccessSettings' => $user->hasPermission('plugin_classifieds_settings'),
             );
         }
 
