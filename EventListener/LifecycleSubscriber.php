@@ -48,14 +48,23 @@ class LifecycleSubscriber implements EventSubscriberInterface
     {
         $tool = new \Doctrine\ORM\Tools\SchemaTool($this->em);
         $tool->dropSchema($this->getClasses(), true);
+        $this->removePermissions();
     }
 
     /**
-     * Collect plugin permissions
+     * Save plugin permissions into database
      */
     private function setPermissions()
     {
-        $this->pluginsService->savePluginPermissions($this->pluginsService->collectPermissions());
+        $this->pluginsService->savePluginPermissions($this->pluginsService->collectPermissions($this->translator->trans('ads.menu.name')));
+    }
+
+    /**
+     * Remove plugin permissions
+     */
+    private function removePermissions()
+    {
+        $this->pluginsService->removePluginPermissions($this->pluginsService->collectPermissions($this->translator->trans('ads.menu.name')));
     }
 
     public static function getSubscribedEvents()
