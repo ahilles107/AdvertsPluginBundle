@@ -41,8 +41,8 @@ ads:
         review: "When enabled, each new classified status will be set to deactivated by default."
         enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."
     menu:
-        manage: "Manage announcements"
-        name: "Announcements"
+        manage: "Manage classifieds"
+        name: "Classifieds"
         settings: "Settings"
         classifieds: "Classifieds"
         edit: "Edit classified"

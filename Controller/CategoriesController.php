@@ -27,7 +27,14 @@ class CategoriesController extends Controller
      */
     public function indexAction(Request $request)
     {
-        return array();
+        $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if ($user->hasPermission('plugin_classifieds_access')) {
+            return array();
+        }
+
+        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
     }
 
     /**
@@ -40,7 +47,7 @@ class CategoriesController extends Controller
         $translator = $this->get('translator');
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_edit')) {
+        if ($user->hasPermission('plugin_classifieds_edit') && $user->hasPermission('plugin_classifieds_access')) {
             $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
                 ->findOneById($id);
 
@@ -60,7 +67,7 @@ class CategoriesController extends Controller
             );
         }
 
-        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
+        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
     }
 
     /**
@@ -73,7 +80,7 @@ class CategoriesController extends Controller
         $translator = $this->get('translator');
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_add')) {
+        if ($user->hasPermission('plugin_classifieds_add') && $user->hasPermission('plugin_classifieds_access')) {
             $form = $this->createForm(new CategoryType(), array());
 
             if ($request->isMethod('POST')) {
@@ -92,7 +99,7 @@ class CategoriesController extends Controller
             return new JsonResponse(array('status' => false));
         }
 
-        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
+        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
     }
 
     /**
@@ -145,27 +152,34 @@ class CategoriesController extends Controller
         $cacheService = $this->get('newscoop.cache');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $zendRouter = $this->get('zend_router');
+        $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
 
-        $cacheKey = array('classifieds_categories__'.md5(serialize($categories[0])), $categories[1]);
+        if ($user->hasPermission('plugin_classifieds_access')) {
+            $cacheKey = array('classifieds_categories__'.md5(serialize($categories[0])), $categories[1]);
 
-        if ($cacheService->contains($cacheKey)) {
-            $responseArray =  $cacheService->fetch($cacheKey);
-        } else {
-            $pocessed = array();
-            foreach ($categories[0] as $category) {
-                $pocessed[] = $this->processCategory($category, $zendRouter);
+            if ($cacheService->contains($cacheKey)) {
+                $responseArray =  $cacheService->fetch($cacheKey);
+            } else {
+                $pocessed = array();
+                foreach ($categories[0] as $category) {
+                    $pocessed[] = $this->processCategory($category, $zendRouter);
+                }
+
+                $responseArray = array(
+                    'records' => $pocessed,
+                    'queryRecordCount' => $categories[1],
+                    'totalRecordCount'=> count($categories[0])
+                );
+
+                $cacheService->save($cacheKey, $responseArray);
             }
 
-            $responseArray = array(
-                'records' => $pocessed,
-                'queryRecordCount' => $categories[1],
-                'totalRecordCount'=> count($categories[0])
-            );
-
-            $cacheService->save($cacheKey, $responseArray);
+            return new JsonResponse($responseArray);
         }
 
-        return new JsonResponse($responseArray);
+        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
     }
 
     /**
@@ -175,13 +189,13 @@ class CategoriesController extends Controller
     {
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_delete')) {
+        if ($user->hasPermission('plugin_classifieds_delete') && $user->hasPermission('plugin_classifieds_access')) {
             $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
             return new JsonResponse(array('status' => $adsService->deleteCategory($id)));
         }
 
-        return $this->redirect($this->generateUrl('ahs_advertsplugin_admin_index'));
+        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
     }
 
     /**
