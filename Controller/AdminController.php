@@ -17,6 +17,7 @@ use AHS\AdvertsPluginBundle\TemplateList\AnnouncementCriteria;
 use AHS\AdvertsPluginBundle\Entity\Announcement;
 use AHS\AdvertsPluginBundle\Form\AnnouncementType;
 use AHS\AdvertsPluginBundle\Form\SettingsType;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Admin controller
@@ -31,6 +32,10 @@ class AdminController extends Controller
     {
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
+        if (!$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
+        }
+
         if ($user->hasPermission('plugin_classifieds_access')) {
             $em = $this->container->get('em');
             $adsService = $this->get('ahs_adverts_plugin.ads_service');
@@ -43,8 +48,6 @@ class AdminController extends Controller
                 'inactiveAdsCount' => $adsService->countBy(array('is_active' => false)),
             );
         }
-
-        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
     }
 
     /**
@@ -60,37 +63,36 @@ class AdminController extends Controller
         $translator = $this->get('translator');
         $user = $userService->getCurrentUser();
 
-        if ($user->hasPermission('plugin_classifieds_access')) {
-            $criteria = $this->processRequest($request);
-            $adsCount = $adsService->countBy(array('is_active' => true));
-            $adsInactiveCount = $adsService->countBy(array('is_active' => false));
-
-            $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount);
-
-            if ($cacheService->contains($cacheKey)) {
-                $responseArray = $cacheService->fetch($cacheKey);
-            } else {
-                $ads = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->getListByCriteria($criteria);
-
-                $pocessed = array();
-                foreach ($ads as $ad) {
-                    $pocessed[] = $this->processAd($ad, $zendRouter);
-                }
-
-                $responseArray = array(
-                    'records' => $pocessed,
-                    'queryRecordCount' => $ads->count,
-                    'totalRecordCount'=> count($ads->items)
-                );
-
-                $cacheService->save($cacheKey, $responseArray);
-            }
-
-            return new JsonResponse($responseArray);
-
+        if (!$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $criteria = $this->processRequest($request);
+        $adsCount = $adsService->countBy(array('is_active' => true));
+        $adsInactiveCount = $adsService->countBy(array('is_active' => false));
+
+        $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount);
+
+        if ($cacheService->contains($cacheKey)) {
+            $responseArray = $cacheService->fetch($cacheKey);
+        } else {
+            $ads = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->getListByCriteria($criteria);
+
+            $pocessed = array();
+            foreach ($ads as $ad) {
+                $pocessed[] = $this->processAd($ad, $zendRouter);
+            }
+
+            $responseArray = array(
+                'records' => $pocessed,
+                'queryRecordCount' => $ads->count,
+                'totalRecordCount'=> count($ads->items)
+            );
+
+            $cacheService->save($cacheKey, $responseArray);
+        }
+
+        return new JsonResponse($responseArray);
     }
 
     /**
@@ -101,13 +103,13 @@ class AdminController extends Controller
         $userService = $this->get('user');
         $translator = $this->get('translator');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_delete') && $user->hasPermission('plugin_classifieds_access')) {
-            $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
-            return new JsonResponse(array('status' => $adsService->deleteClassified($id)));
+        if (!$user->hasPermission('plugin_classifieds_delete') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->deleteClassified($id)));
     }
 
     /**
@@ -118,13 +120,13 @@ class AdminController extends Controller
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
         $translator = $this->get('translator');
-        if ($user->hasPermission('plugin_classifieds_delete') && $user->hasPermission('plugin_classifieds_access')) {
-            $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
-            return new JsonResponse(array('status' => $adsService->deleteClassifiedImage($id)));
+        if (!$user->hasPermission('plugin_classifieds_delete') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->deleteClassifiedImage($id)));
     }
 
     /**
@@ -137,37 +139,37 @@ class AdminController extends Controller
         $user = $userService->getCurrentUser();
         $em = $this->getDoctrine()->getManager();
 
-        if ($user->hasPermission('plugin_classifieds_edit') && $user->hasPermission('plugin_classifieds_access')) {
-            $translator = $this->get('translator');
-            $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-                ->findOneById($id);
-
-            $form = $this->createForm(new AnnouncementType(), $classified);
-
-            if ($request->isMethod('POST')) {
-                $form->handleRequest($request);
-                if ($form->isValid()) {
-                    $data = $form->getData();
-                    $em->flush();
-
-                    $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
-                }
-            }
-
-            $images = array();
-            $isEmpty = $classified->getImages()->isEmpty();
-            if ($isEmpty) {
-                $images[] = $classified->getFirstImage(true);
-            }
-
-            return array(
-                'form' => $form->createView(),
-                'images' => $images,
-                'isEmpty' => $isEmpty,
-            );
+        if (!$user->hasPermission('plugin_classifieds_edit') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
+        $translator = $this->get('translator');
+        $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->findOneById($id);
+
+        $form = $this->createForm(new AnnouncementType(), $classified);
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $em->flush();
+
+                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+            }
+        }
+
+        $images = array();
+        $isEmpty = $classified->getImages()->isEmpty();
+        if ($isEmpty) {
+            $images[] = $classified->getFirstImage(true);
+        }
+
+        return array(
+            'form' => $form->createView(),
+            'images' => $images,
+            'isEmpty' => $isEmpty,
+        );
     }
 
     /**
@@ -179,13 +181,13 @@ class AdminController extends Controller
         $user = $userService->getCurrentUser();
         $translator = $this->get('translator');
 
-        if ($user->hasPermission('plugin_classifieds_activate') && $user->hasPermission('plugin_classifieds_access')) {
-            $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
-            return new JsonResponse(array('status' => $adsService->activateClassified($id)));
+        if (!$user->hasPermission('plugin_classifieds_activate') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->activateClassified($id)));
     }
 
     /**
@@ -197,13 +199,13 @@ class AdminController extends Controller
         $user = $userService->getCurrentUser();
         $translator = $this->get('translator');
 
-        if ($user->hasPermission('plugin_classifieds_deactivate') && $user->hasPermission('plugin_classifieds_access')) {
-            $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
-            return new JsonResponse(array('status' => $adsService->deactivateClassified($id)));
+        if (!$user->hasPermission('plugin_classifieds_deactivate') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->deactivateClassified($id)));
     }
 
     /**
@@ -218,31 +220,31 @@ class AdminController extends Controller
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
 
-        if ($user->hasPermission('plugin_classifieds_settings') && $user->hasPermission('plugin_classifieds_access')) {
-            $form = $this->createForm(new SettingsType(), array(
-                'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
-                'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false,
-                'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false
-            ));
-
-            if ($request->isMethod('POST')) {
-                $form->handleRequest($request);
-                if ($form->isValid()) {
-                    $data = $form->getData();
-                    $systemPreferences->AdvertsNotificationEmail = $data['notificationEmail'];
-                    $systemPreferences->AdvertsReviewStatus = $data['review'];
-                    $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
-
-                    $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
-                }
-            }
-
-            return array(
-                'form' => $form->createView(),
-            );
+        if (!$user->hasPermission('plugin_classifieds_settings') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
+        $form = $this->createForm(new SettingsType(), array(
+            'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
+            'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false,
+            'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false
+        ));
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $systemPreferences->AdvertsNotificationEmail = $data['notificationEmail'];
+                $systemPreferences->AdvertsReviewStatus = $data['review'];
+                $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
+
+                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+            }
+        }
+
+        return array(
+            'form' => $form->createView(),
+        );
     }
 
     /**

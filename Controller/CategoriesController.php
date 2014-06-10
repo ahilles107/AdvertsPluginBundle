@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AHS\AdvertsPluginBundle\Form\CategoryType;
 use AHS\AdvertsPluginBundle\Entity\Category;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Categories controller
@@ -30,11 +31,11 @@ class CategoriesController extends Controller
         $translator = $this->get('translator');
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_access')) {
-            return array();
+        if (!$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
+        return array();
     }
 
     /**
@@ -47,27 +48,27 @@ class CategoriesController extends Controller
         $translator = $this->get('translator');
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_edit') && $user->hasPermission('plugin_classifieds_access')) {
-            $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
-                ->findOneById($id);
-
-            $form = $this->createForm(new CategoryType(), $category);
-
-            if ($request->isMethod('POST')) {
-                $form->handleRequest($request);
-                if ($form->isValid()) {
-                    $em->flush();
-
-                    $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
-                }
-            }
-
-            return array(
-                'form' => $form->createView(),
-            );
+        if (!$user->hasPermission('plugin_classifieds_edit') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return $this->render('AHSAdvertsPluginBundle::noPermissions.html.twig');
+        $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+            ->findOneById($id);
+
+        $form = $this->createForm(new CategoryType(), $category);
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $em->flush();
+
+                $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
+            }
+        }
+
+        return array(
+            'form' => $form->createView(),
+        );
     }
 
     /**
@@ -80,26 +81,26 @@ class CategoriesController extends Controller
         $translator = $this->get('translator');
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_add') && $user->hasPermission('plugin_classifieds_access')) {
-            $form = $this->createForm(new CategoryType(), array());
-
-            if ($request->isMethod('POST')) {
-                $form->handleRequest($request);
-                if ($form->isValid()) {
-                    $data = $form->getData();
-                    $category = new Category();
-                    $category->setName($data['name']);
-                    $em->persist($category);
-                    $em->flush();
-
-                    return new JsonResponse(array('status' => true));
-                }
-            }
-
-            return new JsonResponse(array('status' => false));
+        if (!$user->hasPermission('plugin_classifieds_add') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $form = $this->createForm(new CategoryType(), array());
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $category = new Category();
+                $category->setName($data['name']);
+                $em->persist($category);
+                $em->flush();
+
+                return new JsonResponse(array('status' => true));
+            }
+        }
+
+        return new JsonResponse(array('status' => false));
     }
 
     /**
@@ -148,7 +149,6 @@ class CategoriesController extends Controller
     public function loadAction(Request $request)
     {
         $em = $this->get('em');
-        $categories = $this->processRequest($request);
         $cacheService = $this->get('newscoop.cache');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $zendRouter = $this->get('zend_router');
@@ -156,30 +156,31 @@ class CategoriesController extends Controller
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
 
-        if ($user->hasPermission('plugin_classifieds_access')) {
-            $cacheKey = array('classifieds_categories__'.md5(serialize($categories[0])), $categories[1]);
-
-            if ($cacheService->contains($cacheKey)) {
-                $responseArray =  $cacheService->fetch($cacheKey);
-            } else {
-                $pocessed = array();
-                foreach ($categories[0] as $category) {
-                    $pocessed[] = $this->processCategory($category, $zendRouter);
-                }
-
-                $responseArray = array(
-                    'records' => $pocessed,
-                    'queryRecordCount' => $categories[1],
-                    'totalRecordCount'=> count($categories[0])
-                );
-
-                $cacheService->save($cacheKey, $responseArray);
-            }
-
-            return new JsonResponse($responseArray);
+        if (!$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $categories = $this->processRequest($request);
+        $cacheKey = array('classifieds_categories__'.md5(serialize($categories[0])), $categories[1]);
+
+        if ($cacheService->contains($cacheKey)) {
+            $responseArray =  $cacheService->fetch($cacheKey);
+        } else {
+            $pocessed = array();
+            foreach ($categories[0] as $category) {
+                $pocessed[] = $this->processCategory($category, $zendRouter);
+            }
+
+            $responseArray = array(
+                'records' => $pocessed,
+                'queryRecordCount' => $categories[1],
+                'totalRecordCount'=> count($categories[0])
+            );
+
+            $cacheService->save($cacheKey, $responseArray);
+        }
+
+        return new JsonResponse($responseArray);
     }
 
     /**
@@ -189,13 +190,13 @@ class CategoriesController extends Controller
     {
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
-        if ($user->hasPermission('plugin_classifieds_delete') && $user->hasPermission('plugin_classifieds_access')) {
-            $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
-            return new JsonResponse(array('status' => $adsService->deleteCategory($id)));
+        if (!$user->hasPermission('plugin_classifieds_delete') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
         }
 
-        return new JsonResponse(array('status' => $translator->trans('ads.menu.nopermissions')), 403);
+        $adsService = $this->get('ahs_adverts_plugin.ads_service');
+
+        return new JsonResponse(array('status' => $adsService->deleteCategory($id)));
     }
 
     /**
