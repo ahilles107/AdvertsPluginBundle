@@ -34,7 +34,6 @@ class DefaultController extends Controller
 
     /**
      * @Route("/classifieds/add")
-     * @Template()
      */
     public function addAction(Request $request)
     {
