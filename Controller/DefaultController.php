@@ -11,6 +11,8 @@ use AHS\AdvertsPluginBundle\Entity\Announcement;
 use AHS\AdvertsPluginBundle\Form\AnnouncementType;
 use AHS\AdvertsPluginBundle\Entity\User;
 use AHS\AdvertsPluginBundle\Entity\Image;
+use AHS\AdvertsPluginBundle\Form\AddAnnouncementType;
+use AHS\AdvertsPluginBundle\Form\Model\AddAnnouncement;
 
 class DefaultController extends Controller
 {
@@ -32,6 +34,7 @@ class DefaultController extends Controller
 
     /**
      * @Route("/classifieds/add")
+     * @Template()
      */
     public function addAction(Request $request)
     {
@@ -55,13 +58,15 @@ class DefaultController extends Controller
         $em = $this->container->get('em');
         $publicationService = $this->container->get('newscoop_newscoop.publication_service');
 
-        $form = $this->createForm(new AnnouncementType(), $announcement, array('translator' => $translator));
+        $form = $this->createForm(new AddAnnouncementType(), new AddAnnouncement(), array('translator' => $translator));
         $categories = $this->getCategories();
 
         $errors = array();
         if ($request->isMethod('POST')) {
             $form->bind($request);
+            $formData = $form->getData();
             if ($form->isValid()) {
+                $announcement = $formData->getAnnouncement();
                 // create announcement user
                 $newscoopUserId = $auth->getIdentity();
 
@@ -102,6 +107,10 @@ class DefaultController extends Controller
                     )
                 ));
             } else {
+                if (!$formData->getTermsAccepted()) {
+                    $errors[]['message'] = $translator->trans('ads.error.termsaccepted');
+                }
+
                 foreach ($form->getErrors() as $error) {
                     $errors[]['message'] = $error->getMessage();
                 }

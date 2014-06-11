@@ -32,6 +32,7 @@ ads:
         cantdeactivate: "Can not deactivate"
         description: "You must add description!"
         name: "You must add title!"
+        termsaccepted: "Please, accept Terms of Service!"
         price:
             empty: "Price field can not be empty!"
             range: "Price must be more than {{ limit }}"

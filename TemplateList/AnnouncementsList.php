@@ -8,7 +8,6 @@
 
 namespace AHS\AdvertsPluginBundle\TemplateList;
 
-use Newscoop\ListResult;
 use Newscoop\TemplateList\PaginatedBaseList;
 
 /**
@@ -19,6 +18,7 @@ class AnnouncementsList extends PaginatedBaseList
     protected function prepareList($criteria, $parameters)
     {
         $em = \Zend_Registry::get('container')->get('em');
+        $criteria->status = array(true); // display only activated
         $queryBuilder = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->getListByCriteria($criteria, false);
 

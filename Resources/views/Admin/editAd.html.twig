@@ -8,9 +8,20 @@
 {% endblock %}
 
 {% block admin_content %}
+{% if form_errors(form) %}
+    <div class="alerts alert-danger">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
+{% for flashMessage in app.session.flashbag.get('success') %}
+        <div class="alerts alert-success">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ flashMessage }}
+        </div>
+{% endfor %}
 <div class="plugin-container">
 {% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 1} %}
-
 <div class="row">
   <div class="col-xs-4">
     <div id="slider">
@@ -42,18 +53,6 @@
 </div>
   <div class="col-xs-8">
 {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
-{% if form_errors(form) %}
-    <div class="alerts alert-danger">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        {{ form_errors(form) }}
-    </div>
-{% endif %}
-{% for flashMessage in app.session.flashbag.get('success') %}
-        <div class="alerts alert-success">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-            {{ flashMessage }}
-        </div>
-{% endfor %}
 <fieldset>
 <div class="form-group">
   <label class="col-md-4 control-label" for="textinput">{{ form_label(form.name) }}</label>

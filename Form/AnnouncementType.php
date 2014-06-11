@@ -1,4 +1,10 @@
 <?php
+/**
+ * @package AHS\AdvertsPluginBundle
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
+ * @copyright 2014 Sourcefabric o.p.s.
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ */
 
 namespace AHS\AdvertsPluginBundle\Form;
 
@@ -12,9 +18,29 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class AnnouncementType extends AbstractType
 {
+    /**
+     * Options
+     * @var array
+     */
+    protected $options;
+
+    /**
+     * Construct
+     * @param array $options Form options
+     */
+    public function __construct(array $options = array())
+    {
+        $this->options = $options;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $translator = $options['translator'];
+        $translator = null;
+        if (!empty($this->options)) {
+            $translator = $this->options['translator'];
+        } else {
+            $translator = $options['translator'];
+        }
 
         $builder
             ->add('name', null, array(
@@ -44,15 +70,15 @@ class AnnouncementType extends AbstractType
                 'error_bubbling' => true,
                 'constraints' => array(
                     new Assert\NotBlank(array(
-                        'message' => $translator->trans('ahs.error.price.empty')
+                        'message' => $translator->trans('ads.error.price.empty')
                     )),
                     new Assert\Range(array(
                         'min' => 0,
-                        'minMessage' => $translator->trans('ahs.error.price.range', array('{{ limit }}')),
+                        'minMessage' => $translator->trans('ads.error.price.range', array('{{ limit }}')),
                     )),
                     new Assert\Type(array(
                         'type' => "float",
-                        'message' => $translator->trans('ahs.error.price.type'),
+                        'message' => $translator->trans('ads.error.price.type'),
                     ))
                 )
             ));
@@ -68,7 +94,7 @@ class AnnouncementType extends AbstractType
             'data_class' => 'AHS\AdvertsPluginBundle\Entity\Announcement',
         ));
 
-        $resolver->setRequired(array(
+        $resolver->setOptional(array(
             'translator',
         ));
     }
