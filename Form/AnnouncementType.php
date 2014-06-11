@@ -5,6 +5,7 @@ namespace AHS\AdvertsPluginBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Announcement form type
@@ -13,28 +14,48 @@ class AnnouncementType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $translator = $options['translator'];
+
         $builder
             ->add('name', null, array(
-                'error_bubbling' => true
+                'error_bubbling' => true,
+                'label' => $translator->trans('ads.label.name'),
+                'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))))
             ))
             ->add('description', 'textarea', array(
-                'error_bubbling' => true
+                'error_bubbling' => true,
+                'label' => $translator->trans('ads.label.description'),
+                'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
             ))
             ->add('category', 'entity', array(
                 'error_bubbling' => true,
+                'label' => $translator->trans('ads.label.category'),
                 'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
                 'property' => 'name',
             ))
             ->add('publication', 'entity', array(
                 'error_bubbling' => true,
+                'label' => $translator->trans('ads.label.publication'),
                 'class' => 'Newscoop\Entity\Publication',
                 'property' => 'name',
                 'required' => false,
             ))
             ->add('price', null, array(
                 'error_bubbling' => true,
-                'invalid_message' => 'Cena musi być liczbą'
-        ));
+                'constraints' => array(
+                    new Assert\NotBlank(array(
+                        'message' => $translator->trans('ahs.error.price.empty')
+                    )),
+                    new Assert\Range(array(
+                        'min' => 0,
+                        'minMessage' => $translator->trans('ahs.error.price.range', array('{{ limit }}')),
+                    )),
+                    new Assert\Type(array(
+                        'type' => "float",
+                        'message' => $translator->trans('ahs.error.price.type'),
+                    ))
+                )
+            ));
     }
 
     /**
@@ -45,6 +66,10 @@ class AnnouncementType extends AbstractType
         $resolver->setDefaults(array(
             'csrf_protection'   => false,
             'data_class' => 'AHS\AdvertsPluginBundle\Entity\Announcement',
+        ));
+
+        $resolver->setRequired(array(
+            'translator',
         ));
     }
 

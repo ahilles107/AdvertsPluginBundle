@@ -1,7 +1,7 @@
 ads:
     label:
         title: "Announcements search"
-        name: "Name"
+        name: "Title"
         description: "Description"
         category: "Category"
         username: "Username"
@@ -30,6 +30,12 @@ ads:
         cantadd: "Can not add new category!"
         cantactivate: "Can not activate"
         cantdeactivate: "Can not deactivate"
+        description: "You must add description!"
+        name: "You must add title!"
+        price:
+            empty: "Price field can not be empty!"
+            range: "Price must be more than {{ limit }}"
+            type: "Price must be a number!"
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."

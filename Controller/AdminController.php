@@ -136,6 +136,7 @@ class AdminController extends Controller
     public function editAdAction(Request $request, $id = null)
     {
         $userService = $this->get('user');
+        $translator = $this->get('translator');
         $user = $userService->getCurrentUser();
         $em = $this->getDoctrine()->getManager();
 
@@ -147,7 +148,7 @@ class AdminController extends Controller
         $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->findOneById($id);
 
-        $form = $this->createForm(new AnnouncementType(), $classified);
+        $form = $this->createForm(new AnnouncementType(), $classified, array('translator' => $translator));
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
@@ -163,6 +164,10 @@ class AdminController extends Controller
         $isEmpty = $classified->getImages()->isEmpty();
         if ($isEmpty) {
             $images[] = $classified->getFirstImage(true);
+        } else {
+            foreach ($classified->getImages() as $image) {
+                $images[] = $classified->processImage($image);
+            }
         }
 
         return array(
@@ -308,9 +313,12 @@ class AdminController extends Controller
         $user = $em->getRepository('Newscoop\Entity\User')
             ->findOneBy(array('id' => $ad->getUser()->getNewscoopUserId()));
 
+        $image = $ad->getFirstImage();
+
         return array(
             'id' => $ad->getId(),
             'name' => $ad->getName(),
+            'thumbnailUrl' => $image['thumbnailUrl'],
             'description' => $ad->getDescription(),
             'publication' => $ad->getPublication()->getName(),
             'price' => $ad->getPrice(),

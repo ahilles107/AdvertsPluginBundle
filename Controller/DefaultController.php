@@ -39,6 +39,7 @@ class DefaultController extends Controller
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
+        $translator = $this->get('translator');
 
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(
@@ -54,7 +55,7 @@ class DefaultController extends Controller
         $em = $this->container->get('em');
         $publicationService = $this->container->get('newscoop_newscoop.publication_service');
 
-        $form = $this->createForm(new AnnouncementType(), $announcement);
+        $form = $this->createForm(new AnnouncementType(), $announcement, array('translator' => $translator));
         $categories = $this->getCategories();
 
         $errors = array();
@@ -206,9 +207,11 @@ class DefaultController extends Controller
     {
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
+        $translator = $this->get('translator');
 
         $auth = \Zend_Auth::getInstance();
         if (!$auth->hasIdentity()) { // ignore for logged user
+
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                     'controller' => '',
                     'action' => 'auth'
@@ -218,7 +221,7 @@ class DefaultController extends Controller
         $em = $this->container->get('em');
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
-        $form = $this->createForm(new AnnouncementType(), $announcement);
+        $form = $this->createForm(new AnnouncementType(), $announcement, array('translator' => $translator));
         $categories = $this->getCategories();
 
         $this->restoreSessionFromDatabase($request, $announcement->getId());
@@ -472,7 +475,6 @@ class DefaultController extends Controller
             ->getResult();
 
         $cacheService->save('ahs_anounncements_comments', $categories);
-
 
         return $categories;
     }

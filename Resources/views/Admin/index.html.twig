@@ -153,6 +153,19 @@
         },
         writers: {
             _cellWriter: function (column, record) {
+                if (column.id == 'name') {
+                    column.attributeWriter = function(record) {
+                        var thumb = record.thumbnailUrl;
+                        var html = "";
+                        if (thumb) {
+                            html += "<center><img src="+record.thumbnailUrl+"></center><br>";
+                        }
+
+                        html += "<span>"+record.name+"</span>";
+                        return html;
+                    }
+                }
+
                 if (column.label == '{{ 'ads.table.actions.actions'|trans }}') {
                     column.attributeWriter = function(record) {
                         var html = "";
