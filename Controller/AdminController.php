@@ -246,7 +246,7 @@ class AdminController extends Controller
         $form = $this->createForm(new SettingsType(), array(
             'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
             'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false,
-            'valid_time' => $systemPreferences->AdvertsValidTime
+            'valid_time' => $systemPreferences->AdvertsValidTime,
             'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false
         ));
 

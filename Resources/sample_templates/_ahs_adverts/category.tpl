@@ -12,7 +12,7 @@
 
 {{block body}}
 {{ dynamic }}
-<nav class="navbar navbar-inverse" role="navigation">
+<nav class="navbar" role="navigation">
     <ol class="breadcrumb">
       <li><a href="#">Ogłoszenia</a></li>
       <li><a href="#">{{ $currentCategory->getName()}}</a></li>
@@ -20,9 +20,8 @@
 </nav>
     <div class="col-md-7">
         <ul id="announcements-list">
-        {{ render file="_ahs_adverts/_tpl/anouncements_list.tpl" announcementsList=$announcementsList }}
+        {{ render file="_ahs_adverts/_tpl/anouncements_list.tpl" }}
         </ul>
-        {{ $announcementsPagination }}
     </div>
 {{ /dynamic }}
 {{/block}}

@@ -35,6 +35,12 @@ class AddAnnouncement
      */
     protected $termsAccepted;
 
+    public function __construct(Announcement $announcement = null, $termsAccepted = false)
+    {
+        $this->announcement = $announcement;
+        $this->termsAccepted = $termsAccepted;
+    }
+
     public function setAnnouncement(Announcement $announcement)
     {
         $this->announcement = $announcement;

@@ -106,6 +106,12 @@ class Announcement
     protected $type;
 
     /**
+     * @ORM\Column(type="boolean", name="terms_accepted")
+     * @var integer
+     */
+    protected $terms_accepted;
+
+    /**
      * TODO:
      * * valid date
      * * anonucement status active/disactive
@@ -429,7 +435,7 @@ class Announcement
         return $this;
     }
 
-    public function extendFor($days)
+    public function extendFor($days = 7)
     {
         if ($this->getValidTo() == null) {
             $date = clone $this->created_at;
@@ -442,5 +448,29 @@ class Announcement
         $this->setValidTo($date);
 
         return $date;
+    }
+
+    /**
+     * Gets the value of terms_accepted.
+     *
+     * @return integer
+     */
+    public function getTermsAccepted()
+    {
+        return $this->terms_accepted;
+    }
+
+    /**
+     * Sets the value of terms_accepted.
+     *
+     * @param integer $terms_accepted the terms  accepted 
+     *
+     * @return self
+     */
+    public function setTermsAccepted($terms_accepted)
+    {
+        $this->terms_accepted = $terms_accepted;
+
+        return $this;
     }
 }

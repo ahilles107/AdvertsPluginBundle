@@ -4,6 +4,7 @@ services:
         arguments:
             - @em
             - @newscoop.plugins.service
+            - @translator
         tags:
             - { name: kernel.event_subscriber}
 

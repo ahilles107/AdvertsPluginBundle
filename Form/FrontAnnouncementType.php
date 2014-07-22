@@ -12,6 +12,7 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
+ * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
  * @copyright 2014 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
@@ -26,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Announcement form type
  */
-class AnnouncementType extends AbstractType
+class FrontAnnouncementType extends AbstractType
 {
     /**
      * Options
@@ -92,9 +93,11 @@ class AnnouncementType extends AbstractType
                 ),
                 'error_bubbling' => true,
             ))
-            ->add('valid_to', 'datetime', array(
+            ->add('terms_accepted', 'checkbox', array(
                 'error_bubbling' => true,
-                'required' => false
+                'constraints' => array(new Assert\True(array(
+                    'message' => $translator->trans('ads.error.termsaccepted'
+                ))))
             ));
     }
 

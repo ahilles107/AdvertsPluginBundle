@@ -30,10 +30,13 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
     private $pluginsService;
 
-    public function __construct($em, $pluginsService)
+    private $translator;
+
+    public function __construct($em, $pluginsService, $translator)
     {
         $this->em = $em;
         $this->pluginsService = $pluginsService;
+        $this->translator = $translator;
     }
 
     public function install(GenericEvent $event)

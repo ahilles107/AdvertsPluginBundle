@@ -26,10 +26,13 @@ class AddAnnouncementType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('announcement', new AnnouncementType($options));
+        $builder->add('announcement', new AnnouncementType($options), array(
+            'error_bubbling' => true
+        ));
         $builder->add('terms', 'checkbox', array(
             'property_path' => 'termsAccepted',
             'required' => true,
+            'error_bubbling' => true
         ));
     }
 

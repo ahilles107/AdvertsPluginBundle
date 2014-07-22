@@ -15,7 +15,7 @@
 
 {{block body}}
 {{ dynamic }}
-<nav class="navbar navbar-inverse" role="navigation">
+<nav class="navbar" role="navigation">
     <ol class="breadcrumb">
       <li><a href="#">Ogłoszenia</a></li>
       <li><a href="#">Dodaj nowe ogłoszenie</a></li>
@@ -52,7 +52,7 @@
 <div class="aside col-md-5">
     <div class="announcementUser">
         <h4>Dodane przez:</h4>
-        <img src="{{ include file="_tpl/user-image.tpl" user=$newscoopUser width=130 height=130 }}" />
+        <img src="{{ $newscoopUser->image(130, 130, 'crop') }}" />
         <p>{{ $newscoopUser->first_name }} {{ $newscoopUser->last_name }} <em>({{ $newscoopUser->uname }})</em></p>
         <ul class="user-info">
             <li>W serwisie od: <span> <abbr class="timeago" title="{{ $newscoopUser->created }}">{{ $newscoopUser->created }}</abbr></span></li>

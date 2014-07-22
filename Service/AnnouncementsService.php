@@ -35,10 +35,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class AnnouncementsService
 {
-	/**
-	 * @var EntityManager
-	 */
-	protected $em;
+    /**
+     * @var EntityManager
+     */
+    protected $em;
 
     /**
      * @var EmailService
@@ -65,7 +65,7 @@ class AnnouncementsService
      */
     protected $router;
 
-	/**
+    /**
      * Construct
      *
      * @param EntityManager            $em                  Entity Manager
@@ -75,16 +75,16 @@ class AnnouncementsService
      * @param SystemPreferencesService $preferencesService  System Preferences
      * @param Router                   $router              Router
      */
-	public function __construct(EntityManager $em, EmailService $emailService, TemplatesService $templatesService,
+    public function __construct(EntityManager $em, EmailService $emailService, TemplatesService $templatesService,
         PlaceholdersService $placeholdersService, SystemPreferencesService $preferencesService, Router $router)
-	{
-		$this->em = $em;
+    {
+        $this->em = $em;
         $this->emailService = $emailService;
         $this->preferencesService = $preferencesService;
         $this->templatesService = $templatesService;
         $this->placeholdersService = $placeholdersService;
         $this->router = $router;
-	}
+    }
 
     /**
      * Delete classified by given id
@@ -225,7 +225,7 @@ class AnnouncementsService
         $this->emailService->send($this->placeholdersService->get('subject'), $message, array($this->preferencesService->AdvertsNotificationEmail));
     }
 
-	/**
+    /**
      * Count classifieds by given criteria
      *
      * @param array $criteria

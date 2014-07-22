@@ -38,18 +38,18 @@
             <a class="carousel-control right" href="#myCarousel" data-slide="next">›</a>
         </div>
         </div>
-	<div class="hidden-sm hidden-xs" id="slider-thumbs">
+  <div class="hidden-sm hidden-xs" id="slider-thumbs">
         <ul class="list-inline">
-        	{% for image in images %}
-	        <li>
-	          	<a id="carousel-selector-{{ loop.index - 1 }}" {% if loop.index  == 0 %}class="selected" {% endif %}>
-	            	<img src="{{ image.thumbnailUrl }}" class="img-responsive">
-	          	</a>
-	        </li>
+          {% for image in images %}
+          <li>
+              <a id="carousel-selector-{{ loop.index - 1 }}" {% if loop.index  == 0 %}class="selected" {% endif %}>
+                <img src="{{ image.thumbnailUrl }}" class="img-responsive">
+              </a>
+          </li>
            {% endfor %}
         </ul>
     </div>
-	</div>
+  </div>
 </div>
   <div class="col-xs-8">
 {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
@@ -57,7 +57,7 @@
 <div class="form-group">
   <label class="col-md-4 control-label" for="textinput">{{ form_label(form.name) }}</label>
   <div class="col-md-4">
-  	{{ form_widget(form.name, {'attr': {'class': 'form-control input-md'}}) }}
+    {{ form_widget(form.name, {'attr': {'class': 'form-control input-md'}}) }}
   </div>
 </div>
 
@@ -83,23 +83,9 @@
 </div>
 
 <div class="form-group">
-  <label class="col-md-4 control-label" for="publication">{{ form_label(form.publication) }}</label>
-  <div class="col-md-4">
-  {{ form_widget(form.publication, {'attr': {'class': 'form-control'}}) }}
-  </div>
-</div>
-
-<div class="form-group">
   <label class="col-md-4 control-label" for="textinput">{{ form_label(form.price) }}</label>
   <div class="col-md-4">
   {{ form_widget(form.price, {'attr': {'class': 'form-control input-md'}}) }}
-  </div>
-</div>
-
-<div class="form-group">
-  <label class="col-md-4 control-label" for="textinput">{{ form_label(form.reads) }}</label>
-  <div class="col-md-4">
-  {{ form_widget(form.reads, {'attr': {'class': 'form-control input-md'}}) }}
   </div>
 </div>
 
@@ -160,20 +146,20 @@ $('#myCarousel').on('slid', function (e) {
 
 {% if isEmpty == false %}
 $('.carousel-inner .item').click(function() {
-	var src = $(this).find('img').attr('src');
-	$('.modal-body img').attr('src', src);
-	var that = $(this);
-	         $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
-	            $.post(Routing.generate('ahs_advertsplugin_admin_deleteimage', {id: that.attr('data-image-id') }))
-				  .done(function(data) {
-				  	if (data.status) {
-	                	flashMessage('{{ 'ads.success.deleted'|trans }}');
-	                	return true;
-				  	}
+  var src = $(this).find('img').attr('src');
+  $('.modal-body img').attr('src', src);
+  var that = $(this);
+           $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
+              $.post(Routing.generate('ahs_advertsplugin_admin_deleteimage', {id: that.attr('data-image-id') }))
+          .done(function(data) {
+            if (data.status) {
+                    flashMessage('{{ 'ads.success.deleted'|trans }}');
+                    return true;
+            }
 
-				  	flashMessage('{{ 'ads.error.cantdelete'|trans }}', 'error');
-				 });
-			 });
+            flashMessage('{{ 'ads.error.cantdelete'|trans }}', 'error');
+         });
+       });
 });
 {% endif %}
 </script>

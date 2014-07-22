@@ -10,6 +10,7 @@
 
     <title>{{block title}}Ogłoszenia{{/block}}</title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="/public/bundles/ahsadvertsplugin/js/plupload/js/plupload.full.js"></script>
     {{block head}}
     <!-- Bootstrap core CSS -->
     <link href="/public/bundles/ahsadvertsplugin/css/bootstrap.min.css" rel="stylesheet">

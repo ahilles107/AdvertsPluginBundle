@@ -28,7 +28,8 @@ class AnnouncementsList extends PaginatedBaseList
     protected function prepareList($criteria, $parameters)
     {
         $em = \Zend_Registry::get('container')->get('em');
-        $criteria->status = array(true); // display only activated
+        // display only activated
+        $criteria->status = array(true);
         $queryBuilder = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->getListByCriteria($criteria, false);
 

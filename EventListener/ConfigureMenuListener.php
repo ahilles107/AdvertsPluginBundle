@@ -52,7 +52,7 @@ class ConfigureMenuListener
         $user = $this->userService->getCurrentUser();
         if ($user->hasPermission('plugin_classifieds_access')) {
             $menu = $event->getMenu();
-            $labelPlugins = $this->translator->trans('Plugins');
+            $labelPlugins = $this->translator->trans('Content');
             $labelPluginName = $this->translator->trans('ads.menu.name');
             $menu[$labelPlugins]->addChild(
                 $this->translator->trans('ads.menu.name'),

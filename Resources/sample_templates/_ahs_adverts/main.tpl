@@ -3,10 +3,12 @@
 {{ block title }}Ogłoszenia - {{ $gimme->publication->name }} {{ /block }}
 
 {{block body}}
-<ol class="breadcrumb">
-  <li><a href="#">Ogłoszenia</a></li>
-  <li><a href="#">Lista Ogłoszeń</a></li>
-</ol>
+<nav class="navbar" role="navigation">
+    <ol class="breadcrumb">
+      <li><a href="#">Ogłoszenia</a></li>
+      <li><a href="#">Dodaj nowe ogłoszenie</a></li>
+    </ol>
+</nav>
 
 <div class="clearfix"></div>
 <div class="col-md-7">
