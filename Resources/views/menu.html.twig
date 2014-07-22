@@ -1,5 +1,7 @@
 <ul class="nav nav-tabs" style="margin-bottom: 15px;">
         <li class="{% if active == 1 %}active{% endif %}"><a class="tab-link" href="{{ url('ahs_advertsplugin_admin_index') }}" data-href="">{{ 'ads.menu.classifieds'|trans }}</a></li>
-        <li class="{% if active == 2 %}active{% endif %} last"><a class="tab-link" href="{{ url('ahs_advertsplugin_categories_index') }}">{{ 'ads.menu.categories'|trans }}</a></li>
+        <li class="{% if active == 2 %}active{% endif %}"><a class="tab-link" href="{{ url('ahs_advertsplugin_categories_index') }}">{{ 'ads.menu.categories'|trans }}</a></li>
+        {% if hasPermission('plugin_classifieds_settings') %}
         <li class="{% if active == 3 %}active{% endif %} last"><a class="tab-link" href="{{ url('ahs_advertsplugin_admin_settings') }}">{{ 'ads.menu.settings'|trans }}</a></li>
+        {% endif %}
 </ul>

@@ -2,6 +2,7 @@
 /**
  * @package Newscoop\ExamplePluginBundle
  * @author Paweł Mikołajczuk <pawel.mikolajczuk@sourcefabric.org>
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  * @copyright 2013 Sourcefabric o.p.s.
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
@@ -10,17 +11,27 @@ namespace AHS\AdvertsPluginBundle\EventListener;
 
 use Newscoop\NewscoopBundle\Event\ConfigureMenuEvent;
 use Symfony\Component\Translation\Translator;
+use Newscoop\Services\UserService;
 
 class ConfigureMenuListener
 {
+    /**
+     * @var Translator
+     */
     private $translator;
+
+    /**
+     * @var UserService;
+     */
+    private $userService;
 
     /**
      * @param Translator $translator
      */
-    public function __construct(Translator $translator)
+    public function __construct(Translator $translator, UserService $userService)
     {
         $this->translator = $translator;
+        $this->userService = $userService;
     }
 
     /**
@@ -28,18 +39,27 @@ class ConfigureMenuListener
      */
     public function onMenuConfigure(ConfigureMenuEvent $event)
     {
-        $menu = $event->getMenu();
-        $labelPlugins = $this->translator->trans('Plugins');
-        $labelPluginName = $this->translator->trans('ads.menu.name');
-        $menu[$labelPlugins]->addChild(
-            $this->translator->trans('ads.menu.name'),
-            array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_index'))
-        );
+        $user = $this->userService->getCurrentUser();
+        if ($user->hasPermission('plugin_classifieds_access')) {
+            $menu = $event->getMenu();
+            $labelPlugins = $this->translator->trans('Plugins');
+            $labelPluginName = $this->translator->trans('ads.menu.name');
+            $menu[$labelPlugins]->addChild(
+                $this->translator->trans('ads.menu.name'),
+                array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_index'))
+            );
 
-        $menu[$labelPlugins][$labelPluginName]->addChild(
-            $this->translator->trans('ads.menu.settings'),
-            array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_settings')
-        ));
-        $menu[$labelPlugins][$labelPluginName][$this->translator->trans('ads.menu.settings')]->setDisplay(false);
+            $menu[$labelPlugins][$labelPluginName]->addChild(
+                $this->translator->trans('ads.menu.settings'),
+                array('uri' => $event->getRouter()->generate('ahs_advertsplugin_admin_settings')
+            ));
+            $menu[$labelPlugins][$labelPluginName][$this->translator->trans('ads.menu.settings')]->setDisplay(false);
+
+            $menu[$labelPlugins][$labelPluginName]->addChild(
+                $this->translator->trans('ads.menu.categories'),
+                array('uri' => $event->getRouter()->generate('ahs_advertsplugin_categories_index')
+            ));
+            $menu[$labelPlugins][$labelPluginName][$this->translator->trans('ads.menu.categories')]->setDisplay(false);
+        }
     }
 }

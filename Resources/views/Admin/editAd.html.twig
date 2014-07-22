@@ -8,9 +8,6 @@
 {% endblock %}
 
 {% block admin_content %}
-<div class="plugin-container">
-{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 1} %}
-{{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
 {% if form_errors(form) %}
     <div class="alerts alert-danger">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -23,6 +20,39 @@
             {{ flashMessage }}
         </div>
 {% endfor %}
+<div class="plugin-container">
+{% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 1} %}
+<div class="row">
+  <div class="col-xs-4">
+    <div id="slider">
+        <div id="carousel-bounding-box">
+            <div id="myCarousel" class="carousel slide">
+             <div class="carousel-inner">
+                {% for image in images %}
+                <div {% if (loop.index - 1) == 0 %}class="active item" {% else %}class="item"{% endif %} data-image-id="{{ image.id }}" data-slide-number="{{ loop.index - 1 }}">
+                    <img src="{{ image.imageUrl }}" class="img-responsive">
+                </div>
+                {% endfor %}
+            </div>
+            <a class="carousel-control left" href="#myCarousel" data-slide="prev">‹</a>
+            <a class="carousel-control right" href="#myCarousel" data-slide="next">›</a>
+        </div>
+        </div>
+	<div class="hidden-sm hidden-xs" id="slider-thumbs">
+        <ul class="list-inline">
+        	{% for image in images %}
+	        <li>
+	          	<a id="carousel-selector-{{ loop.index - 1 }}" {% if loop.index  == 0 %}class="selected" {% endif %}>
+	            	<img src="{{ image.thumbnailUrl }}" class="img-responsive">
+	          	</a>
+	        </li>
+           {% endfor %}
+        </ul>
+    </div>
+	</div>
+</div>
+  <div class="col-xs-8">
+{{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
 <fieldset>
 <div class="form-group">
   <label class="col-md-4 control-label" for="textinput">{{ form_label(form.name) }}</label>
@@ -91,4 +121,60 @@
 </fieldset>
 {{ form_end(form) }}
 </div>
+</div>
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body" style="font-size: 14px;">
+          <img class="img-responsive">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'ads.btn.cancel'|trans }}</button>
+          <button type="button" class="btn btn-danger" id="delete-confirm" data-dismiss="modal">{{ 'ads.btn.delete'|trans }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<script type="text/javascript">
+$('#myCarousel').carousel({
+    interval: 4000
+});
+
+// handles the carousel thumbnails
+$('[id^=carousel-selector-]').click( function(){
+  var id_selector = $(this).attr("id");
+  var id = id_selector.substr(id_selector.length -1);
+  id = parseInt(id);
+  $('#myCarousel').carousel(id);
+  $('[id^=carousel-selector-]').removeClass('selected');
+  $(this).addClass('selected');
+});
+
+// when the carousel slides, auto update
+$('#myCarousel').on('slid', function (e) {
+  var id = $('.item.active').data('slide-number');
+  id = parseInt(id);
+  $('[id^=carousel-selector-]').removeClass('selected');
+  $('[id^=carousel-selector-'+id+']').addClass('selected');
+});
+
+{% if isEmpty == false %}
+$('.carousel-inner .item').click(function() {
+	var src = $(this).find('img').attr('src');
+	$('.modal-body img').attr('src', src);
+	var that = $(this);
+	         $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
+	            $.post(Routing.generate('ahs_advertsplugin_admin_deleteimage', {id: that.attr('data-image-id') }))
+				  .done(function(data) {
+				  	if (data.status) {
+	                	flashMessage('{{ 'ads.success.deleted'|trans }}');
+	                	return true;
+				  	}
+
+				  	flashMessage('{{ 'ads.error.cantdelete'|trans }}', 'error');
+				 });
+			 });
+});
+{% endif %}
+</script>
 {% endblock %}

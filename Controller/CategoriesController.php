@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AHS\AdvertsPluginBundle\Form\CategoryType;
 use AHS\AdvertsPluginBundle\Entity\Category;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Categories controller
@@ -27,6 +28,13 @@ class CategoriesController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if (!$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
+        }
+
         return array();
     }
 
@@ -38,6 +46,12 @@ class CategoriesController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if (!$user->hasPermission('plugin_classifieds_edit') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
+        }
+
         $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
             ->findOneById($id);
 
@@ -65,6 +79,11 @@ class CategoriesController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if (!$user->hasPermission('plugin_classifieds_add') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
+        }
 
         $form = $this->createForm(new CategoryType(), array());
 
@@ -87,7 +106,7 @@ class CategoriesController extends Controller
     /**
      * Process request parameters
      *
-     * @param  Request $request Request object
+     * @param Request $request Request object
      *
      * @return array
      */
@@ -130,11 +149,18 @@ class CategoriesController extends Controller
     public function loadAction(Request $request)
     {
         $em = $this->get('em');
-        $categories = $this->processRequest($request);
         $cacheService = $this->get('newscoop.cache');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $zendRouter = $this->get('zend_router');
+        $translator = $this->get('translator');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
 
+        if (!$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
+        }
+
+        $categories = $this->processRequest($request);
         $cacheKey = array('classifieds_categories__'.md5(serialize($categories[0])), $categories[1]);
 
         if ($cacheService->contains($cacheKey)) {
@@ -162,6 +188,12 @@ class CategoriesController extends Controller
      */
     public function deleteAction(Request $request, $id)
     {
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if (!$user->hasPermission('plugin_classifieds_delete') || !$user->hasPermission('plugin_classifieds_access')) {
+            throw new AccessDeniedException();
+        }
+
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
         return new JsonResponse(array('status' => $adsService->deleteCategory($id)));
@@ -170,8 +202,8 @@ class CategoriesController extends Controller
     /**
      * Process single category
      *
-     * @param  Category     $category        Category
-     * @param  Zend_Router  $zendRouter Zend Router
+     * @param Category    $category   Category
+     * @param Zend_Router $zendRouter Zend Router
      *
      * @return array
      */

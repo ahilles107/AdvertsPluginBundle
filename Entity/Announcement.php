@@ -37,7 +37,6 @@ class Announcement
 
     /**
      * @ORM\Column(type="text", name="description")
-     * @Assert\NotBlank(message="Musisz podac opis")
      * @var string
      */
     protected $description;
@@ -68,9 +67,6 @@ class Announcement
 
     /**
      * @ORM\Column(type="float", name="price")
-     * @Assert\NotBlank(message="Musisz podac cenę")
-     * @Assert\Range(min = "0", minMessage = "Cena musi być większa od 0")
-     * @Assert\Type(type="float", message = "Cena musi być liczbą")
      * @var string
      */
     protected $price;
@@ -113,7 +109,8 @@ class Announcement
      */
     protected $is_active;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setCreatedAt(new \DateTime());
         $this->images = new \Doctrine\Common\Collections\ArrayCollection();
         $this->is_active = true;
@@ -150,6 +147,7 @@ class Announcement
     public function isStillValid()
     {
         $date = new \DateTime();
+
         return $date <= $this->getValidTo();
     }
 
@@ -215,7 +213,7 @@ class Announcement
         return $this->getFirstImage(true);
     }
 
-    protected function processImage($image)
+    public function processImage($image)
     {
         $newscoopImage = new \Image($image->getNewscoopImageId());
         $processedPhoto = array(
@@ -227,7 +225,6 @@ class Announcement
 
         return $processedPhoto;
     }
-
 
     public function getUser()
     {

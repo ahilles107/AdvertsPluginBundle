@@ -1,10 +1,9 @@
 {% extends 'NewscoopNewscoopBundle::admin_layout.html.twig' %}
 
 {% block admin_title %}{{ parent() }} - {{ 'ads.menu.manage'|trans }}{% endblock %}
-{% block admin_page_title_content %}{{ 'ads.menu.manage'|trans }}{% endblock %}
+{% block admin_page_title_content %}{{ 'ads.menu.categories'|trans }}{% endblock %}
 
 {% block admin_stylesheets %}
-<link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/bootstrap.css') }}">
 <link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/jquery.dynatable.css') }}">
 <link rel="stylesheet" href="{{ asset('/bundles/ahsadvertsplugin/css/backend.css') }}">
 {% endblock %}
@@ -17,7 +16,9 @@
 <div class="plugin-container">
 {% include "AHSAdvertsPluginBundle::menu.html.twig" with {active: 2} %}
 <div class="actionbar">
+    {% if hasPermission('plugin_classifieds_add') %}
         <button type="button" class="btn btn-default add-new-category"><span class="glyphicon glyphicon-plus">{{ 'ads.btn.addnew'|trans }}</span></button>
+    {% endif %}
     </div><br><br><br><br>
 <table id="ads-table" class="table table-bordered table-hover table-striped" style="word-wrap: break-word;table-layout: fixed;">
         <thead>
@@ -25,7 +26,9 @@
             <th data-dynatable-column="name">{{ 'ads.label.name'|trans }}</th>
             <th data-dynatable-column="announcements">{{ 'ads.label.classifieds'|trans }}</th>
             <th data-dynatable-column="created_at">{{ 'ads.label.created'|trans }}</th>
-            <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
+            {% if hasPermission('plugin_classifieds_edit') or hasPermission('plugin_classifieds_delete') %}
+                <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -113,14 +116,16 @@
                         var html = "";
                         for (index = 0; index < record['links'].length; ++index) {
                             var el = record['links'][index];
-
+                            {% if hasPermission('plugin_classifieds_edit') %}
                             if (el['rel'] == 'edit') {
                                 html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_categories_edit', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a> ";
                             }
-
+                            {% endif %}
+                            {% if hasPermission('plugin_classifieds_delete') %}
                             if (el['rel'] == 'delete' && record['status'] != "Deleted") {
                                 html += "<a class='btn btn-xs btn-danger action-btn js-remove-category' data-category-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
                             }
+                            {% endif %}
                         }
                         return html;
                     }
@@ -155,7 +160,7 @@
             }
         }
     }).data('dynatable');
-
+{% if hasPermission('plugin_classifieds_delete') %}
 $('.js-remove-category').live('click', function(event){
         event.preventDefault();
         var that = $(this);
@@ -172,6 +177,8 @@ $('.js-remove-category').live('click', function(event){
              });
         });
     });
+{% endif %}
+{% if hasPermission('plugin_classifieds_add') %}
 $('.add-new-category').live('click', function(event){
         event.preventDefault();
          $('#addConfirmModal').modal();
@@ -204,6 +211,7 @@ $('form#add-new-category').live('submit', function () {
 
     return false;
 });
+{% endif %}
 
 </script>
 {% endblock %}

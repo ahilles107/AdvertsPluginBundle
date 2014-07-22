@@ -83,7 +83,9 @@
             <th data-dynatable-column="username">{{ 'ads.label.username'|trans }}</th>
             <th data-dynatable-column="created">{{ 'ads.created'|trans }}</th>
             <th data-dynatable-column="valid_to">{{ 'ads.label.valid_to'|trans }}</th>
+            {% if hasPermission('plugin_classifieds_edit') or hasPermission('plugin_classifieds_delete') or hasPermission('plugin_classifieds_activate') or hasPermission('plugin_classifieds_deactivate') %}
             <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -152,27 +154,46 @@
         },
         writers: {
             _cellWriter: function (column, record) {
+                if (column.id == 'name') {
+                    column.attributeWriter = function(record) {
+                        var thumb = record.thumbnailUrl;
+                        var html = "";
+                        if (thumb) {
+                            html += "<center><img src="+record.thumbnailUrl+"></center><br>";
+                        }
+
+                        html += "<span>"+record.name+"</span>";
+                        return html;
+                    }
+                }
+
                 if (column.label == '{{ 'ads.table.actions.actions'|trans }}') {
                     column.attributeWriter = function(record) {
                         var html = "";
                         for (index = 0; index < record['links'].length; ++index) {
                             var el = record['links'][index];
 
+                            {% if hasPermission('plugin_classifieds_edit') %}
                             if (el['rel'] == 'edit') {
                                 html += "<a class='btn btn-xs btn-default action-btn' href="+Routing.generate('ahs_advertsplugin_admin_editad', {id: record.id })+"><span class='glyphicon glyphicon-edit'>{{ 'ads.table.actions.edit'|trans }}</span></a>";
                             }
+                            {% endif %}
 
+                            {% if hasPermission('plugin_classifieds_delete') %}
                             if (el['rel'] == 'delete') {
                                 html += "<a class='btn btn-xs btn-danger action-btn js-remove-ad' data-ad-id='"+record.id+"'><span class='glyphicon glyphicon-trash'>{{ 'ads.table.actions.remove'|trans }}</span></a>";
                             }
-
+                            {% endif %}
+                            {% if hasPermission('plugin_classifieds_activate') %}
                             if (el['rel'] == 'activate' && record['status'] == false) {
-                                html += "<a class='btn btn-xs btn-success action-btn js-activate' href="+el['href']+"><span class='glyphicon glyphicon-chevron-up'></span>{{ 'ads.table.actions.activate'|trans }}</a>";
+                                html += "<a class='btn btn-xs btn-success action-btn js-activate' href="+el['href']+"><span class='glyphicon glyphicon-thumbs-up'></span>{{ 'ads.table.actions.activate'|trans }}</a>";
                             }
-
+                            {% endif %}
+                            {% if hasPermission('plugin_classifieds_deactivate') %}
                             if (el['rel'] == 'deactivate' && record['status'] == true) {
-                                html += "<a class='btn btn-xs btn-warning action-btn js-deactivate' href="+el['href']+"><span class='glyphicon glyphicon-chevron-down'></span>{{ 'ads.table.actions.deactivate'|trans }}</a>";
+                                html += "<a class='btn btn-xs btn-warning action-btn js-deactivate' href="+el['href']+"><span class='glyphicon glyphicon-thumbs-down'></span>{{ 'ads.table.actions.deactivate'|trans }}</a>";
                             }
+                            {% endif %}
                         }
                         return html;
                     }
@@ -221,16 +242,13 @@
     }).data('dynatable');
 
     $('.dynatable-filter').click(function(e){
-    	callServer('ping', [], function(json) {
 	        $('.dynatable-filter').removeClass('active');
 	        $(this).addClass('active');
 	        dynatable.queries.add('filter', $(this).data('filter'));
 	        dynatable.process();
-        });
     });
 
     $('.dynatable-ad-status').click(function(e){
-    	callServer('ping', [], function(json) {
 	        var values = [];
 	        $('.dynatable-ad-status').each(function(key, el){
 	            if ($(el).is(':checked')) {
@@ -240,14 +258,12 @@
 
 	        dynatable.queries.add('ad-status', values);
 	        dynatable.process();
-        });
     });
 
     $('.js-remove-ad').live('click', function(event){
         event.preventDefault();
         var that = $(this);
          $('#deleteConfirmModal').modal({ show: true, keyboard: false }).one('click', '#delete-confirm', function (e) {
-         	callServer('ping', [], function(json) {
 	            $.post(Routing.generate('ahs_advertsplugin_admin_deletead', {id: that.attr('data-ad-id') }))
 				  .done(function(data) {
 				  	if (data.status) {
@@ -259,7 +275,6 @@
 				  	flashMessage('{{ 'ads.error.cantdelete'|trans }}', 'error');
 				 });
 			 });
-        });
     });
 
     $('.js-activate').live('click', function(event){

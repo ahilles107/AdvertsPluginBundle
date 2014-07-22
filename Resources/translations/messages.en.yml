@@ -1,7 +1,7 @@
 ads:
     label:
         title: "Announcements search"
-        name: "Name"
+        name: "Title"
         description: "Description"
         category: "Category"
         username: "Username"
@@ -31,6 +31,13 @@ ads:
         cantadd: "Can not add new category!"
         cantactivate: "Can not activate"
         cantdeactivate: "Can not deactivate"
+        description: "You must add description!"
+        name: "You must add title!"
+        termsaccepted: "Please, accept Terms of Service!"
+        price:
+            empty: "Price field can not be empty!"
+            range: "Price must be more than {{ limit }}"
+            type: "Price must be a number!"
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."
@@ -39,11 +46,12 @@ ads:
         deactivated: "Successfully deactivated"
     help:
         notify: "Notifications about new classifieds will be sent to this email."
-        review: "When set, each new classified status will be set to deactivated by default."
         valid_time: "Set how long (days) classified will be valid (by default)"
+        review: "When enabled, each new classified status will be set to deactivated by default."
+        enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."
     menu:
-        manage: "Manage announcements"
-        name: "Announcements"
+        manage: "Manage classifieds"
+        name: "Classifieds"
         settings: "Settings"
         classifieds: "Classifieds"
         edit: "Edit classified"
@@ -52,6 +60,14 @@ ads:
         editcategory: "Edit category"
     created: "Created"
     updated: "Updated"
+    permissions:
+        edit: "Edit"
+        activate: "Activate"
+        deactivate: "Deactivate"
+        settings: "Manage settings"
+        delete: "Delete"
+        add: "Add"
+        access: "Access plugin"
     table:
         actions:
             actions: "Actions"

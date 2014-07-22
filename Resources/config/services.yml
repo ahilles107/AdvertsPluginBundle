@@ -3,6 +3,7 @@ services:
         class: AHS\AdvertsPluginBundle\EventListener\LifecycleSubscriber
         arguments:
             - @em
+            - @newscoop.plugins.service
         tags:
             - { name: kernel.event_subscriber}
 
@@ -12,11 +13,19 @@ services:
           - { name: kernel.event_listener, event: newscoop_newscoop.menu_configure, method: onMenuConfigure }
         arguments:
             - @translator
+            - @user
 
     ahs_adverts_plugin.list_objects.listener:
         class: AHS\AdvertsPluginBundle\EventListener\ListObjectsListener
         tags:
           - { name: kernel.event_listener, event: newscoop.listobjects.register, method: registerObjects }
+
+    ahs_adverts_plugin.permissions.listener:
+        class: AHS\AdvertsPluginBundle\EventListener\PermissionsListener
+        arguments:
+            - @translator
+        tags:
+          - { name: kernel.event_listener, event: newscoop.plugins.permissions.register, method: registerPermissions }
 
     ahs_adverts_plugin.serializer.announcement_url_handler:
         class: AHS\AdvertsPluginBundle\Serializer\AnnouncementUrlHandler
@@ -32,3 +41,4 @@ services:
             - @newscoop.templates.service
             - @newscoop.placeholders.service
             - @system_preferences_service
+            - @router

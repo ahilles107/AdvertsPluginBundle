@@ -17,6 +17,8 @@ use Newscoop\Services\TemplatesService;
 use Newscoop\Services\PlaceholdersService;
 use AHS\AdvertsPluginBundle\Entity\User as ClassifiedUser;
 use AHS\AdvertsPluginBundle\Entity\Announcement;
+use Symfony\Component\Routing\Router;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Announcements Service
@@ -48,21 +50,30 @@ class AnnouncementsService
      */
     protected $preferencesService;
 
+    /**
+     * @var Router
+     */
+    protected $router;
+
 	/**
-     * Announcements construct
+     * Construct
      *
-     * @param EntityManager            $em                 Entity Manager
-     * @param EmailService             $emailService       Email Service
-     * @param SystemPreferencesService $preferencesService System Preferences Service
+     * @param EntityManager            $em                  Entity Manager
+     * @param EmailService             $emailService        Email Service
+     * @param TemplatesService         $templatesService    Templates Service
+     * @param PlaceholdersService      $placeholdersService Placeholder Service
+     * @param SystemPreferencesService $preferencesService  System Preferences
+     * @param Router                   $router              Router
      */
 	public function __construct(EntityManager $em, EmailService $emailService, TemplatesService $templatesService,
-        PlaceholdersService $placeholdersService, SystemPreferencesService $preferencesService)
+        PlaceholdersService $placeholdersService, SystemPreferencesService $preferencesService, Router $router)
 	{
 		$this->em = $em;
         $this->emailService = $emailService;
         $this->preferencesService = $preferencesService;
         $this->templatesService = $templatesService;
         $this->placeholdersService = $placeholdersService;
+        $this->router = $router;
 	}
 
     /**
@@ -101,6 +112,29 @@ class AnnouncementsService
 
         if ($category) {
             $this->em->remove($category);
+            $this->em->flush();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Delete classified image by given id
+     *
+     * @param  int|string $id Image id
+     *
+     * @return boolean
+     */
+    public function deleteClassifiedImage($id)
+    {
+        $image = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+            ->findOneById($id);
+
+        if ($image) {
+            $image->preRemoveHandler();
+            $this->em->remove($image);
             $this->em->flush();
 
             return true;
@@ -156,11 +190,12 @@ class AnnouncementsService
     /**
      * Send notification about new classified added
      *
-     * @param  ClassifiedUser $user Classified user
-     *
+     * @param  Request        $request    Request object
+     * @param  ClassifiedUser $user       Classified user
+     * @param  Announcement   $classified Announcement
      * @return void
      */
-    public function sendNotificationEmail(ClassifiedUser $user, Announcement $classified)
+    public function sendNotificationEmail(Request $request, ClassifiedUser $user, Announcement $classified)
     {
         $smarty = $this->templatesService->getSmarty();
         $user = $this->em->getRepository('Newscoop\Entity\User')
@@ -168,8 +203,15 @@ class AnnouncementsService
 
         $smarty->assign('user', new \MetaUser($user));
         $smarty->assign('classified', $classified);
+        $smarty->assign('created', $classified->getCreatedAt()->format('Y-m-d H:i:s'));
+        $smarty->assign('editLink', $request->getUriForPath($this->router->generate('ahs_advertsplugin_admin_editad', array('id' => $classified->getId()))));
 
-        $message = $this->templatesService->fetchTemplate("_views/email_classified_notify.tpl");
+        try {
+            $message = $this->templatesService->fetchTemplate("_ahs_adverts/email_classified_notify.tpl");
+        } catch (\Exception $e) {
+            throw new NotFoundHttpException("Could not load template: _ahs_adverts/email_classified_notify.tpl");
+        }
+
         $this->emailService->send($this->placeholdersService->get('subject'), $message, array($this->preferencesService->AdvertsNotificationEmail));
     }
 

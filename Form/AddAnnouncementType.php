@@ -12,17 +12,15 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-/**
- * Category form type
- */
-class CategoryType extends AbstractType
+class AddAnnouncementType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add('name', null, array(
-                'error_bubbling' => true
-            ));
+        $builder->add('announcement', new AnnouncementType($options));
+        $builder->add('terms', 'checkbox', array(
+            'property_path' => 'termsAccepted',
+            'required' => true,
+        ));
     }
 
     /**
@@ -31,7 +29,11 @@ class CategoryType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'csrf_protection'   => false
+            'csrf_protection' => false,
+        ));
+
+        $resolver->setRequired(array(
+            'translator',
         ));
     }
 
@@ -40,6 +42,6 @@ class CategoryType extends AbstractType
      */
     public function getName()
     {
-        return 'category';
+        return 'add_announcement';
     }
 }

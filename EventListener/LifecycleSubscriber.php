@@ -18,8 +18,12 @@ class LifecycleSubscriber implements EventSubscriberInterface
 {
     private $em;
 
-    public function __construct($em) {
+    private $pluginsService;
+
+    public function __construct($em, $pluginsService)
+    {
         $this->em = $em;
+        $this->pluginsService = $pluginsService;
     }
 
     public function install(GenericEvent $event)
@@ -28,6 +32,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $tool->updateSchema($this->getClasses(), true);
 
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
+        $this->setPermissions();
     }
 
     public function update(GenericEvent $event)
@@ -36,12 +41,30 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $tool->updateSchema($this->getClasses(), true);
 
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
+        $this->setPermissions();
     }
 
     public function remove(GenericEvent $event)
     {
         $tool = new \Doctrine\ORM\Tools\SchemaTool($this->em);
         $tool->dropSchema($this->getClasses(), true);
+        $this->removePermissions();
+    }
+
+    /**
+     * Save plugin permissions into database
+     */
+    private function setPermissions()
+    {
+        $this->pluginsService->savePluginPermissions($this->pluginsService->collectPermissions($this->translator->trans('ads.menu.name')));
+    }
+
+    /**
+     * Remove plugin permissions
+     */
+    private function removePermissions()
+    {
+        $this->pluginsService->removePluginPermissions($this->pluginsService->collectPermissions($this->translator->trans('ads.menu.name')));
     }
 
     public static function getSubscribedEvents()
@@ -53,7 +76,8 @@ class LifecycleSubscriber implements EventSubscriberInterface
         );
     }
 
-    private function getClasses(){
+    private function getClasses()
+    {
         return array(
           $this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\Announcement'),
           $this->em->getClassMetadata('AHS\AdvertsPluginBundle\Entity\Category'),

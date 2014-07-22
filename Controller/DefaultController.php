@@ -11,6 +11,8 @@ use AHS\AdvertsPluginBundle\Entity\Announcement;
 use AHS\AdvertsPluginBundle\Form\AnnouncementType;
 use AHS\AdvertsPluginBundle\Entity\User;
 use AHS\AdvertsPluginBundle\Entity\Image;
+use AHS\AdvertsPluginBundle\Form\AddAnnouncementType;
+use AHS\AdvertsPluginBundle\Form\Model\AddAnnouncement;
 
 class DefaultController extends Controller
 {
@@ -39,6 +41,7 @@ class DefaultController extends Controller
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
+        $translator = $this->get('translator');
 
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -51,13 +54,15 @@ class DefaultController extends Controller
         $em = $this->container->get('em');
         $publicationService = $this->container->get('newscoop_newscoop.publication_service');
 
-        $form = $this->createForm(new AnnouncementType(), $announcement);
+        $form = $this->createForm(new AddAnnouncementType(), new AddAnnouncement(), array('translator' => $translator));
         $categories = $this->getCategories();
 
         $errors = array();
         if ($request->isMethod('POST')) {
             $form->bind($request);
+            $formData = $form->getData();
             if ($form->isValid()) {
+                $announcement = $formData->getAnnouncement();
                 // create announcement user
                 $newscoopUserId = $auth->getIdentity();
 
@@ -86,9 +91,12 @@ class DefaultController extends Controller
                 $em->persist($announcement);
                 $em->flush();
                 $cacheService->clearNamespace('announcements');
-                
+
                 $this->savePhotosInAnnouncement($announcement, $request);
-                $adsService->sendNotificationEmail($user, $announcement);
+
+                if ($systemPreferences->AdvertsEnableNotify == "1") {
+                    $adsService->sendNotificationEmail($request, $user, $announcement);
+                }
 
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',
@@ -97,6 +105,10 @@ class DefaultController extends Controller
                     )
                 ));
             } else {
+                if (!$formData->getTermsAccepted()) {
+                    $errors[]['message'] = $translator->trans('ads.error.termsaccepted');
+                }
+
                 foreach ($form->getErrors() as $error) {
                     $errors[]['message'] = $error->getMessage();
                 }
@@ -177,11 +189,10 @@ class DefaultController extends Controller
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
         $userSevice = $this->container->get('user.list');
-        $user = $userSevice->findOneBy(
-            array(
-                'id' => $announcement->getUser()->getNewscoopUserId()
-            )
-        );
+        $user = $userSevice->findOneBy(array(
+            'id' => $announcement->getUser()->getNewscoopUserId()
+        ));
+
         $newscoopUser = new \MetaUser($user);
         $announcement->addRead();
         $em->flush();
@@ -203,22 +214,21 @@ class DefaultController extends Controller
     {
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
+        $translator = $this->get('translator');
 
         $auth = \Zend_Auth::getInstance();
         if (!$auth->hasIdentity()) { // ignore for logged user
-            return new RedirectResponse($this->container->get('zend_router')->assemble(
-                array(
+
+            return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                     'controller' => '',
                     'action' => 'auth'
-                ),
-                'default'
-            ));
+            ), 'default'));
         }
 
         $em = $this->container->get('em');
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
-        $form = $this->createForm(new AnnouncementType(), $announcement);
+        $form = $this->createForm(new AnnouncementType(), $announcement, array('translator' => $translator));
         $categories = $this->getCategories();
 
         $this->restoreSessionFromDatabase($request, $announcement->getId());
@@ -472,7 +482,6 @@ class DefaultController extends Controller
             ->getResult();
 
         $cacheService->save('ahs_anounncements_comments', $categories);
-
 
         return $categories;
     }
