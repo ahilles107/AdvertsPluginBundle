@@ -41,13 +41,10 @@ class DefaultController extends Controller
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
         if (!$auth->hasIdentity()) {
-            return new RedirectResponse($this->container->get('zend_router')->assemble(
-                    array(
-                        'controller' => '',
-                        'action' => 'auth'
-                    ),
-                    'default'
-                ) . '?_target_path=' . $this->generateUrl('ahs_advertsplugin_default_add'));
+            return new RedirectResponse($this->container->get('zend_router')->assemble(array(
+                'controller' => '',
+                'action' => 'auth'
+            ), 'default') . '?_target_path=' . $this->generateUrl('ahs_advertsplugin_default_add'));
         }
 
         $announcement = new Announcement();
@@ -64,11 +61,9 @@ class DefaultController extends Controller
                 // create announcement user
                 $newscoopUserId = $auth->getIdentity();
 
-                $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
-                    array(
-                        'newscoopUserId' => $newscoopUserId
-                    )
-                );
+                $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+                    'newscoopUserId' => $newscoopUserId
+                ));
 
                 if (!$user) {
                     $user = new User();
@@ -79,17 +74,19 @@ class DefaultController extends Controller
                 $announcement->setUser($user);
                 $announcement->setPublication($publicationService->getPublication());
 
-                $em->persist($announcement);
-
                 $systemPreferences = $this->get('system_preferences_service');
 
-                if ($systemPreferences->AdvertsReviewStatus == "1") {
+                // set valid date
+                $announcement->extendFor($systemPreferences->AdvertsValidTime);
+                // set anouncement default status
+                if ($systemPreferences->AdvertsReviewStatus == '1') {
                     $announcement->setIsActive(false);
                 }
 
-                $cacheService->clearNamespace('announcements');
+                $em->persist($announcement);
                 $em->flush();
-
+                $cacheService->clearNamespace('announcements');
+                
                 $this->savePhotosInAnnouncement($announcement, $request);
                 $adsService->sendNotificationEmail($user, $announcement);
 

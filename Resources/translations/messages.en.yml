@@ -12,6 +12,7 @@ ads:
         suremsg: "Are you sure you want to delete? This operation can not be undone."
         classifieds: "Total classifieds"
         created: "Created"
+        valid_to: 'Valid To'
         addingcategory: "Adding new category..."
     btn:
         cancel: "Cancel"
@@ -39,6 +40,7 @@ ads:
     help:
         notify: "Notifications about new classifieds will be sent to this email."
         review: "When set, each new classified status will be set to deactivated by default."
+        valid_time: "Set how long (days) classified will be valid (by default)"
     menu:
         manage: "Manage announcements"
         name: "Announcements"

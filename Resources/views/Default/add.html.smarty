@@ -56,7 +56,7 @@
 
 {{ block sidebar }}
 <div class="aside">
-    <p class="valid_date">Ogłoszenie będzie ważne do: <span class="advert_valid_date" title="{{ $announcement->getValidDate()|date_format:"Y-m-d h:i:s" }}">{{ $announcement->getValidDate()|date_format:"Y-m-d" }}</span> </p>
+    <p class="valid_date">Ogłoszenie będzie ważne do: <span class="advert_valid_date" title="{{ $announcement->getValidTo()|date_format:"Y-m-d h:i:s" }}">{{ $announcement->getValidTo()|date_format:"Y-m-d" }}</span> </p>
 
     <h2 class="photo_upload">Dodaj zdjęcia</h2>
     <div class="upload_photos">

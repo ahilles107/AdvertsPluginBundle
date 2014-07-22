@@ -62,7 +62,7 @@
     </div>
 
     <h4>Ogłoszenie ważne do:</h4>
-    <p class="valid_date"><span class="advert_valid_date" title="{{ $announcement->getValidDate()|date_format:"Y-m-d h:i:s" }}">{{ $announcement->getValidDate()|date_format:"Y-m-d" }}</span></p>
+    <p class="valid_date"><span class="advert_valid_date" title="{{ $announcement->getValidTo()|date_format:"Y-m-d h:i:s" }}">{{ $announcement->getValidTo()|date_format:"Y-m-d" }}</span></p>
 
     <h4>Cena:</h4>
     <span class="price">{{ $announcement->getPrice() }} zł</span>

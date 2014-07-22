@@ -21,11 +21,17 @@ class SettingsType extends AbstractType
     {
         $builder
             ->add('notificationEmail', 'email', array(
-                'error_bubbling' => true
+                'error_bubbling' => true,
+                'required' => false
             ))
             ->add('review', 'checkbox', array(
                 'error_bubbling' => true,
                 'required' => false
+            ))
+            ->add('valid_time', 'number', array(
+                'error_bubbling' => true,
+                'required' => false,
+                'precision' => 0
             ));
     }
 

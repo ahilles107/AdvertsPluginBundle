@@ -35,15 +35,21 @@ class AnnouncementType extends AbstractType
                 'property' => 'name',
                 'required' => false,
             ))
-            ->add('user', 'entity', array(
-                'error_bubbling' => true,
-                'class' => 'Newscoop\Entity\User',
-                'property' => 'username',
-            ))
             ->add('price', null, array(
                 'error_bubbling' => true,
                 'invalid_message' => 'Cena musi być liczbą'
-        ));
+            ))
+            ->add('type', 'choice', array(
+                'choices' => array(
+                    '1'   => 'Oferuje',
+                    '2' => 'Szukam'
+                ),
+                'error_bubbling' => true,
+            ))
+            ->add('valid_to', 'datetime', array(
+                'error_bubbling' => true,
+            ))
+            ;
     }
 
     /**

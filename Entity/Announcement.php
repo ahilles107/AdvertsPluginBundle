@@ -7,7 +7,7 @@
 
 namespace AHS\AdvertsPluginBundle\Entity;
 
-use Doctrine\ORM\Mapping AS ORM;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -18,6 +18,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Announcement
 {
+    const TYPE_LOOKING = 1;
+    const TYPE_OFFERING = 2;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -80,13 +83,24 @@ class Announcement
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
-     * @var string
+     * @var datetime
      */
     protected $created_at;
 
     /**
-     * TODO: 
-     * * anonucement type looking/offering
+     * @ORM\Column(type="datetime", name="valid_to")
+     * @var datetime
+     */
+    protected $validTo;
+
+    /**
+     * @ORM\Column(type="integer", name="type")
+     * @var integer
+     */
+    protected $type;
+
+    /**
+     * TODO:
      * * valid date
      * * anonucement status active/disactive
      * * * anouncement result - succesful or notsuccesfull
@@ -103,6 +117,7 @@ class Announcement
         $this->setCreatedAt(new \DateTime());
         $this->images = new \Doctrine\Common\Collections\ArrayCollection();
         $this->is_active = true;
+        $this->type = Announcement::TYPE_OFFERING;
     }
 
     /**
@@ -132,18 +147,10 @@ class Announcement
         return $this->created_at;
     }
 
-    public function getValidDate()
-    {
-        $date = clone $this->created_at;
-        $date->modify('+14 days');
-
-        return $date;
-    }
-
     public function isStillValid()
     {
         $date = new \DateTime();
-        return $date <= $this->getValidDate();
+        return $date <= $this->getValidTo();
     }
 
     public function getDescription()
@@ -359,5 +366,74 @@ class Announcement
         $this->reads = $reads;
 
         return $this;
+    }
+
+    /**
+     * Gets the value of type.
+     *
+     * @return integer
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Sets the value of type.
+     *
+     * @param integer $type the type
+     *
+     * @return self
+     */
+    public function setType($type)
+    {
+        if ($type != Announcement::TYPE_OFFERING) {
+            $this->type = Announcement::TYPE_LOOKING;
+
+            return $this;
+        }
+
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of valid to date.
+     *
+     * @return datetime
+     */
+    public function getValidTo()
+    {
+        return $this->validTo;
+    }
+
+    /**
+     * Sets the value of valid_to.
+     *
+     * @param \Datetime $validTo the valid to date
+     *
+     * @return self
+     */
+    public function setValidTo(\DateTime $validTo)
+    {
+        $this->validTo = $validTo;
+
+        return $this;
+    }
+
+    public function extendFor($days)
+    {
+        if ($this->getValidTo() == null) {
+            $date = clone $this->created_at;
+            $date->modify('+'.$days.' days');
+        } else {
+            $date = $this->getValidTo();
+            $date->modify('+'.$days.' days');
+        }
+
+        $this->setValidTo($date);
+
+        return $date;
     }
 }

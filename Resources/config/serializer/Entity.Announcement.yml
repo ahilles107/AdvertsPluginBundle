@@ -44,7 +44,7 @@ AHS\AdvertsPluginBundle\Entity\Announcement:
             groups: ["list", "details"]
             serialized_name: user
     virtual_properties:
-        getValidDate:
+        getValidTo:
             serialized_name: valid_date
             groups: ["details", "list"]
         isStillValid:

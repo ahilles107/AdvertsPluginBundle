@@ -33,6 +33,11 @@ class AnnouncementCriteria extends Criteria
     /**
      * @var int
      */
+    public $type;
+
+    /**
+     * @var int
+     */
     public $user;
 
     /**

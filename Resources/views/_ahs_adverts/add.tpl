@@ -45,6 +45,14 @@
         </div>
 
         <div style="margin:8px 4px;">
+            <label style="display: block; font-size: 20px; font-weight: bold; margin-bottom: 10px;">Typ</label>
+            <select style="padding: 5px; min-width: 250px;" name="announcement[type]">
+                    <option  {{ if $announcement->getType() != null }}{{ if $announcement->getType() == 1 }}selected="selected"{{ /if }}{{ /if }} value="1">Oferuję</option>
+                    <option  {{ if $announcement->getType() != null }}{{ if $announcement->getType() == 2 }}selected="selected"{{ /if }}{{ /if }} value="1">Szukam</option>
+            </select> 
+        </div>
+
+        <div style="margin:8px 4px;">
             <textarea name="announcement[description]" style="width: 600px; height: 200px; padding: 5px; font-size: 19px;">{{ $announcement->getDescription() }}</textarea>
         </div>
 
@@ -67,7 +75,7 @@
 {{ block sidebar }}
 <div class="col-md-5">
     <div class="aside">
-        <p class="valid_date">Ogłoszenie będzie ważne do: <span class="advert_valid_date" title="{{ $announcement->getValidDate()|date_format:"Y-m-d h:i:s" }}">{{ $announcement->getValidDate()|date_format:"Y-m-d" }}</span> </p>
+        <p class="valid_date">Ogłoszenie będzie ważne do: <span class="advert_valid_date" title="{{ $announcement->getValidTo()|date_format:"Y-m-d h:i:s" }}">{{ $announcement->getValidTo()|date_format:"Y-m-d" }}</span> </p>
 
         <h2 class="photo_upload">Dodaj zdjęcia</h2>
         <div class="upload_photos">

@@ -40,6 +40,14 @@
   </div>
 </div>
 <div class="form-group">
+  <label class="col-md-4 control-label" for="textinput">{{ form_label(form.valid_time) }}</label>
+  <div class="col-md-4">
+    {{ form_widget(form.valid_time, {'attr': {'class': 'form-control input-sm', 'style': 'width: 50px;'}}) }}
+    <div class="clearfix"></div>
+    <span class="help-block">{{ 'ads.help.valid_time'|trans }}</span>
+  </div>
+</div>
+<div class="form-group">
   <label class="col-md-4 control-label" for="singlebutton"></label>
   <div class="col-md-4">
     <button id="singlebutton" name="singlebutton" class="btn btn-success pull-right">{{ 'ads.btn.save'|trans }}</button>

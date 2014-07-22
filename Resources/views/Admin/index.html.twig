@@ -82,6 +82,7 @@
             <th data-dynatable-column="reads">{{ 'ads.label.reads'|trans }}</th>
             <th data-dynatable-column="username">{{ 'ads.label.username'|trans }}</th>
             <th data-dynatable-column="created">{{ 'ads.created'|trans }}</th>
+            <th data-dynatable-column="valid_to">{{ 'ads.label.valid_to'|trans }}</th>
             <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
           </tr>
         </thead>
@@ -186,6 +187,12 @@
                 if (column.id == 'created') {
                     column.attributeWriter = function(record) {
                         return record.created.date;
+                    }
+                }
+
+                if (column.id == 'valid_to') {
+                    column.attributeWriter = function(record) {
+                        return record.valid_to.date;
                     }
                 }
 

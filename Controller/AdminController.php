@@ -103,6 +103,10 @@ class AdminController extends Controller
         $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->findOneById($id);
 
+        if ($classified->getValidTo() < $classified->getCreatedAt()) {
+            $classified->setValidTo(new \DateTime());
+        }
+
         $form = $this->createForm(new AnnouncementType(), $classified);
 
         if ($request->isMethod('POST')) {
@@ -151,7 +155,8 @@ class AdminController extends Controller
         $systemPreferences = $this->get('system_preferences_service');
         $form = $this->createForm(new SettingsType(), array(
             'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
-            'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false
+            'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false,
+            'valid_time' => $systemPreferences->AdvertsValidTime
         ));
 
         if ($request->isMethod('POST')) {
@@ -160,6 +165,7 @@ class AdminController extends Controller
                 $data = $form->getData();
                 $systemPreferences->AdvertsNotificationEmail = $data['notificationEmail'];
                 $systemPreferences->AdvertsReviewStatus = $data['review'];
+                $systemPreferences->AdvertsValidTime = $data['valid_time'];
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }
@@ -248,6 +254,7 @@ class AdminController extends Controller
                     'username' => $user->getUsername(),
             ),
             'created' => $ad->getCreatedAt(),
+            'valid_to' => $ad->getValidTo(),
             'status' => $ad->getIsActive(),
             'links' => array(
                 array(

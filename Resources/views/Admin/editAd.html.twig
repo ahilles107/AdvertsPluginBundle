@@ -46,16 +46,16 @@
 </div>
 
 <div class="form-group">
-  <label class="col-md-4 control-label" for="publication">{{ form_label(form.publication) }}</label>
+  <label class="col-md-4 control-label" for="type">{{ form_label(form.type) }}</label>
   <div class="col-md-4">
-  {{ form_widget(form.publication, {'attr': {'class': 'form-control'}}) }}
+  {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
   </div>
 </div>
 
 <div class="form-group">
-  <label class="col-md-4 control-label" for="user">{{ form_label(form.user) }}</label>
+  <label class="col-md-4 control-label" for="publication">{{ form_label(form.publication) }}</label>
   <div class="col-md-4">
-  {{ form_widget(form.user, {'attr': {'class': 'form-control'}}) }}
+  {{ form_widget(form.publication, {'attr': {'class': 'form-control'}}) }}
   </div>
 </div>
 
@@ -70,6 +70,13 @@
   <label class="col-md-4 control-label" for="textinput">{{ form_label(form.reads) }}</label>
   <div class="col-md-4">
   {{ form_widget(form.reads, {'attr': {'class': 'form-control input-md'}}) }}
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="col-md-4 control-label" for="textinput">{{ form_label(form.valid_to) }}</label>
+  <div class="col-md-4">
+  {{ form_widget(form.valid_to) }}
   </div>
 </div>
 
