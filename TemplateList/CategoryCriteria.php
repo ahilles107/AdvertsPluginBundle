@@ -19,9 +19,9 @@ namespace AHS\AdvertsPluginBundle\TemplateList;
 use Newscoop\Criteria;
 
 /**
- * Available criteria for announcement listing.
+ * Available criteria for categories listing.
  */
-class AnnouncementCriteria extends Criteria
+class CategoryCriteria extends Criteria
 {
     /**
      * @var int
@@ -34,36 +34,6 @@ class AnnouncementCriteria extends Criteria
     public $name;
 
     /**
-     * @var int
-     */
-    public $category;
-
-    /**
-     * @var int
-     */
-    public $type;
-
-    /**
-     * @var int
-     */
-    public $user;
-
-    /**
-     * @var int
-     */
-    public $publication;
-
-    /**
-     * @var boolean
-     */
-    public $price;
-
-    /**
-     * @var int
-     */
-    public $reads;
-
-    /**
      * @var \DateTime
      */
     public $created_at;
@@ -72,19 +42,4 @@ class AnnouncementCriteria extends Criteria
      * @var array
      */
     public $orderBy = array('created_at' => 'desc');
-
-    /**
-     * @var boolean
-     */
-    public $withImages;
-
-    /**
-     * @var string
-     */
-    public $query;
-
-    /**
-     * @var array
-     */
-    public $status = array();
 }

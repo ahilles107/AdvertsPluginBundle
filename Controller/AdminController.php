@@ -12,8 +12,6 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
- * @copyright 2014 Sourcefabric o.p.s.
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 namespace AHS\AdvertsPluginBundle\Controller;
@@ -119,7 +117,9 @@ class AdminController extends Controller
 
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
-        return new JsonResponse(array('status' => $adsService->deleteClassified($id)));
+        return new JsonResponse(array(
+            'status' => $adsService->deleteClassified($id)
+        ));
     }
 
     /**
@@ -136,7 +136,9 @@ class AdminController extends Controller
 
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
-        return new JsonResponse(array('status' => $adsService->deleteClassifiedImage($id)));
+        return new JsonResponse(array(
+            'status' => $adsService->deleteClassifiedImage($id)
+        ));
     }
 
     /**
@@ -206,7 +208,9 @@ class AdminController extends Controller
 
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
-        return new JsonResponse(array('status' => $adsService->activateClassified($id)));
+        return new JsonResponse(array(
+            'status' => $adsService->activateClassified($id)
+        ));
     }
 
     /**
@@ -224,7 +228,9 @@ class AdminController extends Controller
 
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
-        return new JsonResponse(array('status' => $adsService->deactivateClassified($id)));
+        return new JsonResponse(array(
+            'status' => $adsService->deactivateClassified($id)
+        ));
     }
 
     /**
@@ -340,13 +346,13 @@ class AdminController extends Controller
             'price' => $ad->getPrice(),
             'reads' => $ad->getReads(),
             'username' => array(
-                    'href' => $zendRouter->assemble(array(
-                        'module' => 'admin',
-                        'controller' => 'user',
-                        'action' => 'edit',
-                        'user' => $user->getId(),
-                    ), 'default', true),
-                    'username' => $user->getUsername(),
+                'href' => $zendRouter->assemble(array(
+                    'module' => 'admin',
+                    'controller' => 'user',
+                    'action' => 'edit',
+                    'user' => $user->getId(),
+                ), 'default', true),
+                'username' => $user->getUsername(),
             ),
             'created' => $ad->getCreatedAt(),
             'valid_to' => $ad->getValidTo(),

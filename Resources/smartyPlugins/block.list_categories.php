@@ -15,10 +15,10 @@
  */
 
 /**
- * Newscoop list_announcements block plugin
+ * Newscoop list_categories block plugin
  *
  * Type:     block
- * Name:     list_announcements
+ * Name:     list_categories
  *
  * @param array $params
  * @param mixed $content
@@ -26,16 +26,16 @@
  * @param bool $repeat
  * @return string
  */
-function smarty_block_list_announcements($params, $content, &$smarty, &$repeat)
+function smarty_block_list_categories($params, $content, &$smarty, &$repeat)
 {
     $context = $smarty->getTemplateVars('gimme');
     $paginatorService = \Zend_Registry::get('container')->get('newscoop.listpaginator.service');
     $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
 
     if (!isset($content)) { // init
-        $start = $context->next_list_start('AHS\AdvertsPluginBundle\TemplateList\AnnouncementsList');
-        $list = new \AHS\AdvertsPluginBundle\TemplateList\AnnouncementsList(
-            new \AHS\AdvertsPluginBundle\TemplateList\AnnouncementCriteria(),
+        $start = $context->next_list_start('AHS\AdvertsPluginBundle\TemplateList\CategoriesList');
+        $list = new \AHS\AdvertsPluginBundle\TemplateList\CategoriesList(
+            new \AHS\AdvertsPluginBundle\TemplateList\CategoryCriteria(),
             $paginatorService,
             $cacheService
         );
@@ -52,13 +52,13 @@ function smarty_block_list_announcements($params, $content, &$smarty, &$repeat)
             return null;
         }
 
-        $context->setCurrentList($list, array('announcement', 'pagination'));
-        $context->announcement = $context->current_announcements_list->current;
+        $context->setCurrentList($list, array('anouncements_category', 'pagination'));
+        $context->anouncements_category = $context->current_categories_list->current;
         $repeat = true;
     } else { // next
-        $context->current_announcements_list->defaultIterator()->next();
-        if (!is_null($context->current_announcements_list->current)) {
-            $context->announcement = $context->current_announcements_list->current;
+        $context->current_categories_list->defaultIterator()->next();
+        if (!is_null($context->current_categories_list->current)) {
+            $context->anouncements_category = $context->current_categories_list->current;
             $repeat = true;
         } else {
             $context->resetCurrentList();

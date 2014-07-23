@@ -1,3 +1,4 @@
+{{ dynamic }}
 {{ if count($announcementPhotos) > 0}}
 <ul class="announcement_photos">
     {{ foreach from=$announcementPhotos item=photo }}
@@ -8,3 +9,4 @@
     {{ /foreach }}
 </ul>
 {{ /if }}
+{{ /dynamic }}

@@ -13,7 +13,6 @@
  * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
  * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 namespace AHS\AdvertsPluginBundle\Repository;

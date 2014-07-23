@@ -13,8 +13,6 @@
  * @package AHS\AdvertsPluginBundle
  * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
- * @copyright 2014 Sourcefabric o.p.s.
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 namespace AHS\AdvertsPluginBundle\Form;

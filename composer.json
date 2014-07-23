@@ -4,10 +4,7 @@
     "keywords": ["newscoop", "adverts", "cms", "integration", "classifieds"],
     "version": "0.1.6",
     "type": "newscoop-plugin",
-    "license": [
-        "GPL-3.0",
-        "Commercial"
-    ],
+    "license": "GPL-3.0, Commercial",
     "authors": [
         {
             "name": "Pawel Mikolajczuk",
@@ -16,8 +13,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "newscoop/plugins-installer": "*",
-        "knplabs/knp-paginator-bundle": "v2.3.2"
+        "newscoop/plugins-installer": "*"
     },
     "autoload": {
         "psr-0": { "AHS\\AdvertsPluginBundle\\AHSAdvertsPluginBundle": "" }

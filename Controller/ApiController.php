@@ -30,10 +30,7 @@ class ApiController extends FOSRestController
     public function latestAnouncementsAction(Request $request)
     {
         $em = $this->container->get('em');
-
-        $validDate = new \DateTime();
-        $validDate->modify('-100 days');
-
+        
         $publicationService = $this->container->get('newscoop.publication_service');
         $publicationId = $publicationService->getPublication()->getId();
 
@@ -44,12 +41,10 @@ class ApiController extends FOSRestController
         $latestAnnouncements = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->createQueryBuilder('a')
             ->andWhere('a.is_active = true')
-            ->andWhere('a.created_at >= :validDate')
             ->andWhere('a.publication >= :publicationId')
             ->orderBy('a.created_at', 'DESC')
             ->setParameters(
                 array(
-                    'validDate' => $validDate,
                     'publicationId' => $publicationId
                 )
             )

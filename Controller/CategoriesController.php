@@ -12,8 +12,6 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
- * @copyright 2014 Sourcefabric o.p.s.
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 namespace AHS\AdvertsPluginBundle\Controller;
@@ -49,7 +47,7 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @Route("admin/announcements/category/edit/{id}", options={"expose"=true})
+     * @Route("/admin/announcements/category/edit/{id}", options={"expose"=true})
      * @Template()
      */
     public function editAction(Request $request, $id = null)
@@ -82,7 +80,7 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @Route("admin/announcements/category/add", options={"expose"=true})
+     * @Route("/admin/announcements/category/add", options={"expose"=true})
      * @Template()
      */
     public function addAction(Request $request, $id = null)
@@ -194,7 +192,7 @@ class CategoriesController extends Controller
     }
 
     /**
-     * @Route("admin/announcements/category/delete/{id}", options={"expose"=true})
+     * @Route("/admin/announcements/category/delete/{id}", options={"expose"=true})
      */
     public function deleteAction(Request $request, $id)
     {

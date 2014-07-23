@@ -12,21 +12,20 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <mikolajczuk.protected@gmail.com>
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 namespace AHS\AdvertsPluginBundle\Entity;
 
-use Doctrine\ORM\Mapping AS ORM;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Category entity
  *
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="AHS\AdvertsPluginBundle\Repository\CategoriesRepository")
  * @ORM\Table(name="plugin_adverts_category")
  */
-class Category 
+class Category
 {
     /**
      * @ORM\Id()
@@ -44,7 +43,7 @@ class Category
 
     /**
      * @ORM\OneToMany(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", mappedBy="category")
-     */ 
+     */
     protected $announcements;
 
     /**
@@ -53,7 +52,8 @@ class Category
      */
     protected $created_at;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setCreatedAt(new \DateTime());
         $this->announcements = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -82,7 +82,7 @@ class Category
     public function setName($name)
     {
         $this->name = $name;
-        
+
         return $this;
     }
 
@@ -94,7 +94,7 @@ class Category
     public function setAnnouncement(\AHS\AdvertsPluginBundle\Entity\Announcement $announcement)
     {
         $this->announcements[] = $announcement;
-        
+
         return $this;
     }
 
@@ -106,7 +106,7 @@ class Category
     public function setCreatedAt(\DateTime $created_at)
     {
         $this->created_at = $created_at;
-        
+
         return $this;
     }
 
@@ -119,8 +119,8 @@ class Category
             // Latin symbols
             '©' => '(c)',
             // Polish
-            'Ą' => 'A', 'Ć' => 'C', 'Ę' => 'e', 'Ł' => 'L', 'Ń' => 'N', 'Ó' => 'o', 'Ś' => 'S', 'Ź' => 'Z', 
-            'Ż' => 'Z', 
+            'Ą' => 'A', 'Ć' => 'C', 'Ę' => 'e', 'Ł' => 'L', 'Ń' => 'N', 'Ó' => 'o', 'Ś' => 'S', 'Ź' => 'Z',
+            'Ż' => 'Z',
             'ą' => 'a', 'ć' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'ó' => 'o', 'ś' => 's', 'ź' => 'z',
             'ż' => 'z',
         );
@@ -141,8 +141,7 @@ class Category
         if (empty($text)) {
             return 'n-a';
         }
-     
+
         return $text;
     }
 }
-

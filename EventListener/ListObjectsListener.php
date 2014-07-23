@@ -12,7 +12,6 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <mikolajczuk.private@gmail.com>
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 namespace AHS\AdvertsPluginBundle\EventListener;
@@ -23,7 +22,7 @@ class ListObjectsListener
 {
     /**
      * Register plugin list objects in Newscoop
-     * 
+     *
      * @param  CollectObjectsDataEvent $event
      */
     public function registerObjects(CollectObjectsDataEvent $event)
@@ -36,6 +35,16 @@ class ListObjectsListener
 
         $event->registerObjectTypes('announcement', array(
             'class' => '\AHS\AdvertsPluginBundle\Entity\Announcement'
+        ));
+
+        $event->registerListObject('ahs\advertspluginbundle\templatelist\categories', array(
+            'class' => 'AHS\AdvertsPluginBundle\TemplateList\Categories',
+            'list' => 'categories',
+            'url_id' => 'ctgr',
+        ));
+
+        $event->registerObjectTypes('anouncements_category', array(
+            'class' => '\AHS\AdvertsPluginBundle\Entity\Category'
         ));
     }
 }
