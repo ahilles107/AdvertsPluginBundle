@@ -188,9 +188,9 @@ class FrontController extends Controller
                 'categories' => $categories,
                 'form' => $form->createView(),
                 'form_path' => $this->generateUrl(
-                        'ahs_advertsplugin_default_edit',
-                        array('id' => $announcement->getId())
-                    ),
+                    'ahs_advertsplugin_default_edit',
+                    array('id' => $announcement->getId())
+                ),
                 'type' => 'edit',
                 'errors' => $errors
             )
@@ -257,6 +257,21 @@ class FrontController extends Controller
             array(
                 'categories' => $categories,
                 'currentCategory' => $currentCategory,
+            )
+        ));
+    }
+
+    /**
+     * @Route("/classifieds/type/{type}")
+     */
+    public function typeAction(Request $request, $type)
+    {
+        $templatesService = $this->get('newscoop.templates.service');
+
+        return new Response($templatesService->fetchTemplate(
+            '_ahs_adverts/type.tpl',
+            array(
+                'currentType' => $type,
             )
         ));
     }
