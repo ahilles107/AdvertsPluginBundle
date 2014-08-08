@@ -9,20 +9,25 @@
  * file that was distributed with this source code.
  */
 
+/**
+ * @package AHS\AdvertsPluginBundle
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
+ */
+
 namespace AHS\AdvertsPluginBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use AHS\AdvertsPluginBundle\Entity\Announcement;
-use AHS\AdvertsPluginBundle\Form\AnnouncementType;
 use AHS\AdvertsPluginBundle\Form\FrontAnnouncementType;
 use AHS\AdvertsPluginBundle\Entity\User;
 use AHS\AdvertsPluginBundle\Entity\Image;
 
-class DefaultController extends Controller
+class FrontController extends Controller
 {
     /**
      * @Route("/classifieds")
@@ -140,6 +145,7 @@ class DefaultController extends Controller
 
         $auth = \Zend_Auth::getInstance();
         if (!$auth->hasIdentity()) { // ignore for logged user
+
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                     'controller' => '',
                     'action' => 'auth'
@@ -245,7 +251,7 @@ class DefaultController extends Controller
         $paginatorService->setUsedRouteParams(
             array('id' => $currentCategory->getId(), 'slug' => $currentCategory->getSlug())
         );
-        
+
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/category.tpl',
             array(
@@ -353,6 +359,38 @@ class DefaultController extends Controller
             array(
                 'announcementPhotos' => $this->processPhotos($request)
             )
+        ));
+    }
+
+    /**
+     * @Route("/classifieds/change-status/{id}/{status}", options={"expose"=true})
+     * @Method("POST")
+     */
+    public function changeStatusAction(Request $request, $id, $status)
+    {
+        $userService = $this->get('user');
+        $em = $this->get('em');
+        $user = $userService->getCurrentUser();
+        $responseStatus = false;
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
+        if ($announcement) {
+            if ($user->getId() == (int) $announcement->getUser()->getNewscoopUserId()) {
+                $announcement->setResult(false);
+                if ($status === 'success') {
+                    $announcement->setResult(true);
+                }
+
+                if (!is_null($request->request->get('announcementStatusComment'))) {
+                    $announcement->setComment($request->request->get('announcementStatusComment'));
+                }
+
+                $responseStatus = true;
+                $em->flush();
+            }
+        }
+
+        return new JsonResponse(array(
+            'status' => $responseStatus
         ));
     }
 

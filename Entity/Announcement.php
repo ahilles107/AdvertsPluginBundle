@@ -12,12 +12,12 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <mikolajczuk.protected@gmail.com>
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  */
 
 namespace AHS\AdvertsPluginBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Announcement entity
@@ -106,9 +106,21 @@ class Announcement
 
     /**
      * @ORM\Column(type="boolean", name="terms_accepted")
-     * @var integer
+     * @var boolean
      */
     protected $terms_accepted;
+
+    /**
+     * @ORM\Column(type="boolean", name="result", nullable=true)
+     * @var boolean
+     */
+    protected $result;
+
+    /**
+     * @ORM\Column(type="string", name="comment", nullable=true)
+     * @var string
+     */
+    protected $comment;
 
     /**
      * TODO:
@@ -462,13 +474,61 @@ class Announcement
     /**
      * Sets the value of terms_accepted.
      *
-     * @param integer $terms_accepted the terms  accepted 
+     * @param integer $terms_accepted the terms  accepted
      *
      * @return self
      */
     public function setTermsAccepted($terms_accepted)
     {
         $this->terms_accepted = $terms_accepted;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of result.
+     *
+     * @return boolean
+     */
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    /**
+     * Sets the value of result.
+     *
+     * @param boolean $result the result
+     *
+     * @return self
+     */
+    public function setResult($result)
+    {
+        $this->result = $result;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of comment.
+     *
+     * @return string
+     */
+    public function getComment()
+    {
+        return $this->comment;
+    }
+
+    /**
+     * Sets the value of comment.
+     *
+     * @param string $comment the comment
+     *
+     * @return self
+     */
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
 
         return $this;
     }
