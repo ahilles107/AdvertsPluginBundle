@@ -34,12 +34,15 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
     private $cronjobs;
 
-    public function __construct($em, $pluginsService, $translator, $scheduler)
+    private $systemPreferences;
+
+    public function __construct($em, $pluginsService, $translator, $scheduler, $systemPreferences)
     {
         $this->em = $em;
         $this->pluginsService = $pluginsService;
         $this->translator = $translator;
         $this->scheduler = $scheduler;
+        $this->systemPreferences = $systemPreferences;
         $appDirectory = realpath(__DIR__.'/../../../../application/console');
         $this->cronjobs = array(
             "Deactivate expired classifieds." => array(
@@ -57,6 +60,9 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
         $this->setPermissions();
         $this->addJobs();
+        $systemPreferences->AdvertsNotificationEmail = $systemPreferences->EmailFromAddress;
+        $systemPreferences->AdvertsValidTime = 7;
+        $systemPreferences->AdvertsMaxClassifiedsPerUser = 5;
     }
 
     public function update(GenericEvent $event)
@@ -71,6 +77,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
     public function remove(GenericEvent $event)
     {
+        $this->removeSettings();
         $this->removePermissions();
         $this->removeJobs();
     }
@@ -109,6 +116,20 @@ class LifecycleSubscriber implements EventSubscriberInterface
         foreach ($this->cronjobs as $jobName => $jobConfig) {
             $this->scheduler->removeJob($jobName, $jobConfig);
         }
+    }
+
+    /**
+     * Clean up system preferences
+     *
+     * @return void
+     */
+    private function removeSettings()
+    {
+        $this->systemPreferences->delete('AdvertsNotificationEmail');
+        $this->systemPreferences->delete('AdvertsValidTime');
+        $this->systemPreferences->delete('AdvertsMaxClassifiedsPerUser');
+        $this->systemPreferences->delete('AdvertsReviewStatus');
+        $this->systemPreferences->delete('AdvertsEnableNotify');
     }
 
     public static function getSubscribedEvents()

@@ -78,7 +78,7 @@ class DeactivateClassifiedsCommand extends ContainerAwareCommand
                 $expiredAnnouncements = $qbRows->getQuery()->getResult();
 
                 foreach ($expiredAnnouncements as $announcement) {
-                    $classifiedsService->deactivateClassified(null, $announcement);
+                    $classifiedsService->deactivateClassified($announcement);
                 }
             }
 
