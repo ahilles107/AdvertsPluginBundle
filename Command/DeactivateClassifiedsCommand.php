@@ -61,9 +61,7 @@ class DeactivateClassifiedsCommand extends ContainerAwareCommand
             $batch = 100;
             $steps = ($announcementsCount > $batch) ? ceil($announcementsCount / $batch) : 1;
             for ($i = 0; $i < $steps; $i++) {
-
                 $offset = $i * $batch;
-
                 $qbRows
                     ->where("a.validTo < :now")
                     ->andWhere('a.is_active = :status')
@@ -76,7 +74,6 @@ class DeactivateClassifiedsCommand extends ContainerAwareCommand
                     ->setMaxResults($batch);
 
                 $expiredAnnouncements = $qbRows->getQuery()->getResult();
-
                 foreach ($expiredAnnouncements as $announcement) {
                     $classifiedsService->deactivateClassified($announcement);
                 }

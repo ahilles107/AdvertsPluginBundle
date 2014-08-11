@@ -10,8 +10,9 @@
  */
 
 /**
- * @package Newscoop\ExamplePluginBundle
+ * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <pawel.mikolajczuk@sourcefabric.org>
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  */
 
 namespace AHS\AdvertsPluginBundle\EventListener;
