@@ -21,6 +21,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use AHS\AdvertsPluginBundle\Entity\Announcement;
 use AHS\AdvertsPluginBundle\Form\FrontAnnouncementType;
@@ -30,7 +31,7 @@ use AHS\AdvertsPluginBundle\Entity\Image;
 class FrontController extends Controller
 {
     /**
-     * @Route("/classifieds")
+     * @Route("/classifieds", name="ahs_advertsplugin_default_index")
      */
     public function indexAction(Request $request)
     {
@@ -46,15 +47,17 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/add", options={"expose"=true})
+     * @Route("/classifieds/add", name="ahs_advertsplugin_default_add", options={"expose"=true})
      */
     public function addAction(Request $request)
     {
         $auth = \Zend_Auth::getInstance();
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
+        $systemPreferences = $this->get('system_preferences_service');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $translator = $this->get('translator');
+        $em = $this->container->get('em');
 
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -63,60 +66,70 @@ class FrontController extends Controller
             ), 'default') . '?_target_path=' . $this->generateUrl('ahs_advertsplugin_default_add'));
         }
 
+        $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->createQueryBuilder('a')
+            ->select('count(a)')
+            ->where('a.announcementStatus = true')
+            ->getQuery()
+            ->getSingleScalarResult();
+
         $announcement = new Announcement();
-        $em = $this->container->get('em');
         $publicationService = $this->container->get('newscoop_newscoop.publication_service');
 
         $form = $this->createForm(new FrontAnnouncementType(), $announcement, array('translator' => $translator));
         $categories = $this->getCategories();
 
         $errors = array();
-        if ($request->isMethod('POST')) {
-            $form->bind($request);
-            if ($form->isValid()) {
-                // create announcement user
-                $newscoopUserId = $auth->getIdentity();
-                $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
-                    'newscoopUserId' => $newscoopUserId
-                ));
+        if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser) {
+            $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
+        } else {
+            if ($request->isMethod('POST')) {
+                $form->bind($request);
+                if ($form->isValid()) {
+                    // create announcement user
+                    $newscoopUserId = $auth->getIdentity();
+                    $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+                        'newscoopUserId' => $newscoopUserId
+                    ));
 
-                if (!$user) {
-                    $user = new User();
-                    $user->setNewscoopUserId($newscoopUserId);
-                    $em->persist($user);
-                }
+                    if (!$user) {
+                        $user = new User();
+                        $user->setNewscoopUserId($newscoopUserId);
+                        $em->persist($user);
+                    }
 
-                $announcement->setUser($user);
-                $announcement->setPublication($publicationService->getPublication());
+                    $announcement->setUser($user);
+                    $announcement->setPublication($publicationService->getPublication());
 
-                $systemPreferences = $this->get('system_preferences_service');
+                    $systemPreferences = $this->get('system_preferences_service');
 
-                // set valid date
-                $announcement->extendFor($systemPreferences->AdvertsValidTime);
-                // set anouncement default status
-                if ($systemPreferences->AdvertsReviewStatus == '1') {
-                    $announcement->setIsActive(false);
-                }
+                    // set valid date
+                    $announcement->extendFor($systemPreferences->AdvertsValidTime);
+                    // set anouncement default status
+                    if ($systemPreferences->AdvertsReviewStatus == '1') {
+                        $announcement->setIsActive(false);
+                    }
 
-                $em->persist($announcement);
-                $em->flush();
-                $cacheService->clearNamespace('announcements');
+                    $em->persist($announcement);
+                    $em->flush();
+                    $cacheService->clearNamespace('announcements');
 
-                $this->savePhotosInAnnouncement($announcement, $request);
+                    $this->savePhotosInAnnouncement($announcement, $request);
 
-                if ($systemPreferences->AdvertsEnableNotify == "1") {
-                    $adsService->sendNotificationEmail($request, $user, $announcement);
-                }
+                    if ($systemPreferences->AdvertsEnableNotify == "1") {
+                        $adsService->sendNotificationEmail($request, $user, $announcement);
+                    }
 
-                return new RedirectResponse($this->generateUrl(
-                    'ahs_advertsplugin_default_show',
-                    array(
-                        'id' => $announcement->getId(),
-                    )
-                ));
-            } else {
-                foreach ($form->getErrors() as $error) {
-                    $errors[]['message'] = $error->getMessage();
+                    return new RedirectResponse($this->generateUrl(
+                        'ahs_advertsplugin_default_show',
+                        array(
+                            'id' => $announcement->getId(),
+                        )
+                    ));
+                } else {
+                    foreach ($form->getErrors() as $error) {
+                        $errors[]['message'] = $error->getMessage();
+                    }
                 }
             }
         }
@@ -135,7 +148,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/edit/{id}", requirements={"id" = "\d+"}, options={"expose"=true})
+     * @Route("/classifieds/edit/{id}", requirements={"id" = "\d+"}, name="ahs_advertsplugin_default_edit", options={"expose"=true})
      */
     public function editAction(Request $request, $id = null)
     {
@@ -198,7 +211,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/view/{id}/{slug}", requirements={"id" = "\d+"})
+     * @Route("/classifieds/view/{id}/{slug}", requirements={"id" = "\d+"}, name="ahs_advertsplugin_default_show")
      */
     public function showAction(Request $request, $id = null, $slug = null)
     {
@@ -227,7 +240,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/category/{id}/{slug}")
+     * @Route("/classifieds/category/{id}/{slug}", name="ahs_advertsplugin_default_category")
      */
     public function categoryAction(Request $request, $id, $slug = null)
     {
@@ -262,7 +275,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/type/{type}")
+     * @Route("/classifieds/type/{type}", name="ahs_advertsplugin_default_type")
      */
     public function typeAction(Request $request, $type)
     {
@@ -277,7 +290,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/upload_photo", options={"expose"=true})
+     * @Route("/classifieds/upload_photo", options={"expose"=true}, name="ahs_advertsplugin_default_uploadphoto")
      */
     public function uploadPhotoAction(Request $request)
     {
@@ -326,7 +339,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/remove_photo", options={"expose"=true})
+     * @Route("/classifieds/remove_photo", options={"expose"=true}, name="ahs_advertsplugin_default_removephoto")
      */
     public function removePhotoAction(Request $request)
     {
@@ -362,7 +375,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/render_photos", options={"expose"=true})
+     * @Route("/classifieds/render_photos", options={"expose"=true}, name="ahs_advertsplugin_default_renderphotos")
      */
     public function renderPhotosAction(Request $request)
     {
@@ -378,10 +391,10 @@ class FrontController extends Controller
     }
 
     /**
-     * @Route("/classifieds/change-status/{id}/{status}", options={"expose"=true})
+     * @Route("/classifieds/change-status/{id}/{status}", options={"expose"=true}, name="ahs_advertsplugin_default_changestatus")
      * @Method("POST")
      */
-    public function changeStatusAction(Request $request, $id, $status)
+    public function changeStatusAction(Request $request, $id, $status = null)
     {
         $userService = $this->get('user');
         $em = $this->get('em');
@@ -390,13 +403,18 @@ class FrontController extends Controller
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
         if ($announcement) {
             if ($user->getId() == (int) $announcement->getUser()->getNewscoopUserId()) {
-                $announcement->setResult(false);
-                if ($status === 'success') {
-                    $announcement->setResult(true);
-                }
+                if ($announcement->getAnnouncementStatus()) {
+                    $announcement->setResult(false);
+                    $announcement->setAnnouncementStatus(false);
+                    if ($status === 'success') {
+                        $announcement->setResult(true);
+                    }
 
-                if (!is_null($request->request->get('announcementStatusComment'))) {
-                    $announcement->setComment($request->request->get('announcementStatusComment'));
+                    if (!is_null($request->request->get('announcementComment'))) {
+                        $announcement->setComment($request->request->get('announcementComment'));
+                    }
+                } else {
+                    $announcement->setAnnouncementStatus(true);
                 }
 
                 $responseStatus = true;

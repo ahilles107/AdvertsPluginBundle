@@ -5,6 +5,7 @@ services:
             - @em
             - @newscoop.plugins.service
             - @translator
+            - @newscoop.scheduler
         tags:
             - { name: kernel.event_subscriber}
 

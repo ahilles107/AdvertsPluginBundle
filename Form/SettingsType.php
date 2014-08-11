@@ -44,6 +44,11 @@ class SettingsType extends AbstractType
                 'error_bubbling' => true,
                 'required' => false,
                 'precision' => 0
+            ))
+            ->add('maxClassifieds', 'number', array(
+                'error_bubbling' => true,
+                'required' => true,
+                'precision' => 0
             ));
     }
 

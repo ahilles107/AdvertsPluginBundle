@@ -123,12 +123,10 @@ class Announcement
     protected $comment;
 
     /**
-     * TODO:
-     * * valid date
-     * * anonucement status active/disactive
-     * * * anouncement result - succesful or notsuccesfull
-     * * * fix caching
+     * @ORM\Column(type="boolean", name="announcementStatus")
+     * @var boolean
      */
+    protected $announcementStatus;
 
     /**
      * @ORM\Column(type="boolean", name="is_active", nullable=true)
@@ -142,6 +140,7 @@ class Announcement
         $this->images = new \Doctrine\Common\Collections\ArrayCollection();
         $this->is_active = true;
         $this->type = Announcement::TYPE_OFFERING;
+        $this->announcementStatus = true;
     }
 
     /**
@@ -529,6 +528,30 @@ class Announcement
     public function setComment($comment)
     {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of announcementStatus.
+     *
+     * @return boolean
+     */
+    public function getAnnouncementStatus()
+    {
+        return $this->announcementStatus;
+    }
+
+    /**
+     * Sets the value of announcementStatus.
+     *
+     * @param boolean $announcementStatus the announcement status
+     *
+     * @return self
+     */
+    public function setAnnouncementStatus($announcementStatus)
+    {
+        $this->announcementStatus = $announcementStatus;
 
         return $this;
     }

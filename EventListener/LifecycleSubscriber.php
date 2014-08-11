@@ -30,11 +30,23 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
     private $translator;
 
-    public function __construct($em, $pluginsService, $translator)
+    private $scheduler;
+
+    private $cronjobs;
+
+    public function __construct($em, $pluginsService, $translator, $scheduler)
     {
         $this->em = $em;
         $this->pluginsService = $pluginsService;
         $this->translator = $translator;
+        $this->scheduler = $scheduler;
+        $appDirectory = realpath(__DIR__.'/../../../../application/console');
+        $this->cronjobs = array(
+            "Deactivate expired classifieds." => array(
+                'command' => $appDirectory . ' classifieds:deactivate',
+                'schedule' => '* * * * *',
+            ),
+        );
     }
 
     public function install(GenericEvent $event)
@@ -44,6 +56,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
         $this->setPermissions();
+        $this->addJobs();
     }
 
     public function update(GenericEvent $event)
@@ -53,11 +66,13 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
         $this->setPermissions();
+        $this->addJobs();
     }
 
     public function remove(GenericEvent $event)
     {
         $this->removePermissions();
+        $this->removeJobs();
     }
 
     /**
@@ -74,6 +89,26 @@ class LifecycleSubscriber implements EventSubscriberInterface
     private function removePermissions()
     {
         $this->pluginsService->removePluginPermissions($this->pluginsService->collectPermissions($this->translator->trans('ads.menu.name')));
+    }
+
+    /**
+     * Add plugin cron jobs
+     */
+    private function addJobs()
+    {
+        foreach ($this->cronjobs as $jobName => $jobConfig) {
+            $this->scheduler->registerJob($jobName, $jobConfig);
+        }
+    }
+
+    /**
+     * Remove plugin cron jobs
+     */
+    private function removeJobs()
+    {
+        foreach ($this->cronjobs as $jobName => $jobConfig) {
+            $this->scheduler->removeJob($jobName, $jobConfig);
+        }
     }
 
     public static function getSubscribedEvents()

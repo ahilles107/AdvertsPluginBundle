@@ -221,15 +221,18 @@ class AdminController extends Controller
         $userService = $this->get('user');
         $user = $userService->getCurrentUser();
         $translator = $this->get('translator');
+        $em = $this->get('em');
 
         if (!$user->hasPermission('plugin_classifieds_deactivate') || !$user->hasPermission('plugin_classifieds_access')) {
             throw new AccessDeniedException();
         }
 
+        $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->findOneById($id);
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
 
         return new JsonResponse(array(
-            'status' => $adsService->deactivateClassified($id)
+            'status' => $classified ? $adsService->deactivateClassified($classified) : false
         ));
     }
 
@@ -253,7 +256,8 @@ class AdminController extends Controller
             'notificationEmail' => $systemPreferences->AdvertsNotificationEmail,
             'review' => $systemPreferences->AdvertsReviewStatus == "1" ? true : false,
             'valid_time' => $systemPreferences->AdvertsValidTime,
-            'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false
+            'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false,
+            'maxClassifieds' => $systemPreferences->AdvertsMaxClassifiedsPerUser,
         ));
 
         if ($request->isMethod('POST')) {
@@ -264,6 +268,7 @@ class AdminController extends Controller
                 $systemPreferences->AdvertsReviewStatus = $data['review'];
                 $systemPreferences->AdvertsValidTime = $data['valid_time'];
                 $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
+                $systemPreferences->AdvertsMaxClassifiedsPerUser = $data['maxClassifieds'];
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }

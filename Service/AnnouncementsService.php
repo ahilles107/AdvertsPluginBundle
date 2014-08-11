@@ -87,7 +87,7 @@ class AnnouncementsService
     /**
      * Delete classified by given id
      *
-     * @param  int|string $id Classified id
+     * @param int|string $id Classified id
      *
      * @return boolean
      */
@@ -109,7 +109,7 @@ class AnnouncementsService
     /**
      * Delete category by given id
      *
-     * @param  int|string $id Category id
+     * @param int|string $id Category id
      *
      * @return boolean
      */
@@ -131,7 +131,7 @@ class AnnouncementsService
     /**
      * Delete classified image by given id
      *
-     * @param  int|string $id Image id
+     * @param int|string $id Image id
      *
      * @return boolean
      */
@@ -154,7 +154,7 @@ class AnnouncementsService
     /**
      * Activate classified by given id
      *
-     * @param  int|string $id Classified id
+     * @param int|string $id Classified id
      *
      * @return boolean
      */
@@ -165,6 +165,7 @@ class AnnouncementsService
 
         if ($classified) {
             $classified->setIsActive(true);
+            $classified->setAnnouncementStatus(true);
             $this->em->flush();
 
             return true;
@@ -176,23 +177,17 @@ class AnnouncementsService
     /**
      * Deactivate classified by given id
      *
-     * @param  int|string $id Classified id
+     * @param Announcement $classified Classified
      *
      * @return boolean
      */
-    public function deactivateClassified($id)
+    public function deactivateClassified(Announcement $classified)
     {
-        $classified = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->findOneById($id);
+        $classified->setIsActive(false);
+        $classified->setAnnouncementStatus(false);
+        $this->em->flush();
 
-        if ($classified) {
-            $classified->setIsActive(false);
-            $this->em->flush();
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
