@@ -61,9 +61,9 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
         $this->setPermissions();
         $this->addJobs();
-        $systemPreferences->AdvertsNotificationEmail = $systemPreferences->EmailFromAddress;
-        $systemPreferences->AdvertsValidTime = 7;
-        $systemPreferences->AdvertsMaxClassifiedsPerUser = 5;
+        $this->systemPreferences->AdvertsNotificationEmail = $systemPreferences->EmailFromAddress;
+        $this->systemPreferences->AdvertsValidTime = 7;
+        $this->systemPreferences->AdvertsMaxClassifiedsPerUser = 5;
     }
 
     public function update(GenericEvent $event)
