@@ -26,6 +26,7 @@ use AHS\AdvertsPluginBundle\Entity\Announcement;
 use AHS\AdvertsPluginBundle\Form\AnnouncementType;
 use AHS\AdvertsPluginBundle\Form\SettingsType;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Newscoop\EventDispatcher\Events\GenericEvent;
 
 /**
  * Admin controller
@@ -198,18 +199,30 @@ class AdminController extends Controller
      */
     public function activateAction(Request $request, $id)
     {
-        $userService = $this->get('user');
-        $user = $userService->getCurrentUser();
-        $translator = $this->get('translator');
+        try {
+            $userService = $this->get('user');
+            $user = $userService->getCurrentUser();
+            $translator = $this->get('translator');
+            $em = $this->get('em');
+            $status = true;
 
-        if (!$user->hasPermission('plugin_classifieds_activate') || !$user->hasPermission('plugin_classifieds_access')) {
-            throw new AccessDeniedException();
+            if (!$user->hasPermission('plugin_classifieds_activate') || !$user->hasPermission('plugin_classifieds_access')) {
+                throw new AccessDeniedException();
+            }
+
+            $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+                ->findOneById($id);
+
+            $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
+                'announcement' => $classified,
+                'status' => true
+            )));
+        } catch (\Exception $e) {
+            $status = false;
         }
 
-        $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
         return new JsonResponse(array(
-            'status' => $adsService->activateClassified($id)
+            'status' => $status
         ));
     }
 
@@ -218,21 +231,30 @@ class AdminController extends Controller
      */
     public function deactivateAction(Request $request, $id)
     {
-        $userService = $this->get('user');
-        $user = $userService->getCurrentUser();
-        $translator = $this->get('translator');
-        $em = $this->get('em');
+        try {
+            $userService = $this->get('user');
+            $user = $userService->getCurrentUser();
+            $translator = $this->get('translator');
+            $em = $this->get('em');
+            $status = true;
 
-        if (!$user->hasPermission('plugin_classifieds_deactivate') || !$user->hasPermission('plugin_classifieds_access')) {
-            throw new AccessDeniedException();
+            if (!$user->hasPermission('plugin_classifieds_deactivate') || !$user->hasPermission('plugin_classifieds_access')) {
+                throw new AccessDeniedException();
+            }
+
+            $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+                ->findOneById($id);
+
+            $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
+                'announcement' => $classified,
+                'status' => false
+            )));
+        } catch (\Exception $e) {
+            $status = false;
         }
 
-        $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->findOneById($id);
-        $adsService = $this->get('ahs_adverts_plugin.ads_service');
-
         return new JsonResponse(array(
-            'status' => $classified ? $adsService->deactivateClassified($classified) : false
+            'status' => $status
         ));
     }
 

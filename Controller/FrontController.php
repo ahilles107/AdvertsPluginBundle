@@ -27,6 +27,7 @@ use AHS\AdvertsPluginBundle\Entity\Announcement;
 use AHS\AdvertsPluginBundle\Form\FrontAnnouncementType;
 use AHS\AdvertsPluginBundle\Entity\User;
 use AHS\AdvertsPluginBundle\Entity\Image;
+use Newscoop\EventDispatcher\Events\GenericEvent;
 
 class FrontController extends Controller
 {
@@ -117,7 +118,10 @@ class FrontController extends Controller
                     $this->savePhotosInAnnouncement($announcement, $request);
 
                     if ($systemPreferences->AdvertsEnableNotify == "1") {
-                        $adsService->sendNotificationEmail($request, $user, $announcement);
+                        $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
+                            'announcement' => $announcement,
+                            'notification' => array($request, $user)
+                        )));
                     }
 
                     return new RedirectResponse($this->generateUrl(

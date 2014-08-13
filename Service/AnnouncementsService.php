@@ -154,24 +154,17 @@ class AnnouncementsService
     /**
      * Activate classified by given id
      *
-     * @param int|string $id Classified id
+     * @param Announcement $classified Classified
      *
      * @return boolean
      */
-    public function activateClassified($id)
+    public function activateClassified(Announcement $classified)
     {
-        $classified = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->findOneById($id);
+        $classified->setIsActive(true);
+        $classified->setAnnouncementStatus(true);
+        $this->em->flush();
 
-        if ($classified) {
-            $classified->setIsActive(true);
-            $classified->setAnnouncementStatus(true);
-            $this->em->flush();
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
