@@ -48,7 +48,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $this->cronjobs = array(
             "Deactivate expired classifieds." => array(
                 'command' => $appDirectory . ' classifieds:deactivate',
-                'schedule' => '* * * * *',
+                'schedule' => '20 * * * *',
             ),
         );
     }
@@ -61,7 +61,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
         $this->setPermissions();
         $this->addJobs();
-        $this->systemPreferences->AdvertsNotificationEmail = $systemPreferences->EmailFromAddress;
+        $this->systemPreferences->AdvertsNotificationEmail = $this->systemPreferences->EmailFromAddress;
         $this->systemPreferences->AdvertsValidTime = 7;
         $this->systemPreferences->AdvertsMaxClassifiedsPerUser = 5;
     }

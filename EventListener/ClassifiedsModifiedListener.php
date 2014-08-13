@@ -42,22 +42,26 @@ class ClassifiedsModifiedListener
         $params = $event->getArguments();
         $announcement = $params['announcement'];
         if (isset($announcement)) {
-            if (isset($params['notification'])) {
-                if (is_array($params['notification']) && !empty($params['notification'])) {
-                    $this->adsService->sendNotificationEmail($params['notification'][0], $params['notification'][1], $announcement);
-                }
-            }
+            foreach ($params as $key => $value) {
+                switch ($key) {
+                    case 'notification':
+                        $this->adsService->sendNotificationEmail($value[0], $value[1], $announcement);
+                        break;
+                    case 'status':
+                        if ($value) {
+                            $this->adsService->activateClassified($announcement);
+                        } else {
+                            $this->adsService->deactivateClassified($announcement);
+                        }
 
-            if (isset($params['status'])) {
-                if ($params['status']) {
-                    $this->adsService->activateClassified($announcement);
-                } else {
-                    $this->adsService->deactivateClassified($announcement);
-                }
-            }
+                        break;
+                    case 'contact':
+                        $this->adsService->sendMessageToAuthor($announcement, $value);
+                        break;
 
-            if (isset($params['contact']) && !empty($params['contact'])) {
-                $this->adsService->sendMessageToAuthor($announcement, $params['contact']);
+                    default:
+                        break;
+                }
             }
         }
     }
