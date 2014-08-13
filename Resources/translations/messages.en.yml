@@ -47,7 +47,7 @@ ads:
         activated: "Successfully activated"
         deactivated: "Successfully deactivated"
     help:
-        notify: "Notifications about new classifieds will be sent to this email."
+        notify: "Notifications about new classifieds will be sent to this email. Notifications from plugin will be sent from this email."
         valid_time: "Set how long (days) classified will be valid (by default)"
         review: "When enabled, each new classified status will be set to deactivated by default."
         enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."

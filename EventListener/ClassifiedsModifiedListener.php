@@ -33,7 +33,7 @@ class ClassifiedsModifiedListener
     }
 
     /**
-     * Register plugin permissions in Newscoop ACL
+     * Trigger actions on Classified event
      *
      * @param ClassifiedsEvent $event
      */
@@ -54,6 +54,10 @@ class ClassifiedsModifiedListener
                 } else {
                     $this->adsService->deactivateClassified($announcement);
                 }
+            }
+
+            if (isset($params['contact']) && !empty($params['contact'])) {
+                $this->adsService->sendMessageToAuthor($announcement, $params['contact']);
             }
         }
     }

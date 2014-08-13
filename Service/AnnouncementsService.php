@@ -212,6 +212,32 @@ class AnnouncementsService
     }
 
     /**
+     * Send message to author of given classified
+     *
+     * @param Announcement $classified Announcement
+     * @param array        $params     Extra parameters to compose message
+     *
+     * @return void
+     */
+    public function sendMessageToAuthor(Announcement $classified, $params = array())
+    {
+        $smarty = $this->templatesService->getSmarty();
+        $user = $this->em->getRepository('Newscoop\Entity\User')->findOneById($classified->getUser()->getNewscoopUserId());
+
+        $smarty->assign('user', new \MetaUser($user));
+        $smarty->assign('announcement', $classified);
+        $smarty->assign('params', $params);
+
+        try {
+            $message = $this->templatesService->fetchTemplate("_ahs_adverts/email_classified_contact.tpl");
+        } catch (\Exception $e) {
+            throw new NotFoundHttpException("Could not load template: _ahs_adverts/email_classified_contact.tpl");
+        }
+
+        $this->emailService->send($this->placeholdersService->get('subject'), $message, $user->getEmail(), array($this->preferencesService->AdvertsNotificationEmail));
+    }
+
+    /**
      * Count classifieds by given criteria
      *
      * @param array $criteria
