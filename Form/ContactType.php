@@ -21,34 +21,28 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
- * Settings form type
+ * Contact form type
  */
-class SettingsType extends AbstractType
+class ContactType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('enableNotify', 'checkbox', array(
+            ->add('subject', 'text', array(
+                'error_bubbling' => true,
+                'required' => true
+            ))
+            ->add('email', 'email', array(
+                'error_bubbling' => true,
+                'required' => true
+            ))
+            ->add('phone', 'text', array(
                 'error_bubbling' => true,
                 'required' => false
             ))
-            ->add('notificationEmail', 'email', array(
-                'error_bubbling' => true,
-                'required' => false
-            ))
-            ->add('review', 'checkbox', array(
-                'error_bubbling' => true,
-                'required' => false
-            ))
-            ->add('valid_time', 'number', array(
-                'error_bubbling' => true,
-                'required' => false,
-                'precision' => 0
-            ))
-            ->add('maxClassifieds', 'number', array(
+            ->add('message', 'textarea', array(
                 'error_bubbling' => true,
                 'required' => true,
-                'precision' => 0
             ));
     }
 
@@ -58,7 +52,7 @@ class SettingsType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'csrf_protection' => true,
+            'csrf_protection' => false,
         ));
     }
 
@@ -67,6 +61,6 @@ class SettingsType extends AbstractType
      */
     public function getName()
     {
-        return 'settings';
+        return 'contactForm';
     }
 }

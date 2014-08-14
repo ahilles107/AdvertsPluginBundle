@@ -87,7 +87,7 @@ class AnnouncementsService
     /**
      * Delete classified by given id
      *
-     * @param  int|string $id Classified id
+     * @param int|string $id Classified id
      *
      * @return boolean
      */
@@ -109,7 +109,7 @@ class AnnouncementsService
     /**
      * Delete category by given id
      *
-     * @param  int|string $id Category id
+     * @param int|string $id Category id
      *
      * @return boolean
      */
@@ -131,7 +131,7 @@ class AnnouncementsService
     /**
      * Delete classified image by given id
      *
-     * @param  int|string $id Image id
+     * @param int|string $id Image id
      *
      * @return boolean
      */
@@ -154,45 +154,33 @@ class AnnouncementsService
     /**
      * Activate classified by given id
      *
-     * @param  int|string $id Classified id
+     * @param Announcement $classified Classified
      *
      * @return boolean
      */
-    public function activateClassified($id)
+    public function activateClassified(Announcement $classified)
     {
-        $classified = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->findOneById($id);
+        $classified->setIsActive(true);
+        $classified->setAnnouncementStatus(true);
+        $this->em->flush();
 
-        if ($classified) {
-            $classified->setIsActive(true);
-            $this->em->flush();
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
      * Deactivate classified by given id
      *
-     * @param  int|string $id Classified id
+     * @param Announcement $classified Classified
      *
      * @return boolean
      */
-    public function deactivateClassified($id)
+    public function deactivateClassified(Announcement $classified)
     {
-        $classified = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->findOneById($id);
+        $classified->setIsActive(false);
+        $classified->setAnnouncementStatus(false);
+        $this->em->flush();
 
-        if ($classified) {
-            $classified->setIsActive(false);
-            $this->em->flush();
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -221,6 +209,32 @@ class AnnouncementsService
         }
 
         $this->emailService->send($this->placeholdersService->get('subject'), $message, array($this->preferencesService->AdvertsNotificationEmail));
+    }
+
+    /**
+     * Send message to author of given classified
+     *
+     * @param Announcement $classified Announcement
+     * @param array        $params     Extra parameters to compose message
+     *
+     * @return void
+     */
+    public function sendMessageToAuthor(Announcement $classified, $params = array())
+    {
+        $smarty = $this->templatesService->getSmarty();
+        $user = $this->em->getRepository('Newscoop\Entity\User')->findOneById($classified->getUser()->getNewscoopUserId());
+
+        $smarty->assign('user', new \MetaUser($user));
+        $smarty->assign('announcement', $classified);
+        $smarty->assign('params', $params);
+
+        try {
+            $message = $this->templatesService->fetchTemplate("_ahs_adverts/email_classified_contact.tpl");
+        } catch (\Exception $e) {
+            throw new NotFoundHttpException("Could not load template: _ahs_adverts/email_classified_contact.tpl");
+        }
+
+        $this->emailService->send($this->placeholdersService->get('subject'), $message, $user->getEmail(), array($this->preferencesService->AdvertsNotificationEmail));
     }
 
     /**

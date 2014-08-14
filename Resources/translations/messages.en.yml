@@ -14,6 +14,7 @@ ads:
         created: "Created"
         valid_to: 'Valid To'
         addingcategory: "Adding new category..."
+        maxClassifieds: "Max count of classifieds per user"
     btn:
         cancel: "Cancel"
         delete: "Delete"
@@ -34,6 +35,7 @@ ads:
         description: "You must add description!"
         name: "You must add title!"
         termsaccepted: "Please, accept Terms of Service!"
+        maxClassifieds: "You can not have more than {{ count }} classifieds active at the same time. Deactivate old announcement/s to add new one."
         price:
             empty: "Price field can not be empty!"
             range: "Price must be more than {{ limit }}"
@@ -45,10 +47,11 @@ ads:
         activated: "Successfully activated"
         deactivated: "Successfully deactivated"
     help:
-        notify: "Notifications about new classifieds will be sent to this email."
+        notify: "Notifications about new classifieds will be sent to this email. Notifications from plugin will be sent from this email."
         valid_time: "Set how long (days) classified will be valid (by default)"
         review: "When enabled, each new classified status will be set to deactivated by default."
         enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."
+        maxClassifieds: "Users can post as many classifieds as they like, but no more than set here, concurrently active."
     menu:
         manage: "Manage classifieds"
         name: "Classifieds"

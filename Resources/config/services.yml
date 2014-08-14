@@ -5,6 +5,8 @@ services:
             - @em
             - @newscoop.plugins.service
             - @translator
+            - @newscoop.scheduler
+            - @system_preferences_service
         tags:
             - { name: kernel.event_subscriber}
 
@@ -43,3 +45,10 @@ services:
             - @newscoop.placeholders.service
             - @system_preferences_service
             - @router
+
+    ahs_adverts_plugin.classifieds.listener:
+        class: AHS\AdvertsPluginBundle\EventListener\ClassifiedsModifiedListener
+        arguments:
+            - @ahs_adverts_plugin.ads_service
+        tags:
+            -  { name: kernel.event_listener, event: classifieds.modified, method: onClassifiedEvent }
