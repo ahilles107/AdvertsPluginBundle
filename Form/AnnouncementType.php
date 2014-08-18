@@ -85,8 +85,8 @@ class AnnouncementType extends AbstractType
             ))
             ->add('type', 'choice', array(
                 'choices' => array(
-                    '1' => $translator->trans('ads.label.offering'),
-                    '2' => $translator->trans('ads.label.lookingfor')
+                    '1' => $translator->trans('ads.label.lookingfor'),
+                    '2' => $translator->trans('ads.label.offering')
                 ),
                 'error_bubbling' => true,
             ))
