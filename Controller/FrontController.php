@@ -52,6 +52,7 @@ class FrontController extends Controller
      */
     public function addAction(Request $request)
     {
+        $session = $request->getSession();
         $auth = \Zend_Auth::getInstance();
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
@@ -91,7 +92,7 @@ class FrontController extends Controller
 
         $errors = array();
         if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
-            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser) {
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('nolimit')) {
                 $limitExhausted = true;
                 $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
             }
@@ -131,6 +132,8 @@ class FrontController extends Controller
                     )));
                 }
 
+                $session->remove('nolimit');
+
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',
                     array(
@@ -143,6 +146,8 @@ class FrontController extends Controller
                 }
             }
         }
+
+        $session->remove('nolimit');
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/add.tpl',
