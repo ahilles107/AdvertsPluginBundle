@@ -60,7 +60,7 @@ class AnnouncementType extends AbstractType
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.description'),
                 'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
-            )
+            ))
             ->add('category', 'entity', array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.category'),
