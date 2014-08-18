@@ -18,6 +18,7 @@ namespace AHS\AdvertsPluginBundle\EventListener;
 
 use Newscoop\EventDispatcher\Events\GenericEvent;
 use AHS\AdvertsPluginBundle\Service\AnnouncementsService;
+use Newscoop\Services\CacheService;
 
 class ClassifiedsModifiedListener
 {
@@ -27,9 +28,16 @@ class ClassifiedsModifiedListener
      */
     protected $adsService;
 
-    public function __construct(AnnouncementsService $adsService)
+    /**
+     * Cache service
+     * @var CacheService
+     */
+    protected $cacheService;
+
+    public function __construct(AnnouncementsService $adsService, CacheService $cacheService)
     {
         $this->adsService = $adsService;
+        $this->cacheService = $cacheService;
     }
 
     /**
@@ -53,6 +61,8 @@ class ClassifiedsModifiedListener
                         } else {
                             $this->adsService->deactivateClassified($announcement);
                         }
+
+                        $this->cacheService->clearNamespace('announcements');
 
                         break;
                     case 'contact':
