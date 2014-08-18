@@ -59,6 +59,7 @@ class FrontController extends Controller
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $translator = $this->get('translator');
         $em = $this->container->get('em');
+        $limitExhausted = false;
 
         if (!$auth->hasIdentity()) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -67,10 +68,18 @@ class FrontController extends Controller
             ), 'default') . '?_target_path=' . $this->generateUrl('ahs_advertsplugin_default_add'));
         }
 
+        // create announcement user
+        $newscoopUserId = $auth->getIdentity();
+        $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+            'newscoopUserId' => $newscoopUserId
+        ));
+
         $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->createQueryBuilder('a')
             ->select('count(a)')
             ->where('a.announcementStatus = true')
+            ->andWhere('a.user = :user')
+            ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -81,59 +90,56 @@ class FrontController extends Controller
         $categories = $this->getCategories();
 
         $errors = array();
-        if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser) {
-            $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
-        } else {
-            if ($request->isMethod('POST')) {
-                $form->bind($request);
-                if ($form->isValid()) {
-                    // create announcement user
-                    $newscoopUserId = $auth->getIdentity();
-                    $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
-                        'newscoopUserId' => $newscoopUserId
-                    ));
+        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser) {
+                $limitExhausted = true;
+                $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
+            }
+        }
 
-                    if (!$user) {
-                        $user = new User();
-                        $user->setNewscoopUserId($newscoopUserId);
-                        $em->persist($user);
-                    }
+        if ($request->isMethod('POST') && !$limitExhausted) {
+            $form->bind($request);
+            if ($form->isValid()) {
+                if (!$user) {
+                    $user = new User();
+                    $user->setNewscoopUserId($newscoopUserId);
+                    $em->persist($user);
+                }
 
-                    $announcement->setUser($user);
-                    $announcement->setPublication($publicationService->getPublication());
+                $announcement->setUser($user);
+                $announcement->setPublication($publicationService->getPublication());
 
-                    $systemPreferences = $this->get('system_preferences_service');
+                $systemPreferences = $this->get('system_preferences_service');
 
-                    // set valid date
-                    $announcement->extendFor($systemPreferences->AdvertsValidTime);
-                    // set anouncement default status
-                    if ($systemPreferences->AdvertsReviewStatus == '1') {
-                        $announcement->setIsActive(false);
-                    }
+                // set valid date
+                $announcement->extendFor($systemPreferences->AdvertsValidTime);
+                // set anouncement default status
+                if ($systemPreferences->AdvertsReviewStatus == '1') {
+                    $announcement->setIsActive(false);
+                }
 
-                    $em->persist($announcement);
-                    $em->flush();
-                    $cacheService->clearNamespace('announcements');
+                $em->persist($announcement);
+                $em->flush();
+                $cacheService->clearNamespace('announcements');
 
-                    $this->savePhotosInAnnouncement($announcement, $request);
+                $this->savePhotosInAnnouncement($announcement, $request);
 
-                    if ($systemPreferences->AdvertsEnableNotify == "1") {
-                        $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
-                            'announcement' => $announcement,
-                            'notification' => array($request, $user)
-                        )));
-                    }
+                if ($systemPreferences->AdvertsEnableNotify == "1") {
+                    $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
+                        'announcement' => $announcement,
+                        'notification' => array($request, $user)
+                    )));
+                }
 
-                    return new RedirectResponse($this->generateUrl(
-                        'ahs_advertsplugin_default_show',
-                        array(
-                            'id' => $announcement->getId(),
-                        )
-                    ));
-                } else {
-                    foreach ($form->getErrors() as $error) {
-                        $errors[]['message'] = $error->getMessage();
-                    }
+                return new RedirectResponse($this->generateUrl(
+                    'ahs_advertsplugin_default_show',
+                    array(
+                        'id' => $announcement->getId(),
+                    )
+                ));
+            } else {
+                foreach ($form->getErrors() as $error) {
+                    $errors[]['message'] = $error->getMessage();
                 }
             }
         }

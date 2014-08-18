@@ -49,6 +49,10 @@ class SettingsType extends AbstractType
                 'error_bubbling' => true,
                 'required' => true,
                 'precision' => 0
+            ))
+            ->add('enableMaxClassifieds', 'checkbox', array(
+                'error_bubbling' => true,
+                'required' => false
             ));
     }
 

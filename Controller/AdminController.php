@@ -283,6 +283,7 @@ class AdminController extends Controller
             'valid_time' => $systemPreferences->AdvertsValidTime,
             'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false,
             'maxClassifieds' => $systemPreferences->AdvertsMaxClassifiedsPerUser,
+            'enableMaxClassifieds' => $systemPreferences->AdvertsMaxClassifiedsPerUserEnabled == "1" ? true : false,
         ));
 
         if ($request->isMethod('POST')) {
@@ -294,6 +295,7 @@ class AdminController extends Controller
                 $systemPreferences->AdvertsValidTime = $data['valid_time'];
                 $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
                 $systemPreferences->AdvertsMaxClassifiedsPerUser = $data['maxClassifieds'];
+                $systemPreferences->AdvertsMaxClassifiedsPerUserEnabled = $data['enableMaxClassifieds'];
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }

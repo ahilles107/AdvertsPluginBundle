@@ -84,6 +84,11 @@ class AnnouncementCriteria extends Criteria
     public $status = array();
 
     /**
+     * @var boolean
+     */
+    public $announcementStatus;
+
+    /**
      * @var array
      */
     public $type = array();
