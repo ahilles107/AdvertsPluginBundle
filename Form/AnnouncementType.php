@@ -60,7 +60,7 @@ class AnnouncementType extends AbstractType
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.description'),
                 'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
-            ))
+            )
             ->add('category', 'entity', array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.category'),
@@ -85,8 +85,8 @@ class AnnouncementType extends AbstractType
             ))
             ->add('type', 'choice', array(
                 'choices' => array(
-                    '1'   => 'Oferuje',
-                    '2' => 'Szukam'
+                    '1' => $translator->trans('ads.label.offering'),
+                    '2' => $translator->trans('ads.label.lookingfor')
                 ),
                 'error_bubbling' => true,
             ))

@@ -41,11 +41,6 @@ class AnnouncementCriteria extends Criteria
     /**
      * @var int
      */
-    public $type;
-
-    /**
-     * @var int
-     */
     public $user;
 
     /**
@@ -87,4 +82,9 @@ class AnnouncementCriteria extends Criteria
      * @var array
      */
     public $status = array();
+
+    /**
+     * @var array
+     */
+    public $type = array();
 }

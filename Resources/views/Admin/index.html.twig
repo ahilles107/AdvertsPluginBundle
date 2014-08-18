@@ -70,6 +70,31 @@
                 </div>
             </div>
         </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" class="collapsed"><span class="glyphicon glyphicon-folder-close"></span> {{ 'ads.filter.filterstype'|trans }}</a>
+                        </h4>
+                </div>
+                <div id="collapseThree" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                            <td>
+                            <input type="checkbox" class="dynatable-ad-type" name="ad-type[]" value="1" /> {{ 'ads.label.lookingfor'|trans }} <span class="label label-info">{{ adsLookingCount }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                            <input type="checkbox" class="dynatable-ad-type" name="ad-type[]" value="2" /> {{ 'ads.label.offering'|trans }} <span class="label label-info">{{ adsOfferingCount }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="col-md-10">
         <table id="ads-table" class="table table-bordered table-hover table-striped" style="word-wrap: break-word;table-layout: fixed;">
@@ -258,6 +283,18 @@
 
 	        dynatable.queries.add('ad-status', values);
 	        dynatable.process();
+    });
+
+    $('.dynatable-ad-type').click(function(e){
+            var values = [];
+            $('.dynatable-ad-type').each(function(key, el){
+                if ($(el).is(':checked')) {
+                    values.push($(el).val());
+                }
+            });
+
+            dynatable.queries.add('ad-type', values);
+            dynatable.process();
     });
 
     $('.js-remove-ad').live('click', function(event){

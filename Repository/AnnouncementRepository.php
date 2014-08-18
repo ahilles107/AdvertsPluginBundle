@@ -20,6 +20,7 @@ namespace AHS\AdvertsPluginBundle\Repository;
 use Doctrine\ORM\EntityRepository;
 use AHS\AdvertsPluginBundle\TemplateList\AnnouncementCriteria;
 use Newscoop\ListResult;
+use AHS\AdvertsPluginBundle\Entity\Announcement;
 
 /**
  * AnnouncementRepository
@@ -47,6 +48,19 @@ class AnnouncementRepository extends EntityRepository
             } else {
                 $qb->andWhere('a.is_active = :status');
                 $qb->setParameter('status', $criteria->status[0] == 'true' ? true : false);
+            }
+        }
+
+        if (!empty($criteria->type)) {
+            if (count($criteria->type) > 1) {
+                $qb->andWhere($qb->expr()->orX('a.type = :looking', 'a.type = :offering'));
+                $qb->setParameters(array(
+                    'looking' => Announcement::TYPE_LOOKING,
+                    'offering' => Announcement::TYPE_OFFERING,
+                ));
+            } else {
+                $qb->andWhere('a.type = :type');
+                $qb->setParameter('type', (int) $criteria->type[0]);
             }
         }
 
@@ -109,7 +123,7 @@ class AnnouncementRepository extends EntityRepository
     /**
      * Get ads count for given criteria
      *
-     * @param array $criteria
+     * @param  array $criteria
      * @return int
      */
     public function countBy(array $criteria = array())

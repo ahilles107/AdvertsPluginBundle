@@ -25,7 +25,8 @@ ads:
         addnew: "Add"
     filter:
         category: "Categories"
-        filters: "Filters"
+        filters: "Filter by status"
+        filterstype: "Filter by type"
     status:
         active: "Active"
         inactive: "Inactive"

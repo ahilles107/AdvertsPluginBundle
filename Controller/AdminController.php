@@ -55,6 +55,8 @@ class AdminController extends Controller
                 'allAdsCount' => $adsService->countBy(),
                 'activeAdsCount' => $adsService->countBy(array('is_active' => true)),
                 'inactiveAdsCount' => $adsService->countBy(array('is_active' => false)),
+                'adsLookingCount' => $adsService->countBy(array('type' => Announcement::TYPE_LOOKING)),
+                'adsOfferingCount' => $adsService->countBy(array('type' => Announcement::TYPE_OFFERING)),
             );
         }
     }
@@ -79,9 +81,10 @@ class AdminController extends Controller
         $criteria = $this->processRequest($request);
         $adsCount = $adsService->countBy(array('is_active' => true));
         $adsInactiveCount = $adsService->countBy(array('is_active' => false));
+        $adsLookingCount = $adsService->countBy(array('type' => Announcement::TYPE_LOOKING));
+        $adsOfferingCount = $adsService->countBy(array('type' => Announcement::TYPE_OFFERING));
 
-        $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount);
-
+        $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount, $adsLookingCount, $adsOfferingCount);
         if ($cacheService->contains($cacheKey)) {
             $responseArray = $cacheService->fetch($cacheKey);
         } else {
@@ -336,6 +339,12 @@ class AdminController extends Controller
             if (array_key_exists('ad-status', $queries)) {
                 foreach ($queries['ad-status'] as $key => $value) {
                     $criteria->status[$key] = $value;
+                }
+            }
+
+            if (array_key_exists('ad-type', $queries)) {
+                foreach ($queries['ad-type'] as $key => $value) {
+                    $criteria->type[$key] = $value;
                 }
             }
         }
