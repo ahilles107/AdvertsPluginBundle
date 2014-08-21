@@ -53,16 +53,17 @@ class FrontController extends Controller
     public function addAction(Request $request)
     {
         $session = $request->getSession();
-        $auth = \Zend_Auth::getInstance();
+        $userService = $this->get('user');
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
         $systemPreferences = $this->get('system_preferences_service');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $translator = $this->get('translator');
         $em = $this->container->get('em');
+        $newscoopUser = $userService->getCurrentUser();
         $limitExhausted = false;
 
-        if (!$auth->hasIdentity()) {
+        if (!$newscoopUser) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                 'controller' => '',
                 'action' => 'auth'
@@ -70,9 +71,8 @@ class FrontController extends Controller
         }
 
         // create announcement user
-        $newscoopUserId = $auth->getIdentity();
         $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
-            'newscoopUserId' => $newscoopUserId
+            'newscoopUserId' => $newscoopUser->getId()
         ));
 
         $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
@@ -92,7 +92,7 @@ class FrontController extends Controller
 
         $errors = array();
         if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
-            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('nolimit')) {
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
                 $limitExhausted = true;
                 $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
             }
@@ -132,7 +132,7 @@ class FrontController extends Controller
                     )));
                 }
 
-                $session->remove('nolimit');
+                $session->remove('ahs_adverts_nolimit');
 
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',
@@ -147,7 +147,7 @@ class FrontController extends Controller
             }
         }
 
-        $session->remove('nolimit');
+        $session->remove('ahs_adverts_nolimit');
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/add.tpl',
@@ -170,9 +170,9 @@ class FrontController extends Controller
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
         $translator = $this->get('translator');
-
-        $auth = \Zend_Auth::getInstance();
-        if (!$auth->hasIdentity()) { // ignore for logged user
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if (!$user) { // ignore for logged user
 
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                     'controller' => '',
@@ -313,11 +313,11 @@ class FrontController extends Controller
         $templatesService = $this->get('newscoop.templates.service');
         global $Campsite;
 
-        $auth = \Zend_Auth::getInstance();
-        $userId = $auth->getIdentity();
+        $userService = $this->get('user');
+        $newscoopUser = $userService->getCurrentUser();
         $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
             array(
-                'newscoopUserId' => $userId
+                'newscoopUserId' => $newscoopUser->getId()
             )
         );
 

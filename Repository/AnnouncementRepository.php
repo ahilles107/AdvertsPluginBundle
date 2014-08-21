@@ -20,7 +20,6 @@ namespace AHS\AdvertsPluginBundle\Repository;
 use Doctrine\ORM\EntityRepository;
 use AHS\AdvertsPluginBundle\TemplateList\AnnouncementCriteria;
 use Newscoop\ListResult;
-use AHS\AdvertsPluginBundle\Entity\Announcement;
 
 /**
  * AnnouncementRepository
@@ -52,13 +51,7 @@ class AnnouncementRepository extends EntityRepository
         }
 
         if (!empty($criteria->type)) {
-            if (count($criteria->type) > 1) {
-                $qb->andWhere($qb->expr()->orX('a.type = :looking', 'a.type = :offering'));
-                $qb->setParameters(array(
-                    'looking' => Announcement::TYPE_LOOKING,
-                    'offering' => Announcement::TYPE_OFFERING,
-                ));
-            } else {
+            if (count($criteria->type) == 1) {
                 $qb->andWhere('a.type = :type');
                 $qb->setParameter('type', (int) $criteria->type[0]);
             }
