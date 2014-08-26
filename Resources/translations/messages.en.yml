@@ -14,7 +14,9 @@ ads:
         created: "Created"
         valid_to: 'Valid To'
         addingcategory: "Adding new category..."
-        maxClassifieds: "Max count of classifieds per user"
+        lookingfor: "Looking for"
+        offering: "Offering"
+        enableMaxClassifieds: "Active classifieds limitation"
     btn:
         cancel: "Cancel"
         delete: "Delete"
@@ -23,7 +25,8 @@ ads:
         addnew: "Add"
     filter:
         category: "Categories"
-        filters: "Filters"
+        filters: "Filter by status"
+        filterstype: "Filter by type"
     status:
         active: "Active"
         inactive: "Inactive"
@@ -52,6 +55,7 @@ ads:
         review: "When enabled, each new classified status will be set to deactivated by default."
         enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."
         maxClassifieds: "Users can post as many classifieds as they like, but no more than set here, concurrently active."
+        enableMaxClassifieds: "Enable limitation of active classifieds per user. When enabled limit will be set to value from the field below."
     menu:
         manage: "Manage classifieds"
         name: "Classifieds"

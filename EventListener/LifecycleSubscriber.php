@@ -64,6 +64,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $this->systemPreferences->AdvertsNotificationEmail = $this->systemPreferences->EmailFromAddress;
         $this->systemPreferences->AdvertsValidTime = 7;
         $this->systemPreferences->AdvertsMaxClassifiedsPerUser = 5;
+        $this->systemPreferences->AdvertsMaxClassifiedsPerUserEnabled = 1;
     }
 
     public function update(GenericEvent $event)
@@ -131,6 +132,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $this->systemPreferences->delete('AdvertsMaxClassifiedsPerUser');
         $this->systemPreferences->delete('AdvertsReviewStatus');
         $this->systemPreferences->delete('AdvertsEnableNotify');
+        $this->systemPreferences->delete('AdvertsMaxClassifiedsPerUserEnabled');
     }
 
     public static function getSubscribedEvents()

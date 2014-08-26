@@ -50,6 +50,13 @@ class AnnouncementRepository extends EntityRepository
             }
         }
 
+        if (!empty($criteria->type)) {
+            if (count($criteria->type) == 1) {
+                $qb->andWhere('a.type = :type');
+                $qb->setParameter('type', (int) $criteria->type[0]);
+            }
+        }
+
         if ($criteria->withImages !== null) {
             if ($criteria->withImages == true) {
                 $qb->select('a, c, i');
@@ -109,7 +116,7 @@ class AnnouncementRepository extends EntityRepository
     /**
      * Get ads count for given criteria
      *
-     * @param array $criteria
+     * @param  array $criteria
      * @return int
      */
     public function countBy(array $criteria = array())

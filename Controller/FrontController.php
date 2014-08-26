@@ -52,25 +52,35 @@ class FrontController extends Controller
      */
     public function addAction(Request $request)
     {
-        $auth = \Zend_Auth::getInstance();
+        $session = $request->getSession();
+        $userService = $this->get('user');
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
         $systemPreferences = $this->get('system_preferences_service');
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
         $translator = $this->get('translator');
         $em = $this->container->get('em');
+        $newscoopUser = $userService->getCurrentUser();
+        $limitExhausted = false;
 
-        if (!$auth->hasIdentity()) {
+        if (!$newscoopUser) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                 'controller' => '',
                 'action' => 'auth'
             ), 'default') . '?_target_path=' . $this->generateUrl('ahs_advertsplugin_default_add'));
         }
 
+        // create announcement user
+        $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+            'newscoopUserId' => $newscoopUser->getId()
+        ));
+
         $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->createQueryBuilder('a')
             ->select('count(a)')
             ->where('a.announcementStatus = true')
+            ->andWhere('a.user = :user')
+            ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -81,62 +91,63 @@ class FrontController extends Controller
         $categories = $this->getCategories();
 
         $errors = array();
-        if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser) {
-            $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
-        } else {
-            if ($request->isMethod('POST')) {
-                $form->bind($request);
-                if ($form->isValid()) {
-                    // create announcement user
-                    $newscoopUserId = $auth->getIdentity();
-                    $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
-                        'newscoopUserId' => $newscoopUserId
-                    ));
+        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
+                $limitExhausted = true;
+                $errors[]['message'] = $translator->trans('ads.error.maxClassifieds', array('{{ count }}' => $systemPreferences->AdvertsMaxClassifiedsPerUser));
+            }
+        }
 
-                    if (!$user) {
-                        $user = new User();
-                        $user->setNewscoopUserId($newscoopUserId);
-                        $em->persist($user);
-                    }
+        if ($request->isMethod('POST') && !$limitExhausted) {
+            $form->bind($request);
+            if ($form->isValid()) {
+                if (!$user) {
+                    $user = new User();
+                    $user->setNewscoopUserId($newscoopUserId);
+                    $em->persist($user);
+                }
 
-                    $announcement->setUser($user);
-                    $announcement->setPublication($publicationService->getPublication());
+                $announcement->setUser($user);
+                $announcement->setPublication($publicationService->getPublication());
 
-                    $systemPreferences = $this->get('system_preferences_service');
+                $systemPreferences = $this->get('system_preferences_service');
 
-                    // set valid date
-                    $announcement->extendFor($systemPreferences->AdvertsValidTime);
-                    // set anouncement default status
-                    if ($systemPreferences->AdvertsReviewStatus == '1') {
-                        $announcement->setIsActive(false);
-                    }
+                // set valid date
+                $announcement->extendFor($systemPreferences->AdvertsValidTime);
+                // set anouncement default status
+                if ($systemPreferences->AdvertsReviewStatus == '1') {
+                    $announcement->setIsActive(false);
+                }
 
-                    $em->persist($announcement);
-                    $em->flush();
-                    $cacheService->clearNamespace('announcements');
+                $em->persist($announcement);
+                $em->flush();
+                $cacheService->clearNamespace('announcements');
 
-                    $this->savePhotosInAnnouncement($announcement, $request);
+                $this->savePhotosInAnnouncement($announcement, $request);
 
-                    if ($systemPreferences->AdvertsEnableNotify == "1") {
-                        $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
-                            'announcement' => $announcement,
-                            'notification' => array($request, $user)
-                        )));
-                    }
+                if ($systemPreferences->AdvertsEnableNotify == "1") {
+                    $this->get('dispatcher')->dispatch('classifieds.modified', new GenericEvent($this, array(
+                        'announcement' => $announcement,
+                        'notification' => array($request, $user)
+                    )));
+                }
 
-                    return new RedirectResponse($this->generateUrl(
-                        'ahs_advertsplugin_default_show',
-                        array(
-                            'id' => $announcement->getId(),
-                        )
-                    ));
-                } else {
-                    foreach ($form->getErrors() as $error) {
-                        $errors[]['message'] = $error->getMessage();
-                    }
+                $session->remove('ahs_adverts_nolimit');
+
+                return new RedirectResponse($this->generateUrl(
+                    'ahs_advertsplugin_default_show',
+                    array(
+                        'id' => $announcement->getId(),
+                    )
+                ));
+            } else {
+                foreach ($form->getErrors() as $error) {
+                    $errors[]['message'] = $error->getMessage();
                 }
             }
         }
+
+        $session->remove('ahs_adverts_nolimit');
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/add.tpl',
@@ -159,9 +170,9 @@ class FrontController extends Controller
         $templatesService = $this->get('newscoop.templates.service');
         $cacheService = \Zend_Registry::get('container')->get('newscoop.cache');
         $translator = $this->get('translator');
-
-        $auth = \Zend_Auth::getInstance();
-        if (!$auth->hasIdentity()) { // ignore for logged user
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
+        if (!$user) { // ignore for logged user
 
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
                     'controller' => '',
@@ -302,11 +313,11 @@ class FrontController extends Controller
         $templatesService = $this->get('newscoop.templates.service');
         global $Campsite;
 
-        $auth = \Zend_Auth::getInstance();
-        $userId = $auth->getIdentity();
+        $userService = $this->get('user');
+        $newscoopUser = $userService->getCurrentUser();
         $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
             array(
-                'newscoopUserId' => $userId
+                'newscoopUserId' => $newscoopUser->getId()
             )
         );
 
