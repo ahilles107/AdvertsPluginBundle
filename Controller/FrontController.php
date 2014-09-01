@@ -98,12 +98,17 @@ class FrontController extends Controller
             }
         }
 
+        if ($session->get('ahs_adverts_cantadd')) {
+            $limitExhausted = true;
+            $errors[]['message'] = $translator->trans('ads.error.cantaddclassifieds');
+        }
+
         if ($request->isMethod('POST') && !$limitExhausted) {
             $form->bind($request);
             if ($form->isValid()) {
                 if (!$user) {
                     $user = new User();
-                    $user->setNewscoopUserId($newscoopUserId);
+                    $user->setNewscoopUserId($newscoopUser->getId());
                     $em->persist($user);
                 }
 
@@ -132,7 +137,9 @@ class FrontController extends Controller
                     )));
                 }
 
-                $session->remove('ahs_adverts_nolimit');
+                if ($session->has('ahs_adverts_nolimit')) {
+                    $session->remove('ahs_adverts_nolimit');
+                }
 
                 return new RedirectResponse($this->generateUrl(
                     'ahs_advertsplugin_default_show',
@@ -147,7 +154,13 @@ class FrontController extends Controller
             }
         }
 
-        $session->remove('ahs_adverts_nolimit');
+        if ($session->has('ahs_adverts_nolimit')) {
+            $session->remove('ahs_adverts_nolimit');
+        }
+
+        if ($session->has('ahs_adverts_cantadd')) {
+            $session->remove('ahs_adverts_cantadd');
+        }
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/add.tpl',

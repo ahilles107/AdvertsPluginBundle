@@ -16,8 +16,8 @@
 
 namespace AHS\AdvertsPluginBundle\Entity;
 
-use Doctrine\ORM\Mapping AS ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\ORM\Mapping as ORM;
+use Newscoop\Entity\User as NewscoopUser;
 
 /**
  * User entity
@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(name="plugin_adverts_user")
  */
-class User 
+class User
 {
     /**
      * @ORM\Id()
@@ -43,8 +43,15 @@ class User
 
     /**
      * @ORM\OneToMany(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", mappedBy="user")
-     */ 
+     */
     protected $announcements;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Newscoop\Entity\User")
+     * @ORM\JoinColumn(name="newscoop_user_id", referencedColumnName="Id")
+     * @var Newscoop\Entity\User
+     */
+    protected $user;
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
@@ -52,7 +59,8 @@ class User
      */
     protected $created_at;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setCreatedAt(new \DateTime());
     }
 
@@ -74,7 +82,7 @@ class User
     public function setNewscoopUserId($newscoopUserId)
     {
         $this->newscoopUserId = $newscoopUserId;
-        
+
         return $this;
     }
 
@@ -86,7 +94,7 @@ class User
     public function setAnnouncement(\AHS\AdvertsPluginBundle\Entity\Announcement $announcement)
     {
         $this->announcement = $announcement;
-        
+
         return $this;
     }
 
@@ -98,7 +106,31 @@ class User
     public function setCreatedAt(\DateTime $created_at)
     {
         $this->created_at = $created_at;
-        
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of user.
+     *
+     * @return Newscoop\Entity\User
+     */
+    public function getNewscoopUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * Sets the value of user.
+     *
+     * @param Newscoop\Entity\User $user the user
+     *
+     * @return self
+     */
+    protected function setNewscoopUser(NewscoopUser $user)
+    {
+        $this->user = $user;
+
         return $this;
     }
 }
