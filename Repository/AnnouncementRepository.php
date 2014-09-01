@@ -69,6 +69,12 @@ class AnnouncementRepository extends EntityRepository
             $qb->leftJoin('a.images', 'i');
         }
 
+        if ($criteria->user !== null) {
+            $qb->leftJoin('a.user', 'u')
+                ->andWhere('u.newscoopUserId = :user')
+                ->setParameter('user', $criteria->user);
+        }
+
         if ($criteria->query) {
             $qb->andWhere($qb->expr()->orX("(a.name LIKE :query)", "(a.description LIKE :query)"));
             $qb->setParameter('query', '%' . trim($criteria->query, '%') . '%');
@@ -80,8 +86,10 @@ class AnnouncementRepository extends EntityRepository
         }
 
         foreach ($criteria->perametersOperators as $key => $operator) {
-            $qb->andWhere('a.'.$key.' '.$operator.' :'.$key)
-                ->setParameter($key, $criteria->$key);
+            if ($key !== 'user') {
+                $qb->andWhere('a.'.$key.' '.$operator.' :'.$key)
+                    ->setParameter($key, $criteria->$key);
+            }
         }
 
         $countQb = clone $qb;

@@ -17,7 +17,7 @@
 namespace AHS\AdvertsPluginBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Newscoop\Entity\User;
+use Newscoop\Entity\User as NewscoopUser;
 
 /**
  * User entity
@@ -127,7 +127,7 @@ class User
      *
      * @return self
      */
-    protected function setNewscoopUser(User $user)
+    protected function setNewscoopUser(NewscoopUser $user)
     {
         $this->user = $user;
 
