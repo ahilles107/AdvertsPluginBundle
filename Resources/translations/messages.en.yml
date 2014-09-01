@@ -33,6 +33,7 @@ ads:
     error:
         cantdelete: "Can not delete classified!"
         cantadd: "Can not add new category!"
+        cantaddclassifieds: "We are sorry, but you can not add classifieds! Upgrade to higher membership type."
         cantactivate: "Can not activate"
         cantdeactivate: "Can not deactivate"
         description: "You must add description!"
