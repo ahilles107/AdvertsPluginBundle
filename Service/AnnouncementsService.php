@@ -141,7 +141,6 @@ class AnnouncementsService
             ->findOneById($id);
 
         if ($image) {
-            $image->preRemoveHandler();
             $this->em->remove($image);
             $this->em->flush();
 

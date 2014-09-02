@@ -71,15 +71,6 @@ class Image
     }
 
     /**
-     * @ORM\PreRemove
-     */
-    public function preRemoveHandler()
-    {
-        $newscoopImage = new \Image($this->getNewscoopImageId());
-        $newscoopImage->delete();
-    }
-
-    /**
      * Get id
      *
      * @return integer
@@ -87,18 +78,6 @@ class Image
     public function getId()
     {
         return $this->id;
-    }
-
-    public function getNewscoopImageId()
-    {
-        return $this->newscoopImageId;
-    }
-
-    public function setNewscoopImageId($newscoopImageId)
-    {
-        $this->newscoopImageId = $newscoopImageId;
-
-        return $this;
     }
 
     public function getAnnouncement()
