@@ -44,6 +44,8 @@ ads:
             empty: "Price field can not be empty!"
             range: "Price must be more than {{ limit }}"
             type: "Price must be a number!"
+        unsupportedType: "Unsupported image type %type%"
+        notwritable: "Directory %dir% is not writable or does not exist"
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."

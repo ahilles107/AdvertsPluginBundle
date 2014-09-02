@@ -324,44 +324,38 @@ class FrontController extends Controller
     {
         $em = $this->container->get('em');
         $templatesService = $this->get('newscoop.templates.service');
-        global $Campsite;
+        $imageService = $this->get('ahs_adverts_plugin.image_service');
 
         $userService = $this->get('user');
         $newscoopUser = $userService->getCurrentUser();
         $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
-            array(
-                'newscoopUserId' => $newscoopUser->getId()
-            )
+            array('newscoopUserId' => $newscoopUser->getId())
         );
 
-        $_FILES['file']['name'] = preg_replace('/[^\w\._]+/', '', $_FILES['file']['name']);
-        $file = \Plupload::OnMultiFileUploadCustom($Campsite['IMAGE_DIRECTORY']);
-        $photo = \Image::ProcessFile(
-            $_FILES['file']['name'],
-            $_FILES['file']['name'],
-            $userId,
-            array('Source' => 'ogłoszenia', 'Status' => 'Unapproved', 'Date' => date('Y-m-d'))
-        );
+        $result = null;
+        foreach ($request->files->all() as $image) {
+            $result = $imageService->upload($image, array('user' => $user));
+        }
 
-        $image = new Image();
-        $image->setNewscoopImageId($photo->getImageId());
-        $image->setUser($user);
-
-        $em->persist($image);
-        $em->flush();
+        if (is_array($result)) {
+            return new JsonResponse(array(
+                'errors' => array_unique($result),
+            ));
+        }
 
         if (!$request->getSession()->has('announcement_photos')) {
-            $request->getSession()->set('announcement_photos', array(array('id' => $image->getId())));
+            $request->getSession()->set('announcement_photos', array(array('id' => $result->getId())));
         } else {
             $photos = $request->getSession()->get('announcement_photos', array());
-            $photos[] = array('id' => $image->getId());
+            $photos[] = array('id' => $result->getId());
             $request->getSession()->set('announcement_photos', $photos);
         }
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
             array(
-                'announcementPhotos' => $this->processPhotos($request)
+                'announcementPhotos' => $this->processPhotos($request),
+                'errors' => array()
             )
         ));
     }
@@ -395,7 +389,8 @@ class FrontController extends Controller
                 return new Response($templatesService->fetchTemplate(
                     '_ahs_adverts/_tpl/renderPhotos.tpl',
                     array(
-                        'announcementPhotos' => $this->processPhotos($request)
+                        'announcementPhotos' => $this->processPhotos($request),
+                        'errors' => array()
                     )
                 ));
             }
@@ -413,7 +408,8 @@ class FrontController extends Controller
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
             array(
-                'announcementPhotos' => $this->processPhotos($request)
+                'announcementPhotos' => $this->processPhotos($request),
+                'errors' => array()
             )
         ));
     }
@@ -511,6 +507,7 @@ class FrontController extends Controller
     private function processPhotos($request, $announcement = null)
     {
         $em = $this->container->get('em');
+        $imageService = $this->get('ahs_adverts_plugin.image_service');
         if (!$announcement) {
             $photosFromSession = $request->getSession()->get('announcement_photos', array());
             $ids = array();
@@ -539,12 +536,11 @@ class FrontController extends Controller
 
         $processedPhotos = array();
         foreach ($photos as $photo) {
-            $newscoopImage = new \Image($photo->getNewscoopImageId());
             $processedPhotos[] = array(
-                'id' => $newscoopImage->getImageId(),
+                'id' => $photo->getId(),
                 'announcementPhotoId' => $photo->getId(),
-                'imageUrl' => $newscoopImage->getImageUrl(),
-                'thumbnailUrl' => $newscoopImage->getThumbnailUrl()
+                'imageUrl' => $imageService->getImageUrl($photo->getBasename()),
+                'thumbnailUrl' => $imageService->getThumbnailUrl($photo->getThumbnailPath())
             );
         }
 
