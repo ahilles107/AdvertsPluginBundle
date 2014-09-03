@@ -456,9 +456,32 @@ class FrontController extends Controller
     public function changeStatusAction(Request $request, $id, $status = null)
     {
         $userService = $this->get('user');
+        $session = $request->getSession();
+        $systemPreferences = $this->get('preferences');
         $em = $this->get('em');
         $user = $userService->getCurrentUser();
         $responseStatus = false;
+        $classifiedUser = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+            'newscoopUserId' => $user->getId()
+        ));
+
+        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+            $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+                ->createQueryBuilder('a')
+                ->select('count(a)')
+                ->where('a.announcementStatus = true')
+                ->andWhere('a.user = :user')
+                ->setParameter('user', $classifiedUser)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
+                return new JsonResponse(array(
+                    'status' => $responseStatus
+                ));
+            }
+        }
+
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
         if ($announcement) {
             if ($user->getId() == (int) $announcement->getUser()->getNewscoopUserId()) {
