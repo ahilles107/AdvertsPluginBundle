@@ -113,9 +113,9 @@
         });
 
         uploader.bind('FileUploaded', function(up, file, info) {
-            $('div.show-value').html('Wgrano!');
-            var response = info['response'];
-            $('#addedPhotos').html(response);
+            $('#addedPhotos').html(info['response']);
+            $('div.show-value').html('');
+            $('ul.message-div').delay(2000).fadeOut('slow');
 
             up.refresh();
         });
