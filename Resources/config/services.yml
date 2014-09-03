@@ -7,6 +7,7 @@ services:
             - @translator
             - @newscoop.scheduler
             - @system_preferences_service
+            - %ahs_image%
         tags:
             - { name: kernel.event_subscriber}
 
@@ -39,12 +40,11 @@ services:
     ahs_adverts_plugin.ads_service:
         class: AHS\AdvertsPluginBundle\Service\AnnouncementsService
         arguments:
-            - @em
-            - @email
-            - @newscoop.templates.service
-            - @newscoop.placeholders.service
-            - @system_preferences_service
-            - @router
+            - @service_container
+
+    ahs_adverts_plugin.image_service:
+        class: AHS\AdvertsPluginBundle\Service\ImageService
+        arguments:  ["%ahs_image%", "@em", "@translator"]
 
     ahs_adverts_plugin.classifieds.listener:
         class: AHS\AdvertsPluginBundle\EventListener\ClassifiedsModifiedListener

@@ -324,45 +324,74 @@ class FrontController extends Controller
     {
         $em = $this->container->get('em');
         $templatesService = $this->get('newscoop.templates.service');
-        global $Campsite;
+        $imageService = $this->get('ahs_adverts_plugin.image_service');
+        $systemPreferences = $this->get('preferences');
+        $translator = $this->get('translator');
+        $session = $request->getSession();
 
         $userService = $this->get('user');
+        $limitExhausted = false;
+        $result = array();
         $newscoopUser = $userService->getCurrentUser();
         $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
-            array(
-                'newscoopUserId' => $newscoopUser->getId()
-            )
+            array('newscoopUserId' => $newscoopUser->getId())
         );
 
-        $_FILES['file']['name'] = preg_replace('/[^\w\._]+/', '', $_FILES['file']['name']);
-        $file = \Plupload::OnMultiFileUploadCustom($Campsite['IMAGE_DIRECTORY']);
-        $photo = \Image::ProcessFile(
-            $_FILES['file']['name'],
-            $_FILES['file']['name'],
-            $userId,
-            array('Source' => 'ogłoszenia', 'Status' => 'Unapproved', 'Date' => date('Y-m-d'))
-        );
+        $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->createQueryBuilder('a')
+            ->select('count(a)')
+            ->where('a.announcementStatus = true')
+            ->andWhere('a.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
 
-        $image = new Image();
-        $image->setNewscoopImageId($photo->getImageId());
-        $image->setUser($user);
+        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
+                $limitExhausted = true;
+            }
+        }
 
-        $em->persist($image);
-        $em->flush();
+        if (!$limitExhausted) {
+            $result = null;
+            foreach ($request->files->all() as $image) {
+                $result = $imageService->upload($image, array('user' => $user));
+            }
 
-        if (!$request->getSession()->has('announcement_photos')) {
-            $request->getSession()->set('announcement_photos', array(array('id' => $image->getId())));
-        } else {
-            $photos = $request->getSession()->get('announcement_photos', array());
-            $photos[] = array('id' => $image->getId());
-            $request->getSession()->set('announcement_photos', $photos);
+            if (is_array($result)) {
+                return new Response($templatesService->fetchTemplate(
+                    '_ahs_adverts/_tpl/renderPhotos.tpl',
+                    array(
+                        'announcementPhotos' => $this->processPhotos($request),
+                        'errors' => array_unique($result),
+                    )
+                ));
+            }
+
+            if (!$request->getSession()->has('announcement_photos')) {
+                $request->getSession()->set('announcement_photos', array(array('id' => $result->getId())));
+            } else {
+                $photos = $request->getSession()->get('announcement_photos', array());
+                $photos[] = array('id' => $result->getId());
+                $request->getSession()->set('announcement_photos', $photos);
+            }
+
+            $result = array(
+                'announcementPhotos' => $this->processPhotos($request),
+                'result' => true,
+            );
+        }
+
+        if (empty($result)) {
+            $result = array(
+                'announcementPhotos' => $this->processPhotos($request),
+                'errors' => $translator->trans('ads.error.cantaddimages'),
+            );
         }
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
-            array(
-                'announcementPhotos' => $this->processPhotos($request)
-            )
+            $result
         ));
     }
 
@@ -395,7 +424,8 @@ class FrontController extends Controller
                 return new Response($templatesService->fetchTemplate(
                     '_ahs_adverts/_tpl/renderPhotos.tpl',
                     array(
-                        'announcementPhotos' => $this->processPhotos($request)
+                        'announcementPhotos' => $this->processPhotos($request),
+                        'errors' => array()
                     )
                 ));
             }
@@ -413,7 +443,8 @@ class FrontController extends Controller
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
             array(
-                'announcementPhotos' => $this->processPhotos($request)
+                'announcementPhotos' => $this->processPhotos($request),
+                'errors' => array()
             )
         ));
     }
@@ -425,9 +456,32 @@ class FrontController extends Controller
     public function changeStatusAction(Request $request, $id, $status = null)
     {
         $userService = $this->get('user');
+        $session = $request->getSession();
+        $systemPreferences = $this->get('preferences');
         $em = $this->get('em');
         $user = $userService->getCurrentUser();
         $responseStatus = false;
+        $classifiedUser = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(array(
+            'newscoopUserId' => $user->getId()
+        ));
+
+        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+            $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+                ->createQueryBuilder('a')
+                ->select('count(a)')
+                ->where('a.announcementStatus = true')
+                ->andWhere('a.user = :user')
+                ->setParameter('user', $classifiedUser)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
+                return new JsonResponse(array(
+                    'status' => $responseStatus
+                ));
+            }
+        }
+
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
         if ($announcement) {
             if ($user->getId() == (int) $announcement->getUser()->getNewscoopUserId()) {
@@ -511,6 +565,7 @@ class FrontController extends Controller
     private function processPhotos($request, $announcement = null)
     {
         $em = $this->container->get('em');
+        $imageService = $this->get('ahs_adverts_plugin.image_service');
         if (!$announcement) {
             $photosFromSession = $request->getSession()->get('announcement_photos', array());
             $ids = array();
@@ -539,12 +594,11 @@ class FrontController extends Controller
 
         $processedPhotos = array();
         foreach ($photos as $photo) {
-            $newscoopImage = new \Image($photo->getNewscoopImageId());
             $processedPhotos[] = array(
-                'id' => $newscoopImage->getImageId(),
+                'id' => $photo->getId(),
                 'announcementPhotoId' => $photo->getId(),
-                'imageUrl' => $newscoopImage->getImageUrl(),
-                'thumbnailUrl' => $newscoopImage->getThumbnailUrl()
+                'imageUrl' => $imageService->getImageUrl($photo->getBasename()),
+                'thumbnailUrl' => $imageService->getThumbnailUrl($photo->getThumbnailPath())
             );
         }
 

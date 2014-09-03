@@ -16,8 +16,7 @@
 
 namespace AHS\AdvertsPluginBundle\Entity;
 
-use Doctrine\ORM\Mapping AS ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Image entity
@@ -26,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="plugin_adverts_image")
  * @ORM\HasLifecycleCallbacks()
  */
-class Image 
+class Image
 {
     /**
      * @ORM\Id()
@@ -37,15 +36,9 @@ class Image
     protected $id;
 
     /**
-     * @ORM\Column(type="string", name="newscoop_image_id")
-     * @var string
-     */
-    protected $newscoopImageId;
-
-    /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="announcement")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-     */    
+     */
     protected $user;
 
     /**
@@ -55,21 +48,26 @@ class Image
     protected $announcement;
 
     /**
+     * @ORM\Column(name="basename", nullable=true, length=80)
+     * @var string
+     */
+    protected $basename;
+
+    /**
+     * @ORM\Column(name="thumbnail_path", nullable=true, length=80)
+     * @var string
+     */
+    protected $thumbnailPath;
+
+    /**
      * @ORM\Column(type="datetime", name="created_at")
      * @var string
      */
     protected $created_at;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setCreatedAt(new \DateTime());
-    }
-
-    /** 
-     * @ORM\PreRemove 
-     */
-    public function preRemoveHandler() {
-        $newscoopImage = new \Image($this->getNewscoopImageId());
-        $newscoopImage->delete();
     }
 
     /**
@@ -82,18 +80,6 @@ class Image
         return $this->id;
     }
 
-    public function getNewscoopImageId()
-    {
-        return $this->newscoopImageId;
-    }
-
-    public function setNewscoopImageId($newscoopImageId)
-    {
-        $this->newscoopImageId = $newscoopImageId;
-        
-        return $this;
-    }
-
     public function getAnnouncement()
     {
         return $this->announcement;
@@ -102,7 +88,7 @@ class Image
     public function setAnnouncement(\AHS\AdvertsPluginBundle\Entity\Announcement $announcement)
     {
         $this->announcement = $announcement;
-        
+
         return $this;
     }
 
@@ -114,7 +100,7 @@ class Image
     public function setCreatedAt(\DateTime $created_at)
     {
         $this->created_at = $created_at;
-        
+
         return $this;
     }
 
@@ -126,8 +112,55 @@ class Image
     public function setUser($user)
     {
         $this->user = $user;
-        
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of basename.
+     *
+     * @return string
+     */
+    public function getBasename()
+    {
+        return $this->basename;
+    }
+
+    /**
+     * Sets the value of basename.
+     *
+     * @param string $basename the basename
+     *
+     * @return self
+     */
+    public function setBasename($basename)
+    {
+        $this->basename = $basename;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of thumbnailPath.
+     *
+     * @return string
+     */
+    public function getThumbnailPath()
+    {
+        return $this->thumbnailPath;
+    }
+
+    /**
+     * Sets the value of thumbnailPath.
+     *
+     * @param string $thumbnailPath the thumbnail path
+     *
+     * @return self
+     */
+    public function setThumbnailPath($thumbnailPath)
+    {
+        $this->thumbnailPath = $thumbnailPath;
+
         return $this;
     }
 }
-

@@ -241,12 +241,11 @@ class Announcement
 
     public function processImage($image)
     {
-        $newscoopImage = new \Image($image->getNewscoopImageId());
         $processedPhoto = array(
-            'id' => $newscoopImage->getImageId(),
+            'id' => $image->getId(),
             'announcementPhotoId' => $image->getId(),
-            'imageUrl' => $newscoopImage->getImageUrl(),
-            'thumbnailUrl' => $newscoopImage->getThumbnailUrl()
+            'imageUrl' => '/images/ahs_adverts/'.$image->getBasename(),
+            'thumbnailUrl' => '/images/ahs_adverts/thumbnails/'.$image->getThumbnailPath()
         );
 
         return $processedPhoto;

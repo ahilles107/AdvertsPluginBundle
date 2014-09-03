@@ -1,0 +1,11 @@
+parameters:
+    ahs_image:
+        image_path: "%application_path%/../images/ahs_adverts/"
+        image_dir: "/images/ahs_adverts/"
+        image_prefix: "adverts-image-"
+        thumbnail_path: "%application_path%/../images/ahs_adverts/thumbnails/"
+        thumbnail_dir: "/images/ahs_adverts/thumbnails/"
+        thumbnail_prefix: "adverts-thumb-"
+        thumbnail_max_size: "64"
+        cache_url: "images/ahs_adverts/cache"
+        cache_path: "%application_path%/../images/ahs_adverts/cache/"

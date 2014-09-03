@@ -19,6 +19,8 @@ namespace AHS\AdvertsPluginBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Newscoop\EventDispatcher\Events\GenericEvent;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 /**
  * Event lifecycle management
@@ -37,7 +39,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
 
     private $systemPreferences;
 
-    public function __construct($em, $pluginsService, $translator, $scheduler, $systemPreferences)
+    public function __construct($em, $pluginsService, $translator, $scheduler, $systemPreferences, $config = array())
     {
         $this->em = $em;
         $this->pluginsService = $pluginsService;
@@ -51,6 +53,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
                 'schedule' => '20 * * * *',
             ),
         );
+        $this->config = $config;
     }
 
     public function install(GenericEvent $event)
@@ -59,6 +62,7 @@ class LifecycleSubscriber implements EventSubscriberInterface
         $tool->updateSchema($this->getClasses(), true);
 
         $this->em->getProxyFactory()->generateProxyClasses($this->getClasses(), __DIR__ . '/../../../../library/Proxy');
+        $this->createImagesDirectories();
         $this->setPermissions();
         $this->addJobs();
         $this->systemPreferences->AdvertsNotificationEmail = $this->systemPreferences->EmailFromAddress;
@@ -117,6 +121,29 @@ class LifecycleSubscriber implements EventSubscriberInterface
     {
         foreach ($this->cronjobs as $jobName => $jobConfig) {
             $this->scheduler->removeJob($jobName, $jobConfig);
+        }
+    }
+
+    /**
+     * Creates images directory to store classifieds images
+     *
+     * @return void
+     * @throws IOException
+     */
+    private function createImagesDirectories()
+    {
+        $fs = new Filesystem();
+
+        try {
+            if (!$fs->exists($this->config['image_path'])) {
+                $fs->mkdir($this->config['image_path']);
+            }
+
+            if (!$fs->exists($this->config['thumbnail_path'])) {
+                $fs->mkdir($this->config['thumbnail_path']);
+            }
+        } catch (IOException $e) {
+            throw new IOException($e->getMessage());
         }
     }
 
