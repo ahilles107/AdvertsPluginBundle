@@ -68,13 +68,12 @@ class ImageService
     /**
      * Upload image and create entity
      *
-     * @param UploadedFile   $file
-     * @param array          $attributes
-     * @param ImageInterface $image
+     * @param UploadedFile $file
+     * @param array        $attributes
      *
-     * @return LocalImage
+     * @return Local
      */
-    public function upload(UploadedFile $file, array $attributes, ImageInterface $image = null)
+    public function upload(UploadedFile $file, array $attributes)
     {
         $filesystem = new Filesystem();
         $imagine = new Imagine();
@@ -128,7 +127,7 @@ class ImageService
             $this->orm->remove($image);
             $this->orm->flush();
 
-            throw new \Exception($e->getMessage(), $e->getCode());
+            return array($e->getMessage());
         }
 
         return $image;

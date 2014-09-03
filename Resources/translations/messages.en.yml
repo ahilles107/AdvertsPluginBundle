@@ -46,6 +46,7 @@ ads:
             type: "Price must be a number!"
         unsupportedType: "Unsupported image type %type%"
         notwritable: "Directory %dir% is not writable or does not exist"
+        cantaddimages: "You can not add images."
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."

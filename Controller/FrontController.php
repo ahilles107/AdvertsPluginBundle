@@ -325,38 +325,73 @@ class FrontController extends Controller
         $em = $this->container->get('em');
         $templatesService = $this->get('newscoop.templates.service');
         $imageService = $this->get('ahs_adverts_plugin.image_service');
+        $systemPreferences = $this->get('preferences');
+        $translator = $this->get('translator');
+        $session = $request->getSession();
 
         $userService = $this->get('user');
+        $limitExhausted = false;
+        $result = array();
         $newscoopUser = $userService->getCurrentUser();
         $user = $em->getRepository('AHS\AdvertsPluginBundle\Entity\User')->findOneBy(
             array('newscoopUserId' => $newscoopUser->getId())
         );
 
-        $result = null;
-        foreach ($request->files->all() as $image) {
-            $result = $imageService->upload($image, array('user' => $user));
+        $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->createQueryBuilder('a')
+            ->select('count(a)')
+            ->where('a.announcementStatus = true')
+            ->andWhere('a.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
+                $limitExhausted = true;
+            }
         }
 
-        if (is_array($result)) {
-            return new JsonResponse(array(
-                'errors' => array_unique($result),
-            ));
+        if (!$limitExhausted) {
+            $result = null;
+            foreach ($request->files->all() as $image) {
+                $result = $imageService->upload($image, array('user' => $user));
+            }
+
+            if (is_array($result)) {
+                return new Response($templatesService->fetchTemplate(
+                    '_ahs_adverts/_tpl/renderPhotos.tpl',
+                    array(
+                        'announcementPhotos' => $this->processPhotos($request),
+                        'errors' => array_unique($result),
+                    )
+                ));
+            }
+
+            if (!$request->getSession()->has('announcement_photos')) {
+                $request->getSession()->set('announcement_photos', array(array('id' => $result->getId())));
+            } else {
+                $photos = $request->getSession()->get('announcement_photos', array());
+                $photos[] = array('id' => $result->getId());
+                $request->getSession()->set('announcement_photos', $photos);
+            }
+
+            $result = array(
+                'announcementPhotos' => $this->processPhotos($request),
+                'result' => true,
+            );
         }
 
-        if (!$request->getSession()->has('announcement_photos')) {
-            $request->getSession()->set('announcement_photos', array(array('id' => $result->getId())));
-        } else {
-            $photos = $request->getSession()->get('announcement_photos', array());
-            $photos[] = array('id' => $result->getId());
-            $request->getSession()->set('announcement_photos', $photos);
+        if (empty($result)) {
+            $result = array(
+                'announcementPhotos' => $this->processPhotos($request),
+                'errors' => $translator->trans('ads.error.cantaddimages'),
+            );
         }
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
-            array(
-                'announcementPhotos' => $this->processPhotos($request),
-                'errors' => array()
-            )
+            $result
         ));
     }
 

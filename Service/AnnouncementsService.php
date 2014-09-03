@@ -17,71 +17,26 @@
 namespace AHS\AdvertsPluginBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\ORM\EntityManager;
-use Newscoop\Services\EmailService;
 use Newscoop\Entity\User;
-use Newscoop\NewscoopBundle\Services\SystemPreferencesService;
-use Newscoop\Services\TemplatesService;
-use Newscoop\Services\PlaceholdersService;
 use AHS\AdvertsPluginBundle\Entity\User as ClassifiedUser;
 use AHS\AdvertsPluginBundle\Entity\Announcement;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\DependencyInjection\Container;
 
 /**
  * Announcements Service
  */
 class AnnouncementsService
 {
-    /**
-     * @var EntityManager
-     */
-    protected $em;
+    /** @var Container */
+    protected $container;
 
     /**
-     * @var EmailService
+     * @param Container $container
      */
-    protected $emailService;
-
-    /**
-     * @var TemplatesService
-     */
-    protected $templatesService;
-
-    /**
-     * @var PlaceholdersService
-     */
-    protected $placeholdersService;
-
-    /**
-     * @var SystemPreferencesService
-     */
-    protected $preferencesService;
-
-    /**
-     * @var Router
-     */
-    protected $router;
-
-    /**
-     * Construct
-     *
-     * @param EntityManager            $em                  Entity Manager
-     * @param EmailService             $emailService        Email Service
-     * @param TemplatesService         $templatesService    Templates Service
-     * @param PlaceholdersService      $placeholdersService Placeholder Service
-     * @param SystemPreferencesService $preferencesService  System Preferences
-     * @param Router                   $router              Router
-     */
-    public function __construct(EntityManager $em, EmailService $emailService, TemplatesService $templatesService,
-        PlaceholdersService $placeholdersService, SystemPreferencesService $preferencesService, Router $router)
+    public function __construct(Container $container)
     {
-        $this->em = $em;
-        $this->emailService = $emailService;
-        $this->preferencesService = $preferencesService;
-        $this->templatesService = $templatesService;
-        $this->placeholdersService = $placeholdersService;
-        $this->router = $router;
+        $this->container = $container;
     }
 
     /**
@@ -93,12 +48,13 @@ class AnnouncementsService
      */
     public function deleteClassified($id)
     {
+        $em = $this->container->get('em');
         $classified = $this->getRepository()
             ->findOneById($id);
 
         if ($classified) {
-            $this->em->remove($classified);
-            $this->em->flush();
+            $em->remove($classified);
+            $em->flush();
 
             return true;
         }
@@ -115,12 +71,13 @@ class AnnouncementsService
      */
     public function deleteCategory($id)
     {
-        $category = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
+        $em = $this->container->get('em');
+        $category = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Category')
             ->findOneById($id);
 
         if ($category) {
-            $this->em->remove($category);
-            $this->em->flush();
+            $em->remove($category);
+            $em->flush();
 
             return true;
         }
@@ -137,12 +94,13 @@ class AnnouncementsService
      */
     public function deleteClassifiedImage($id)
     {
-        $image = $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
+        $em = $this->container->get('em');
+        $image = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
             ->findOneById($id);
 
         if ($image) {
-            $this->em->remove($image);
-            $this->em->flush();
+            $em->remove($image);
+            $em->flush();
 
             return true;
         }
@@ -159,9 +117,10 @@ class AnnouncementsService
      */
     public function activateClassified(Announcement $classified)
     {
+        $em = $this->container->get('em');
         $classified->setIsActive(true);
         $classified->setAnnouncementStatus(true);
-        $this->em->flush();
+        $em->flush();
 
         return true;
     }
@@ -175,9 +134,10 @@ class AnnouncementsService
      */
     public function deactivateClassified(Announcement $classified)
     {
+        $em = $this->container->get('em');
         $classified->setIsActive(false);
         $classified->setAnnouncementStatus(false);
-        $this->em->flush();
+        $em->flush();
 
         return true;
     }
@@ -192,22 +152,28 @@ class AnnouncementsService
      */
     public function sendNotificationEmail(Request $request, ClassifiedUser $user, Announcement $classified)
     {
-        $smarty = $this->templatesService->getSmarty();
-        $user = $this->em->getRepository('Newscoop\Entity\User')
+        $emailService = $this->container->get('email');
+        $router = $this->container->get('router');
+        $em = $this->container->get('em');
+        $templatesService = $this->container->get('newscoop.templates.service');
+        $placeholdersService = $this->container->get('newscoop.placeholders.service');
+        $preferencesService = $this->container->get('preferences');
+        $smarty = $templatesService->getSmarty();
+        $user = $em->getRepository('Newscoop\Entity\User')
             ->findOneBy(array('id' => $user->getNewscoopUserId()));
 
         $smarty->assign('user', new \MetaUser($user));
         $smarty->assign('classified', $classified);
         $smarty->assign('created', $classified->getCreatedAt()->format('Y-m-d H:i:s'));
-        $smarty->assign('editLink', $request->getUriForPath($this->router->generate('ahs_advertsplugin_admin_editad', array('id' => $classified->getId()))));
+        $smarty->assign('editLink', $request->getUriForPath($router->generate('ahs_advertsplugin_admin_editad', array('id' => $classified->getId()))));
 
         try {
-            $message = $this->templatesService->fetchTemplate("_ahs_adverts/email_classified_notify.tpl");
+            $message = $templatesService->fetchTemplate("_ahs_adverts/email_classified_notify.tpl");
         } catch (\Exception $e) {
             throw new NotFoundHttpException("Could not load template: _ahs_adverts/email_classified_notify.tpl");
         }
 
-        $this->emailService->send($this->placeholdersService->get('subject'), $message, array($this->preferencesService->AdvertsNotificationEmail));
+        $emailService->send($placeholdersService->get('subject'), $message, array($preferencesService->AdvertsNotificationEmail));
     }
 
     /**
@@ -220,20 +186,25 @@ class AnnouncementsService
      */
     public function sendMessageToAuthor(Announcement $classified, $params = array())
     {
-        $smarty = $this->templatesService->getSmarty();
-        $user = $this->em->getRepository('Newscoop\Entity\User')->findOneById($classified->getUser()->getNewscoopUserId());
+        $emailService = $this->container->get('email');
+        $em = $this->container->get('em');
+        $templatesService = $this->container->get('newscoop.templates.service');
+        $placeholdersService = $this->container->get('newscoop.placeholders.service');
+        $preferencesService = $this->container->get('preferences');
+        $smarty = $templatesService->getSmarty();
+        $user = $em->getRepository('Newscoop\Entity\User')->findOneById($classified->getUser()->getNewscoopUserId());
 
         $smarty->assign('user', new \MetaUser($user));
         $smarty->assign('announcement', $classified);
         $smarty->assign('params', $params);
 
         try {
-            $message = $this->templatesService->fetchTemplate("_ahs_adverts/email_classified_contact.tpl");
+            $message = $templatesService->fetchTemplate("_ahs_adverts/email_classified_contact.tpl");
         } catch (\Exception $e) {
             throw new NotFoundHttpException("Could not load template: _ahs_adverts/email_classified_contact.tpl");
         }
 
-        $this->emailService->send($this->placeholdersService->get('subject'), $message, $user->getEmail(), array($this->preferencesService->AdvertsNotificationEmail));
+        $emailService->send($placeholdersService->get('subject'), $message, $user->getEmail(), array($preferencesService->AdvertsNotificationEmail));
     }
 
     /**
@@ -255,7 +226,9 @@ class AnnouncementsService
      */
     private function getRepository()
     {
-         return $this->em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement');
+        $em = $this->container->get('em');
+
+        return $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement');
 
     }
 }
