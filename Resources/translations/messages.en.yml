@@ -47,6 +47,7 @@ ads:
         unsupportedType: "Unsupported image type %type%"
         notwritable: "Directory %dir% is not writable or does not exist"
         cantaddimages: "You can not add images."
+        namelength: "This value is too long. It should have {{ limit }} characters or less"
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."

@@ -147,10 +147,6 @@ class FrontController extends Controller
                         'id' => $announcement->getId(),
                     )
                 ));
-            } else {
-                foreach ($form->getErrors() as $error) {
-                    $errors[]['message'] = $error->getMessage();
-                }
             }
         }
 

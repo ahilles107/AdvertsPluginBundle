@@ -53,23 +53,25 @@ class FrontAnnouncementType extends AbstractType
 
         $builder
             ->add('name', null, array(
-                'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.name'),
-                'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))))
+                'constraints' => array(
+                    new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))),
+                    new Assert\Length(array(
+                        'max' => 70,
+                        'maxMessage' => $translator->trans('ads.error.namelength', array('{{ limit }}'))
+                    ))
+                )
             ))
             ->add('description', 'textarea', array(
-                'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.description'),
                 'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
             ))
             ->add('category', 'entity', array(
-                'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.category'),
                 'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
                 'property' => 'name',
             ))
             ->add('price', null, array(
-                'error_bubbling' => true,
                 'constraints' => array(
                     new Assert\NotBlank(array(
                         'message' => $translator->trans('ads.error.price.empty')
@@ -92,7 +94,6 @@ class FrontAnnouncementType extends AbstractType
                 'error_bubbling' => true,
             ))
             ->add('terms_accepted', 'checkbox', array(
-                'error_bubbling' => true,
                 'constraints' => array(new Assert\True(array(
                     'message' => $translator->trans('ads.error.termsaccepted'
                 ))))
