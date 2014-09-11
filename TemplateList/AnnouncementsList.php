@@ -31,7 +31,16 @@ class AnnouncementsList extends PaginatedBaseList
         $queryBuilder = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
             ->getListByCriteria($criteria, false);
 
-        return $this->paginateList($queryBuilder, null, $criteria->maxResults);
+        $list = $this->paginateList($queryBuilder, null, $criteria->maxResults);
+        foreach ($list->items as $key => $item) {
+            // get reference to announcement when user object is empty
+            // this will fill user property
+            if ($item->getUser()->getId() == 0) {
+                $list->items[$key] = $em->getReference('AHS\AdvertsPluginBundle\Entity\Announcement', $item->getId());
+            }
+        }
+
+        return $list;
     }
 
     protected function convertParameters($firstResult, $parameters)

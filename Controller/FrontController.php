@@ -108,7 +108,7 @@ class FrontController extends Controller
             if ($form->isValid()) {
                 if (!$user) {
                     $user = new User();
-                    $user->setNewscoopUserId($newscoopUser->getId());
+                    $user->setNewscoopUser($newscoopUser);
                     $em->persist($user);
                 }
 
@@ -147,10 +147,6 @@ class FrontController extends Controller
                         'id' => $announcement->getId(),
                     )
                 ));
-            } else {
-                foreach ($form->getErrors() as $error) {
-                    $errors[]['message'] = $error->getMessage();
-                }
             }
         }
 

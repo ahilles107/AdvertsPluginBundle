@@ -53,34 +53,32 @@ class FrontAnnouncementType extends AbstractType
 
         $builder
             ->add('name', null, array(
-                'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.name'),
-                'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))))
+                'constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Length(array(
+                        'max' => 70,
+                    ))
+                )
             ))
             ->add('description', 'textarea', array(
-                'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.description'),
-                'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
+                'constraints' => array(new Assert\NotBlank())
             ))
             ->add('category', 'entity', array(
-                'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.category'),
                 'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
                 'property' => 'name',
+                'empty_value' => ''
             ))
             ->add('price', null, array(
-                'error_bubbling' => true,
                 'constraints' => array(
-                    new Assert\NotBlank(array(
-                        'message' => $translator->trans('ads.error.price.empty')
-                    )),
+                    new Assert\NotBlank(),
                     new Assert\Range(array(
                         'min' => 0,
-                        'minMessage' => $translator->trans('ads.error.price.range', array('{{ limit }}')),
                     )),
                     new Assert\Type(array(
                         'type' => "float",
-                        'message' => $translator->trans('ads.error.price.type'),
                     ))
                 )
             ))
@@ -92,7 +90,6 @@ class FrontAnnouncementType extends AbstractType
                 'error_bubbling' => true,
             ))
             ->add('terms_accepted', 'checkbox', array(
-                'error_bubbling' => true,
                 'constraints' => array(new Assert\True(array(
                     'message' => $translator->trans('ads.error.termsaccepted'
                 ))))

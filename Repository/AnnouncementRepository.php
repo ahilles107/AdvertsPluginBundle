@@ -64,15 +64,14 @@ class AnnouncementRepository extends EntityRepository
             } else {
                 $qb->andWhere('a.images IS NULL');
             }
-        } else {
-            $qb->select('a, c, i');
-            $qb->leftJoin('a.images', 'i');
         }
 
         if ($criteria->user !== null) {
             $qb->leftJoin('a.user', 'u')
                 ->andWhere('u.newscoopUserId = :user')
                 ->setParameter('user', $criteria->user);
+        } else {
+            $qb->leftJoin('a.user', 'u');
         }
 
         if ($criteria->query) {

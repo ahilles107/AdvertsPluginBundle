@@ -36,7 +36,7 @@ class Image
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="announcement")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="announcements")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     protected $user;

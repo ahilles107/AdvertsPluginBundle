@@ -101,15 +101,15 @@
         <thead>
           <tr>
             <th data-dynatable-column="name">{{ 'ads.label.name'|trans }}</th>
-            <th data-dynatable-column="description">{{ 'ads.label.description'|trans }}</th>
+            <th style="width: 165px" data-dynatable-column="description">{{ 'ads.label.description'|trans }}</th>
             <th data-dynatable-column="publication">{{ 'ads.label.publication'|trans }}</th>
-            <th>{{ 'ads.label.price'|trans }}</th>
+            <th data-dynatable-column="price">{{ 'ads.label.price'|trans }}</th>
             <th data-dynatable-column="reads">{{ 'ads.label.reads'|trans }}</th>
             <th data-dynatable-column="username">{{ 'ads.label.username'|trans }}</th>
             <th data-dynatable-column="created">{{ 'ads.created'|trans }}</th>
             <th data-dynatable-column="valid_to">{{ 'ads.label.valid_to'|trans }}</th>
             {% if hasPermission('plugin_classifieds_edit') or hasPermission('plugin_classifieds_delete') or hasPermission('plugin_classifieds_activate') or hasPermission('plugin_classifieds_deactivate') %}
-            <th style="width: 220px;">{{ 'ads.table.actions.actions'|trans }}</th>
+            <th style="width: 116px;">{{ 'ads.table.actions.actions'|trans }}</th>
             {% endif %}
           </tr>
         </thead>
@@ -133,6 +133,21 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'ads.btn.cancel'|trans }}</button>
           <button type="button" class="btn btn-danger" id="delete-confirm" data-dismiss="modal">{{ 'ads.btn.delete'|trans }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="modal fade" id="descriptionModal" tabindex="-1" role="dialog" aria-labelledby="descriptionModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ 'ads.label.description'|trans }}</h4>
+        </div>
+        <div class="modal-body" style="font-size: 14px;">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'ads.btn.cancel'|trans }}</button>
         </div>
       </div>
     </div>
@@ -227,6 +242,12 @@
                 if (column.id == 'username') {
                     column.attributeWriter = function(record) {
                     	return "<a href="+record.username.href+">"+record.username.username+"</a>";
+                    }
+                }
+
+                if (column.id == 'description') {
+                    column.attributeWriter = function(record) {
+                        return '<button class="btn-xs btn-default description-btn" id="'+record.id+'">{{ 'ads.btn.showDescription'|trans }}</button>';
                     }
                 }
 
@@ -340,6 +361,21 @@
 
 				flashMessage('{{ 'ads.error.cantdeactivate'|trans }}', 'error');
 			});
+    });
+
+    $('.description-btn').live('click', function(event){
+        event.preventDefault();
+        var id = $(this).attr('id');
+            $.post(Routing.generate('ahs_advertsplugin_admin_getdescription', {id: id }))
+                .done(function(data) {
+                  if (data.status) {
+                    $('#descriptionModal').find('.modal-body').html('');
+                    $('#descriptionModal').find('.modal-body').append(data.description);
+                    $('#descriptionModal').modal();
+                } else {
+                    flashMessage("{{ 'ads.error.error'|trans }}", 'error');
+                }
+            });
     });
 </script>
 {% endblock %}

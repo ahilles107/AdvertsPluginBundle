@@ -17,12 +17,17 @@ ads:
         lookingfor: "Looking for"
         offering: "Offering"
         enableMaxClassifieds: "Active classifieds limitation"
+        validTime: "Validation time"
+        review: "Review"
+        enableNotify: "Enable notifications"
+        notificationEmail: "Email for notifications"
     btn:
         cancel: "Cancel"
         delete: "Delete"
         save: "Save"
         back: "Back"
         addnew: "Add"
+        showDescription: "Show description"
     filter:
         category: "Categories"
         filters: "Filter by status"
@@ -47,6 +52,8 @@ ads:
         unsupportedType: "Unsupported image type %type%"
         notwritable: "Directory %dir% is not writable or does not exist"
         cantaddimages: "You can not add images."
+        namelength: "This value is too long. It should have {{ limit }} characters or less"
+        error: "Error occured."
     success:
         deleted: "Classified successfully deleted."
         saved: "Successfully saved."

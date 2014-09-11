@@ -307,6 +307,37 @@ class AdminController extends Controller
     }
 
     /**
+     * @Route("admin/announcements/classified/description/{id}", options={"expose"=true})
+     */
+    public function getDescriptionAction(Request $request, $id)
+    {
+        try {
+            $userService = $this->get('user');
+            $user = $userService->getCurrentUser();
+            $translator = $this->get('translator');
+            $em = $this->get('em');
+            $status = false;
+
+            if (!$user->hasPermission('plugin_classifieds_access')) {
+                throw new AccessDeniedException();
+            }
+
+            $classified = $em->getReference('AHS\AdvertsPluginBundle\Entity\Announcement', $id);
+
+            return new JsonResponse(array(
+                'description' => $classified->getDescription(),
+                'status' => true
+            ));
+        } catch (\Exception $e) {
+            $status = false;
+        }
+
+        return new JsonResponse(array(
+            'status' => $status
+        ));
+    }
+
+    /**
      * Process request parameters
      *
      * @param Request $request Request object
