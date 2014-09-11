@@ -64,9 +64,6 @@ class AnnouncementRepository extends EntityRepository
             } else {
                 $qb->andWhere('a.images IS NULL');
             }
-        } else {
-            $qb->select('a, c, i');
-            $qb->leftJoin('a.images', 'i');
         }
 
         if ($criteria->user !== null) {
