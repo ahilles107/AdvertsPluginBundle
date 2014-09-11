@@ -2,7 +2,7 @@
     "name": "ahs/adverts-plugin-bundle",
     "description": "Adverts Plugin for Newscoop",
     "keywords": ["newscoop", "adverts", "cms", "integration", "classifieds"],
-    "version": "0.1.27",
+    "version": "0.1.28",
     "type": "newscoop-plugin",
     "license": "GPL-3.0, Commercial",
     "authors": [

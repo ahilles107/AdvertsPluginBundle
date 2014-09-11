@@ -108,7 +108,7 @@ class FrontController extends Controller
             if ($form->isValid()) {
                 if (!$user) {
                     $user = new User();
-                    $user->setNewscoopUserId($newscoopUser->getId());
+                    $user->setNewscoopUser($newscoopUser);
                     $em->persist($user);
                 }
 

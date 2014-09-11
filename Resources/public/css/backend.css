@@ -54,3 +54,11 @@ a.action-btn {margin-left: 5px; margin-bottom: 5px;}
 .carousel-control {
     padding-top: 30%;
 }
+
+a.action-btn {
+    width: 90%;
+}
+
+button.description-btn {
+    width: 100%;
+}

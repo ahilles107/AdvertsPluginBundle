@@ -73,6 +73,8 @@ class AnnouncementRepository extends EntityRepository
             $qb->leftJoin('a.user', 'u')
                 ->andWhere('u.newscoopUserId = :user')
                 ->setParameter('user', $criteria->user);
+        } else {
+            $qb->leftJoin('a.user', 'u');
         }
 
         if ($criteria->query) {

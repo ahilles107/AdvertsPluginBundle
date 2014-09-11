@@ -62,6 +62,7 @@ class User
     public function __construct()
     {
         $this->setCreatedAt(new \DateTime());
+        $this->announcements = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -86,14 +87,14 @@ class User
         return $this;
     }
 
-    public function getAnnouncement()
+    public function getAnnouncements()
     {
-        return $this->announcement;
+        return $this->announcements;
     }
 
     public function setAnnouncement(\AHS\AdvertsPluginBundle\Entity\Announcement $announcement)
     {
-        $this->announcement = $announcement;
+        $this->announcements[] = $announcement;
 
         return $this;
     }
@@ -127,7 +128,7 @@ class User
      *
      * @return self
      */
-    protected function setNewscoopUser(NewscoopUser $user)
+    public function setNewscoopUser(NewscoopUser $user)
     {
         $this->user = $user;
 

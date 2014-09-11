@@ -55,34 +55,30 @@ class FrontAnnouncementType extends AbstractType
             ->add('name', null, array(
                 'label' => $translator->trans('ads.label.name'),
                 'constraints' => array(
-                    new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))),
+                    new Assert\NotBlank(),
                     new Assert\Length(array(
                         'max' => 70,
-                        'maxMessage' => $translator->trans('ads.error.namelength', array('{{ limit }}'))
                     ))
                 )
             ))
             ->add('description', 'textarea', array(
                 'label' => $translator->trans('ads.label.description'),
-                'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
+                'constraints' => array(new Assert\NotBlank())
             ))
             ->add('category', 'entity', array(
                 'label' => $translator->trans('ads.label.category'),
                 'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
                 'property' => 'name',
+                'empty_value' => ''
             ))
             ->add('price', null, array(
                 'constraints' => array(
-                    new Assert\NotBlank(array(
-                        'message' => $translator->trans('ads.error.price.empty')
-                    )),
+                    new Assert\NotBlank(),
                     new Assert\Range(array(
                         'min' => 0,
-                        'minMessage' => $translator->trans('ads.error.price.range', array('{{ limit }}')),
                     )),
                     new Assert\Type(array(
                         'type' => "float",
-                        'message' => $translator->trans('ads.error.price.type'),
                     ))
                 )
             ))
