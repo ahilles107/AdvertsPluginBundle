@@ -63,7 +63,12 @@ class FrontAnnouncementType extends AbstractType
             ))
             ->add('description', 'textarea', array(
                 'label' => $translator->trans('ads.label.description'),
-                'constraints' => array(new Assert\NotBlank())
+                'constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Length(array(
+                        'max' => 1000,
+                    ))
+                )
             ))
             ->add('category', 'entity', array(
                 'label' => $translator->trans('ads.label.category'),
