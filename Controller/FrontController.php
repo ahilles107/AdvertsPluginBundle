@@ -461,29 +461,22 @@ class FrontController extends Controller
             'newscoopUserId' => $user->getId()
         ));
 
-        if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
-            $activeAnnouncementsCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-                ->createQueryBuilder('a')
-                ->select('count(a)')
-                ->where('a.announcementStatus = true')
-                ->andWhere('a.user = :user')
-                ->setParameter('user', $classifiedUser)
-                ->getQuery()
-                ->getSingleScalarResult();
+        $activeCount = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
+            ->createQueryBuilder('a')
+            ->select('count(a)')
+            ->where('a.announcementStatus = true')
+            ->andWhere('a.user = :user')
+            ->setParameter('user', $classifiedUser)
+            ->getQuery()
+            ->getSingleScalarResult();
 
-            if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
-                return new JsonResponse(array(
-                    'status' => $responseStatus
-                ));
-            }
-        }
-
-        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
+        $announcement = $em->getReference('AHS\AdvertsPluginBundle\Entity\Announcement', $id);
         if ($announcement) {
             if ($user->getId() == (int) $announcement->getUser()->getNewscoopUserId()) {
                 if ($announcement->getAnnouncementStatus()) {
                     $announcement->setResult(false);
                     $announcement->setAnnouncementStatus(false);
+                    $responseStatus = true;
                     if ($status === 'success') {
                         $announcement->setResult(true);
                     }
@@ -492,10 +485,25 @@ class FrontController extends Controller
                         $announcement->setComment($request->request->get('announcementComment'));
                     }
                 } else {
-                    $announcement->setAnnouncementStatus(true);
+                    if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
+                        if ((int) ($activeCount + 1) <= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_cantadd') || $session->get('ahs_adverts_nolimit')) {
+                            $announcement->setAnnouncementStatus(true);
+                            $session->remove('ahs_adverts_nolimit');
+                            $responseStatus = true;
+                            $em->flush();
+                        }
+
+                        return new JsonResponse(array(
+                            'status' => $responseStatus
+                        ));
+                    }
+
+                    if (!$session->get('ahs_adverts_cantadd')) {
+                        $announcement->setAnnouncementStatus(true);
+                        $responseStatus = true;
+                    }
                 }
 
-                $responseStatus = true;
                 $em->flush();
             }
         }
@@ -503,6 +511,16 @@ class FrontController extends Controller
         return new JsonResponse(array(
             'status' => $responseStatus
         ));
+    }
+
+    /**
+     * @Route("/classifieds/my-classifieds", options={"expose"=true}, name="ahs_advertsplugin_default_myclassifieds")
+     */
+    public function myClassifiedsAction(Request $request)
+    {
+        $templatesService = $this->get('newscoop.templates.service');
+
+        return new Response($templatesService->fetchTemplate('_ahs_adverts/my_classifieds.tpl'));
     }
 
     private function savePhotosInAnnouncement($announcement, $request)
