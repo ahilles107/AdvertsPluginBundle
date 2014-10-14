@@ -244,8 +244,8 @@ class Announcement
         $processedPhoto = array(
             'id' => $image->getId(),
             'announcementPhotoId' => $image->getId(),
-            'imageUrl' => '/images/ahs_adverts/'.$image->getBasename(),
-            'thumbnailUrl' => '/images/ahs_adverts/thumbnails/'.$image->getThumbnailPath()
+            'imageUrl' => '/images/ahs_images/'.$image->getBasename(),
+            'thumbnailUrl' => '/images/ahs_images/thumbnails/'.$image->getThumbnailPath()
         );
 
         return $processedPhoto;
