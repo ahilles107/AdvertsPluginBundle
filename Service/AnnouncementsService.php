@@ -159,10 +159,8 @@ class AnnouncementsService
         $placeholdersService = $this->container->get('newscoop.placeholders.service');
         $preferencesService = $this->container->get('preferences');
         $smarty = $templatesService->getSmarty();
-        $user = $em->getRepository('Newscoop\Entity\User')
-            ->findOneBy(array('id' => $user->getNewscoopUserId()));
 
-        $smarty->assign('user', new \MetaUser($user));
+        $smarty->assign('user', new \MetaUser($user->getNewscoopUser()));
         $smarty->assign('classified', $classified);
         $smarty->assign('created', $classified->getCreatedAt()->format('Y-m-d H:i:s'));
         $smarty->assign('editLink', $request->getUriForPath($router->generate('ahs_advertsplugin_admin_editad', array('id' => $classified->getId()))));
