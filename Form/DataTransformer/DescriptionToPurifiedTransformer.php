@@ -71,8 +71,6 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
             throw new TransformationFailedException("Description field is empty!");
         }
 
-        $description = str_replace("  ", "&nbsp;" , $this->purifier->purify($description));
-
         return nl2br($this->purifier->purify($description));
     }
 }
