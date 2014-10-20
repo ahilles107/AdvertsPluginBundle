@@ -21,6 +21,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use AHS\AdvertsBundle\Form\DataTransformer\DescriptionToPurifiedTransformer;
 
 /**
  * Announcement form type
@@ -51,6 +52,8 @@ class FrontAnnouncementType extends AbstractType
             $translator = $options['translator'];
         }
 
+        $transformer = new DescriptionToPurifiedTransformer();
+
         $builder
             ->add('name', null, array(
                 'label' => $translator->trans('ads.label.name'),
@@ -61,7 +64,7 @@ class FrontAnnouncementType extends AbstractType
                     ))
                 )
             ))
-            ->add('description', 'textarea', array(
+            ->add($builder->create('description', 'textarea', array(
                 'label' => $translator->trans('ads.label.description'),
                 'constraints' => array(
                     new Assert\NotBlank(),
@@ -69,7 +72,7 @@ class FrontAnnouncementType extends AbstractType
                         'max' => 1000,
                     ))
                 )
-            ))
+            ))->addModelTransformer($transformer))
             ->add('category', 'entity', array(
                 'label' => $translator->trans('ads.label.category'),
                 'class' => 'AHS\AdvertsPluginBundle\Entity\Category',
