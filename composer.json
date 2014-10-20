@@ -17,8 +17,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "newscoop/plugins-installer": "*",
-        "ezyang/htmlpurifier": "dev-master"
+        "newscoop/plugins-installer": "*"
     },
     "autoload": {
         "psr-0": { "AHS\\AdvertsPluginBundle\\AHSAdvertsPluginBundle": "" }
