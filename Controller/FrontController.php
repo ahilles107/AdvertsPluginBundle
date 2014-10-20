@@ -348,6 +348,20 @@ class FrontController extends Controller
             }
         }
 
+        // allow only 1 photo to be uploaded
+        $photosFromSession = $request->getSession()->get('announcement_photos', array());
+        if (count($photosFromSession) > 0) {
+            $result = array(
+                'announcementPhotos' => $this->processPhotos($request),
+                'errors' => $translator->trans('ads.error.cantaddimages'),
+            );
+
+            return new Response($templatesService->fetchTemplate(
+                '_ahs_adverts/_tpl/renderPhotos.tpl',
+                $result
+            ));
+        }
+
         if (!$limitExhausted) {
             $result = null;
             foreach ($request->files->all() as $image) {
@@ -359,7 +373,7 @@ class FrontController extends Controller
                     '_ahs_adverts/_tpl/renderPhotos.tpl',
                     array(
                         'announcementPhotos' => $this->processPhotos($request),
-                        'errors' => array_unique($result),
+                        'errors' => array_unique($result)
                     )
                 ));
             }
