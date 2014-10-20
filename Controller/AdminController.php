@@ -114,15 +114,18 @@ class AdminController extends Controller
     {
         $userService = $this->get('user');
         $translator = $this->get('translator');
+        $cacheService = $this->get('newscoop.cache');
         $user = $userService->getCurrentUser();
         if (!$user->hasPermission('plugin_classifieds_delete') || !$user->hasPermission('plugin_classifieds_access')) {
             throw new AccessDeniedException();
         }
 
         $adsService = $this->get('ahs_adverts_plugin.ads_service');
+        $result = $adsService->deleteClassified($id);
+        $cacheService->clearNamespace('announcements');
 
         return new JsonResponse(array(
-            'status' => $adsService->deleteClassified($id)
+            'status' => $result
         ));
     }
 

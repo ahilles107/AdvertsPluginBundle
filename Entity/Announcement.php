@@ -51,7 +51,7 @@ class Announcement
     protected $description;
 
     /**
-     * @ORM\OneToMany(targetEntity="Image", mappedBy="announcement")
+     * @ORM\OneToMany(targetEntity="Image", mappedBy="announcement", cascade={"remove"})
      */
     protected $images;
 
