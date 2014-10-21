@@ -68,7 +68,7 @@ ads:
         enablenotify: "Disabled by default. When enabled, you will recieve email notifications about new classifieds for defined below email address."
         maxClassifieds: "Users can post as many classifieds as they like, but no more than set here, concurrently active."
         enableMaxClassifieds: "Enable limitation of active classifieds per user. When enabled limit will be set to value from the field below."
-        maxPhotos: "Maximum amount of photos which users can upload when adding new classified. If set to 0, users won't be able to upload any images."
+        maxPhotos: "Maximum amount of photos which users can upload when adding a new classified. If set to 0, users won't be able to upload any images."
     menu:
         manage: "Manage classifieds"
         name: "Classifieds"

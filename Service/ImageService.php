@@ -85,11 +85,11 @@ class ImageService
         }
 
         if (!file_exists($this->config['image_path']) || !is_writable($this->config['image_path'])) {
-            $errors[] = $this->translator->trans('ads.error.notwritable', array('%dir%' => '/images/ahs_adverts'));
+            $errors[] = $this->translator->trans('ads.error.notwritable', array('%dir%' => $this->config['image_dir']));
         }
 
         if (!file_exists($this->config['thumbnail_path']) || !is_writable($this->config['thumbnail_path'])) {
-            $errors[] = $this->translator->trans('ads.error.notwritable', array('%dir%' => '/images/ahs_adverts/thumbnails'));
+            $errors[] = $this->translator->trans('ads.error.notwritable', array('%dir%' => $this->config['thumbnail_dir']));
         }
 
         if (!empty($errors)) {

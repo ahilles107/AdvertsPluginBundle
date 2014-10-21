@@ -21,7 +21,7 @@ ads:
         review: "Moderation"
         enableNotify: "Aktivierung der Benachrichtigungen"
         notificationEmail: "E-Mail für Benachrichtigungen"
-        maxPhotos: "Photos limitation"
+        maxPhotos: "Bildupload Management"
     btn:
         cancel: "Abbrechen"
         delete: "Löschen"
@@ -68,7 +68,7 @@ ads:
         enablenotify: "Standardmäßig deaktiviert. Falls aktiviert, werden Sie per E-Mail über neue Kleinanzeigen informiert."
         maxClassifieds: "Maximale Anzahl aktiver Kleinanzeigen."
         enableMaxClassifieds: "Aktiviere Limitierung von aktiven Kleinanzeigen pro User."
-        maxPhotos: "Maximum amount of photos which users can upload when adding new classified. If set to 0, users won't be able to upload any images."
+        maxPhotos: "Maximale Anzahl von Bildern die ein Nutzer beim Erstellen einer Kleinanzeige hochladen kann. Wenn der Wert auf 0 gesetzt ist, können gar keine Bilder hochgeladen werden."
     menu:
         manage: "Kleinanzeigen bearbeiten"
         name: "Kleinanzeigen"
