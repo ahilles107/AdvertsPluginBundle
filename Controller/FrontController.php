@@ -44,7 +44,7 @@ class FrontController extends Controller
             array(
                 'categories' => $categories,
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -172,7 +172,7 @@ class FrontController extends Controller
                 'type' => 'add',
                 'errors' => $errors
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -238,7 +238,7 @@ class FrontController extends Controller
                 'type' => 'edit',
                 'errors' => $errors
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -267,7 +267,7 @@ class FrontController extends Controller
                 'announcementPhotos' => $this->processPhotos($request, $announcement),
                 'newscoopUser' => $newscoopUser
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -302,7 +302,7 @@ class FrontController extends Controller
                 'categories' => $categories,
                 'currentCategory' => $currentCategory,
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -317,7 +317,7 @@ class FrontController extends Controller
             array(
                 'currentType' => $type,
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -365,7 +365,7 @@ class FrontController extends Controller
             return new Response($templatesService->fetchTemplate(
                 '_ahs_adverts/_tpl/renderPhotos.tpl',
                 $result
-            ));
+            ), 200, array('Content-Type' => 'text/html'));
         }
 
         if (!$limitExhausted) {
@@ -381,7 +381,7 @@ class FrontController extends Controller
                         'announcementPhotos' => $this->processPhotos($request),
                         'errors' => array_unique($result)
                     )
-                ));
+                ), 200, array('Content-Type' => 'text/html'));
             }
 
             if (!$request->getSession()->has('announcement_photos')) {
@@ -408,7 +408,7 @@ class FrontController extends Controller
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
             $result
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -443,7 +443,7 @@ class FrontController extends Controller
                         'announcementPhotos' => $this->processPhotos($request),
                         'errors' => array()
                     )
-                ));
+                ), 200, array('Content-Type' => 'text/html'));
             }
         }
     }
@@ -462,7 +462,7 @@ class FrontController extends Controller
                 'announcementPhotos' => $this->processPhotos($request),
                 'errors' => array()
             )
-        ));
+        ), 200, array('Content-Type' => 'text/html'));
     }
 
     /**
@@ -540,7 +540,11 @@ class FrontController extends Controller
     {
         $templatesService = $this->get('newscoop.templates.service');
 
-        return new Response($templatesService->fetchTemplate('_ahs_adverts/my_classifieds.tpl'));
+        return new Response(
+            $templatesService->fetchTemplate('_ahs_adverts/my_classifieds.tpl'),
+            200,
+            array('Content-Type' => 'text/html')
+        );
     }
 
     private function savePhotosInAnnouncement($announcement, $request)
