@@ -20,6 +20,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use AHS\AdvertsBundle\Form\DataTransformer\DescriptionToPurifiedTransformer;
 
 /**
  * Announcement form type
@@ -50,17 +51,19 @@ class AnnouncementType extends AbstractType
             $translator = $options['translator'];
         }
 
+        $transformer = new DescriptionToPurifiedTransformer($options['config']);
+
         $builder
             ->add('name', null, array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.name'),
                 'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))))
             ))
-            ->add('description', 'textarea', array(
+            ->add($builder->create('description', 'textarea', array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.description'),
                 'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.description'))))
-            ))
+            ))->addModelTransformer($transformer))
             ->add('category', 'entity', array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.category'),
@@ -108,6 +111,7 @@ class AnnouncementType extends AbstractType
 
         $resolver->setOptional(array(
             'translator',
+            'config'
         ));
     }
 
