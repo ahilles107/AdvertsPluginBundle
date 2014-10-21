@@ -300,7 +300,7 @@ class AdminController extends Controller
                 $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
                 $systemPreferences->AdvertsMaxClassifiedsPerUser = $data['maxClassifieds'];
                 $systemPreferences->AdvertsMaxClassifiedsPerUserEnabled = $data['enableMaxClassifieds'];
-                $systemPreferences->AdvertsMaxPhotos = $data['maxPhotos'];
+                $systemPreferences->AdvertsMaxPhotos = $data['maxPhotos'] || $data['maxPhotos'] == 0 ? $data['maxPhotos'] : 1;
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }
