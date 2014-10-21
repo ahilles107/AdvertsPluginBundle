@@ -19,6 +19,7 @@ namespace AHS\AdvertsPluginBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Settings form type
@@ -43,16 +44,39 @@ class SettingsType extends AbstractType
             ->add('valid_time', 'number', array(
                 'error_bubbling' => true,
                 'required' => false,
-                'precision' => 0
+                'precision' => 0,
+                'constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Range(array(
+                        'min' => 0,
+                    ))
+                )
             ))
             ->add('maxClassifieds', 'number', array(
                 'error_bubbling' => true,
                 'required' => true,
-                'precision' => 0
+                'precision' => 0,
+                'constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Range(array(
+                        'min' => 0,
+                    ))
+                )
             ))
             ->add('enableMaxClassifieds', 'checkbox', array(
                 'error_bubbling' => true,
                 'required' => false
+            ))
+            ->add('maxPhotos', 'number', array(
+                'error_bubbling' => true,
+                'required' => true,
+                'precision' => 0,
+                'constraints' => array(
+                    new Assert\NotBlank(),
+                    new Assert\Range(array(
+                        'min' => 0,
+                    ))
+                )
             ));
     }
 

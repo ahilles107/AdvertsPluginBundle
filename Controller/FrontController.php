@@ -355,9 +355,9 @@ class FrontController extends Controller
             }
         }
 
-        // allow only 1 photo to be uploaded
+        // allow only 1 photo to be uploaded (counting from 0)
         $photosFromSession = $request->getSession()->get('announcement_photos', array());
-        if (count($photosFromSession) > 0) {
+        if (count($photosFromSession) > (int) ($systemPreferences->AdvertsMaxPhotos - 1)) {
             $result = array(
                 'announcementPhotos' => $this->processPhotos($request),
                 'errors' => $translator->trans('ads.error.cantaddimages'),
