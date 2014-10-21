@@ -171,7 +171,10 @@ class AdminController extends Controller
             $classified->setValidTo(new \DateTime());
         }
 
-        $form = $this->createForm(new AnnouncementType(), $classified, array('translator' => $translator));
+        $form = $this->createForm(new AnnouncementType(), $classified, array(
+            'translator' => $translator,
+            'config' => $this->container->parameters['purifier'],
+        ));
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
@@ -287,6 +290,7 @@ class AdminController extends Controller
             'enableNotify' => $systemPreferences->AdvertsEnableNotify == "1" ? true : false,
             'maxClassifieds' => $systemPreferences->AdvertsMaxClassifiedsPerUser,
             'enableMaxClassifieds' => $systemPreferences->AdvertsMaxClassifiedsPerUserEnabled == "1" ? true : false,
+            'maxPhotos' => $systemPreferences->AdvertsMaxPhotos ? $systemPreferences->AdvertsMaxPhotos : 1
         ));
 
         if ($request->isMethod('POST')) {
@@ -299,6 +303,7 @@ class AdminController extends Controller
                 $systemPreferences->AdvertsEnableNotify = $data['enableNotify'];
                 $systemPreferences->AdvertsMaxClassifiedsPerUser = $data['maxClassifieds'];
                 $systemPreferences->AdvertsMaxClassifiedsPerUserEnabled = $data['enableMaxClassifieds'];
+                $systemPreferences->AdvertsMaxPhotos = $data['maxPhotos'] || $data['maxPhotos'] == 0 ? $data['maxPhotos'] : 1;
 
                 $this->get('session')->getFlashBag()->add('success', $translator->trans('ads.success.saved'));
             }
