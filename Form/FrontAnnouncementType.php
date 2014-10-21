@@ -52,7 +52,7 @@ class FrontAnnouncementType extends AbstractType
             $translator = $options['translator'];
         }
 
-        $transformer = new DescriptionToPurifiedTransformer();
+        $transformer = new DescriptionToPurifiedTransformer($options['config']);
 
         $builder
             ->add('name', null, array(
@@ -116,6 +116,7 @@ class FrontAnnouncementType extends AbstractType
 
         $resolver->setOptional(array(
             'translator',
+            'config'
         ));
     }
 

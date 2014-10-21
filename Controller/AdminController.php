@@ -168,7 +168,10 @@ class AdminController extends Controller
             $classified->setValidTo(new \DateTime());
         }
 
-        $form = $this->createForm(new AnnouncementType(), $classified, array('translator' => $translator));
+        $form = $this->createForm(new AnnouncementType(), $classified, array(
+            'translator' => $translator,
+            'config' => $this->container->parameters['purifier'],
+        ));
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);

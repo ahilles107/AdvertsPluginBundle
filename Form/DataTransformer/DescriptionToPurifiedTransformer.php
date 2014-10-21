@@ -18,7 +18,6 @@ namespace AHS\AdvertsBundle\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use Acme\TaskBundle\Entity\Issue;
 
 class DescriptionToPurifiedTransformer implements DataTransformerInterface
 {
@@ -31,19 +30,20 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
     /**
      * Construct
      */
-    public function __construct()
+    public function __construct($purifierConfig = array())
     {
         $config = \HTMLPurifier_Config::createDefault();
-        $config->set('AutoFormat.Linkify', true);
-        $config->set('AutoFormat.AutoParagraph', true);
-        $config->set('HTML.Allowed', 'a[href], p');
+        $config->set('AutoFormat.Linkify', $purifierConfig['linkify']);
+        $config->set('AutoFormat.AutoParagraph', $purifierConfig['autoparagraph']);
+        $config->set('HTML.Allowed', $purifierConfig['allowedhtml']);
         $this->purifier = new \HTMLPurifier($config);
     }
 
     /**
-     * Transforms description string to its original string.
+     * Transforms purified description string to its original string.
      *
-     * @param  Issue|null $issue
+     * @param string $description
+     *
      * @return string
      */
     public function transform($description)

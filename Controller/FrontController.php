@@ -87,7 +87,11 @@ class FrontController extends Controller
         $announcement = new Announcement();
         $publicationService = $this->container->get('newscoop_newscoop.publication_service');
 
-        $form = $this->createForm(new FrontAnnouncementType(), $announcement, array('translator' => $translator));
+        $form = $this->createForm(new FrontAnnouncementType(), $announcement, array(
+            'translator' => $translator,
+            'config' => $this->container->parameters['purifier'],
+        ));
+
         $categories = $this->getCategories();
 
         $errors = array();
@@ -192,7 +196,10 @@ class FrontController extends Controller
         $em = $this->container->get('em');
         $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
 
-        $form = $this->createForm(new FrontAnnouncementType(), $announcement, array('translator' => $translator));
+        $form = $this->createForm(new FrontAnnouncementType(), $announcement, array(
+            'translator' => $translator,
+            'config' => $this->container->parameters['purifier'],
+        ));
         $categories = $this->getCategories();
 
         $this->restoreSessionFromDatabase($request, $announcement->getId());

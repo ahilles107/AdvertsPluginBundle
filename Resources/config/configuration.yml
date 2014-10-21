@@ -9,3 +9,8 @@ parameters:
         thumbnail_max_size: "64"
         cache_url: "images/ahs_images/cache"
         cache_path: "%application_path%/../images/ahs_images/cache/"
+
+    purifier:
+        linkify: true
+        autoparagraph: true
+        allowedhtml: "a[href], p"
