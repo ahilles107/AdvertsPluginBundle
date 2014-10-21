@@ -34,8 +34,7 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
     {
         $config = \HTMLPurifier_Config::createDefault();
         $config->set('AutoFormat.Linkify', $purifierConfig['linkify']);
-        $config->set('AutoFormat.AutoParagraph', $purifierConfig['autoparagraph']);
-        $config->set('HTML.Allowed', $purifierConfig['allowedhtml']);
+        $config->set('HTML.Allowed', 'a[href]');
         $this->purifier = new \HTMLPurifier($config);
     }
 
@@ -71,6 +70,6 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
             throw new TransformationFailedException("Description field is empty!");
         }
 
-        return nl2br($this->purifier->purify($description));
+        return $this->purifier->purify($description);
     }
 }

@@ -12,5 +12,4 @@ parameters:
 
     purifier:
         linkify: true
-        autoparagraph: true
         allowedhtml: "a[href], p"
