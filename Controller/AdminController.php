@@ -52,11 +52,11 @@ class AdminController extends Controller
 
             return array(
                 'categories' => $categories,
-                'allAdsCount' => $adsService->countBy(),
-                'activeAdsCount' => $adsService->countBy(array('is_active' => true)),
-                'inactiveAdsCount' => $adsService->countBy(array('is_active' => false)),
-                'adsLookingCount' => $adsService->countBy(array('type' => Announcement::TYPE_LOOKING)),
-                'adsOfferingCount' => $adsService->countBy(array('type' => Announcement::TYPE_OFFERING)),
+                'allAdsCount' => $adsService->countBy(array('removed' => false)),
+                'activeAdsCount' => $adsService->countBy(array('is_active' => true, 'removed' => false)),
+                'inactiveAdsCount' => $adsService->countBy(array('is_active' => false, 'removed' => false)),
+                'adsLookingCount' => $adsService->countBy(array('type' => Announcement::TYPE_LOOKING, 'removed' => false)),
+                'adsOfferingCount' => $adsService->countBy(array('type' => Announcement::TYPE_OFFERING, 'removed' => false)),
             );
         }
     }
@@ -79,12 +79,13 @@ class AdminController extends Controller
         }
 
         $criteria = $this->processRequest($request);
-        $adsCount = $adsService->countBy(array('is_active' => true));
-        $adsInactiveCount = $adsService->countBy(array('is_active' => false));
-        $adsLookingCount = $adsService->countBy(array('type' => Announcement::TYPE_LOOKING));
-        $adsOfferingCount = $adsService->countBy(array('type' => Announcement::TYPE_OFFERING));
+        $adsCount = $adsService->countBy(array('is_active' => true, 'removed' => false));
+        $adsInactiveCount = $adsService->countBy(array('is_active' => false, 'removed' => false));
+        $adsLookingCount = $adsService->countBy(array('type' => Announcement::TYPE_LOOKING, 'removed' => false));
+        $adsOfferingCount = $adsService->countBy(array('type' => Announcement::TYPE_OFFERING, 'removed' => false));
+        $removedAdsCount = $adsService->countBy(array('removed' => true));
 
-        $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount, $adsLookingCount, $adsOfferingCount);
+        $cacheKey = array('classifieds__'.md5(serialize($criteria)), $adsCount, $adsInactiveCount, $adsLookingCount, $adsOfferingCount, $removedAdsCount);
         if ($cacheService->contains($cacheKey)) {
             $responseArray = $cacheService->fetch($cacheKey);
         } else {
@@ -164,8 +165,10 @@ class AdminController extends Controller
         }
 
         $translator = $this->get('translator');
-        $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->findOneById($id);
+        $classified = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneBy(array(
+            'id' => $id,
+            'removed' => false
+        ));
 
         if ($classified->getValidTo() < $classified->getCreatedAt()) {
             $classified->setValidTo(new \DateTime());

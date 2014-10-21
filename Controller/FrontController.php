@@ -80,6 +80,7 @@ class FrontController extends Controller
             ->select('count(a)')
             ->where('a.announcementStatus = true')
             ->andWhere('a.user = :user')
+            ->andWhere('a.removed = false')
             ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult();
@@ -194,7 +195,10 @@ class FrontController extends Controller
         }
 
         $em = $this->container->get('em');
-        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneBy(array(
+            'id' => $id,
+            'removed' => false
+        ));
 
         $form = $this->createForm(new FrontAnnouncementType(), $announcement, array(
             'translator' => $translator,
@@ -249,25 +253,36 @@ class FrontController extends Controller
         $em = $this->container->get('em');
         $templatesService = $this->get('newscoop.templates.service');
 
-        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($id);
-
-        $userSevice = $this->container->get('user.list');
-        $user = $userSevice->findOneBy(array(
-            'id' => $announcement->getUser()->getNewscoopUserId()
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneBy(array(
+            'id' => $id,
+            'removed' => false
         ));
 
-        $newscoopUser = new \MetaUser($user);
-        $announcement->addRead();
-        $em->flush();
+        if ($announcement) {
+            $userSevice = $this->container->get('user.list');
+            $user = $userSevice->findOneBy(array(
+                'id' => $announcement->getUser()->getNewscoopUserId()
+            ));
 
-        return new Response($templatesService->fetchTemplate(
-            '_ahs_adverts/show.tpl',
-            array(
-                'announcement' => $announcement,
-                'announcementPhotos' => $this->processPhotos($request, $announcement),
-                'newscoopUser' => $newscoopUser
-            )
-        ));
+            $newscoopUser = new \MetaUser($user);
+            $announcement->addRead();
+            $em->flush();
+
+            return new Response($templatesService->fetchTemplate(
+                '_ahs_adverts/show.tpl',
+                array(
+                    'announcement' => $announcement,
+                    'announcementPhotos' => $this->processPhotos($request, $announcement),
+                    'newscoopUser' => $newscoopUser
+                )
+            ));
+        }
+
+        return new Response(
+            $templatesService->fetchTemplate("404.tpl"),
+            200,
+            array('Content-Type' => 'text/html')
+        );
     }
 
     /**
@@ -286,6 +301,7 @@ class FrontController extends Controller
             ->createQueryBuilder('a')
             ->andWhere('a.category = :category')
             ->andWhere('a.is_active = true')
+            ->andWhere('a.removed = false')
             ->andWhere('a.created_at >= :validDate')
             ->setParameters(array('category' => $currentCategory->getId(), 'validDate' => $validDate))
             ->orderBy('a.created_at', 'DESC')
@@ -345,6 +361,7 @@ class FrontController extends Controller
             ->select('count(a)')
             ->where('a.announcementStatus = true')
             ->andWhere('a.user = :user')
+            ->andWhere('a.removed = false')
             ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult();
@@ -425,8 +442,6 @@ class FrontController extends Controller
             if ($photo['id'] == $photoIdToRemove) {
                 unset($announcementPhotos[$key]);
                 $request->getSession()->set('announcement_photos', $announcementPhotos);
-
-                // remove image from newscoop
                 $photoEntityToRemove = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
                     ->createQueryBuilder('i')
                     ->andWhere('i.id = (:id)')
@@ -486,6 +501,7 @@ class FrontController extends Controller
             ->select('count(a)')
             ->where('a.announcementStatus = true')
             ->andWhere('a.user = :user')
+            ->andWhere('a.removed = false')
             ->setParameter('user', $classifiedUser)
             ->getQuery()
             ->getSingleScalarResult();
@@ -560,6 +576,7 @@ class FrontController extends Controller
         $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
             ->createQueryBuilder('i')
             ->andWhere('i.id IN (:ids)')
+            ->andWhere('i.removed = false')
             ->setParameter('ids', $ids)
             ->getQuery()
             ->getResult();
@@ -576,10 +593,15 @@ class FrontController extends Controller
     {
         $em = $this->container->get('em');
 
-        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneById($announcementId);
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneBy(array(
+            'id' => $announcementId,
+            'removed' => false
+        ));
+
         $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
             ->createQueryBuilder('i')
             ->andWhere('i.announcement =:announcement')
+            ->andWhere('i.removed = false')
             ->setParameter('announcement', $announcement)
             ->getQuery()
             ->getResult();
@@ -614,6 +636,7 @@ class FrontController extends Controller
             $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
                 ->createQueryBuilder('i')
                 ->andWhere('i.id IN (:ids)')
+                ->andWhere('i.removed = false')
                 ->setParameter('ids', $ids)
                 ->getQuery()
                 ->getResult();
@@ -621,6 +644,7 @@ class FrontController extends Controller
             $photos = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Image')
                 ->createQueryBuilder('i')
                 ->andWhere('i.announcement =:announcement')
+                ->andWhere('i.removed = false')
                 ->setParameter('announcement', $announcement)
                 ->getQuery()
                 ->getResult();

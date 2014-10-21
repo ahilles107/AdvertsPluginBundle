@@ -68,6 +68,12 @@ class Announcement
     protected $user;
 
     /**
+     * @ORM\Column(type="integer", name="user_id")
+     * @var integer
+     */
+    protected $userId;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Newscoop\Entity\Publication")
      * @ORM\JoinColumn(name="IdPublication", referencedColumnName="Id")
      * @var \Newscoop\Entity\Publication
@@ -134,6 +140,12 @@ class Announcement
      */
     protected $is_active;
 
+    /**
+     * @ORM\Column(type="boolean", name="removed")
+     * @var string
+     */
+    protected $removed;
+
     public function __construct()
     {
         $this->setCreatedAt(new \DateTime());
@@ -141,6 +153,7 @@ class Announcement
         $this->is_active = true;
         $this->type = Announcement::TYPE_OFFERING;
         $this->announcementStatus = true;
+        $this->removed = false;
     }
 
     /**
@@ -551,6 +564,30 @@ class Announcement
     public function setAnnouncementStatus($announcementStatus)
     {
         $this->announcementStatus = $announcementStatus;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of removed.
+     *
+     * @return string
+     */
+    public function getRemoved()
+    {
+        return $this->removed;
+    }
+
+    /**
+     * Sets the value of removed.
+     *
+     * @param string $removed the removed
+     *
+     * @return self
+     */
+    public function setRemoved($removed)
+    {
+        $this->removed = $removed;
 
         return $this;
     }

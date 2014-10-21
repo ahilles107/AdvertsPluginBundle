@@ -39,7 +39,8 @@ class AnnouncementRepository extends EntityRepository
         $list = new ListResult();
 
         $qb->select('a, c')
-            ->leftJoin('a.category', 'c');
+            ->leftJoin('a.category', 'c')
+            ->where('a.removed = false');
 
         if (!empty($criteria->status)) {
             if (count($criteria->status) > 1) {
