@@ -283,7 +283,7 @@ class FrontController extends Controller
                     'announcementPhotos' => $this->processPhotos($request, $announcement),
                     'newscoopUser' => $newscoopUser
                 )
-            ));
+            ), 200, array('Content-Type' => 'text/html'));
         }
 
         return new Response(
@@ -482,7 +482,6 @@ class FrontController extends Controller
             'removed' => false
         ));
 
-        //ladybug_dump($request->get('_route'));die;
         $templatesService = $this->get('newscoop.templates.service');
 
         return new Response($templatesService->fetchTemplate(
