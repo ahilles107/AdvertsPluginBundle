@@ -12,11 +12,15 @@
 /**
  * @package AHS\AdvertsPluginBundle
  * @author Paweł Mikołajczuk <mikolajczuk.protected@gmail.com>
+ * @author Rafał Muszyński <rafal.muszynski@sourcefabric.org>
  */
 
 namespace AHS\AdvertsPluginBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\ExpressionBuilder;
 
 /**
  * Category entity
@@ -54,7 +58,7 @@ class Category
     public function __construct()
     {
         $this->setCreatedAt(new \DateTime());
-        $this->announcements = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->announcements = new ArrayCollection();
     }
 
     /**
@@ -86,7 +90,12 @@ class Category
 
     public function getAnnouncements()
     {
-        return $this->announcements;
+        $eb = new ExpressionBuilder();
+        $expr = $eb->eq('removed', false);
+        $criteria = new Criteria($expr);
+        $announcements = new ArrayCollection($this->announcements->toArray());
+
+        return $announcements->matching($criteria);
     }
 
     public function setAnnouncement(\AHS\AdvertsPluginBundle\Entity\Announcement $announcement)
