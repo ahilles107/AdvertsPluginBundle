@@ -13,3 +13,4 @@ parameters:
     purifier:
         linkify: true
         allowedhtml: "a[href], p"
+        targetblank: true
