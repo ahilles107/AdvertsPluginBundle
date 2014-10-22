@@ -126,10 +126,17 @@ class CategoriesController extends Controller
 
         $qbCount = clone $qb;
         $totalCategories = (int) $qbCount->select('count(c)')->getQuery()->getSingleScalarResult();
+        $sortByCount = false;
+        $sortType = 'desc';
 
         if ($request->query->has('sorts')) {
             foreach ($request->get('sorts') as $key => $value) {
-                $qb->orderBy('c.'.$key, $value == '-1' ? 'desc' : 'asc');
+                if ($key !== 'announcements') {
+                    $qb->orderBy('c.'.$key, $value == '-1' ? 'desc' : 'asc');
+                } else {
+                    $sortByCount = true;
+                    $sortType = $value == '-1' ? 'desc' : 'asc';
+                }
             }
         }
 
@@ -147,7 +154,19 @@ class CategoriesController extends Controller
             $qb->setFirstResult($request->query->get('offset'));
         }
 
-        return array($qb->getQuery()->getResult(), $totalCategories);
+        $result = $qb->getQuery()->getResult();
+
+        if ($sortByCount) {
+            usort($result, function ($x, $y) use ($sortType) {
+                if ($sortType == 'desc') {
+                    return $y->getAnnouncements()->count() - $x->getAnnouncements()->count();
+                } else {
+                    return $x->getAnnouncements()->count() - $y->getAnnouncements()->count();
+                }
+            });
+        }
+
+        return array($result, $totalCategories);
     }
 
     /**
@@ -217,20 +236,10 @@ class CategoriesController extends Controller
      */
     private function processCategory($category, $zendRouter)
     {
-        $em = $this->get('em');
-
-        $countByCategory = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')
-            ->createQueryBuilder('c')
-            ->select('count(c)')
-            ->where('c.category = :category')
-            ->setParameter('category', $category->getId())
-            ->getQuery()
-            ->getSingleScalarResult();
-
         return array(
             'id' => $category->getId(),
             'name' => $category->getName(),
-            'announcements' => $countByCategory,
+            'announcements' => $category->getAnnouncements()->count(),
             'created' => $category->getCreatedAt(),
             'links' => array(
                 array(
