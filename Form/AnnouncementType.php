@@ -21,6 +21,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use AHS\AdvertsBundle\Form\DataTransformer\DescriptionToPurifiedTransformer;
+use AHS\AdvertsBundle\Form\DataTransformer\StringToTextTransformer;
 
 /**
  * Announcement form type
@@ -52,13 +53,14 @@ class AnnouncementType extends AbstractType
         }
 
         $transformer = new DescriptionToPurifiedTransformer($options['config']);
+        $nameTransformer = new StringToTextTransformer();
 
         $builder
-            ->add('name', null, array(
+            ->add($builder->create('name', null, array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.name'),
                 'constraints' => array(new Assert\NotBlank(array('message' => $translator->trans('ads.error.name'))))
-            ))
+            ))->addModelTransformer($nameTransformer))
             ->add($builder->create('description', 'textarea', array(
                 'error_bubbling' => true,
                 'label' => $translator->trans('ads.label.description'),
