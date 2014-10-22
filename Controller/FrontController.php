@@ -95,6 +95,10 @@ class FrontController extends Controller
 
         $categories = $this->getCategories();
 
+        if ($session->has('announcement_id')) {
+            $session->remove('announcement_id');
+        }
+
         $errors = array();
         if ($systemPreferences->AdvertsMaxClassifiedsPerUserEnabled) {
             if ((int) $activeAnnouncementsCount >= (int) $systemPreferences->AdvertsMaxClassifiedsPerUser && !$session->get('ahs_adverts_nolimit')) {
@@ -144,6 +148,10 @@ class FrontController extends Controller
 
                 if ($session->has('ahs_adverts_nolimit')) {
                     $session->remove('ahs_adverts_nolimit');
+                }
+
+                if ($session->has('announcement_photos')) {
+                    $session->remove('announcement_photos');
                 }
 
                 return new RedirectResponse($this->generateUrl(
@@ -204,9 +212,9 @@ class FrontController extends Controller
             'translator' => $translator,
             'config' => $this->container->parameters['purifier'],
         ));
-        $categories = $this->getCategories();
 
-        $this->restoreSessionFromDatabase($request, $announcement->getId());
+        $categories = $this->getCategories();
+        $request->getSession()->set('announcement_id', $id);
         $errors = array();
         if ($request->isMethod('POST')) {
             $form->bind($request);
@@ -469,12 +477,18 @@ class FrontController extends Controller
     public function renderPhotosAction(Request $request)
     {
         $em = $this->container->get('em');
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneBy(array(
+            'id' => $request->getSession()->get('announcement_id'),
+            'removed' => false
+        ));
+
+        //ladybug_dump($request->get('_route'));die;
         $templatesService = $this->get('newscoop.templates.service');
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/_tpl/renderPhotos.tpl',
             array(
-                'announcementPhotos' => $this->processPhotos($request),
+                'announcementPhotos' => $this->processPhotos($request, $announcement),
                 'errors' => array()
             )
         ), 200, array('Content-Type' => 'text/html'));

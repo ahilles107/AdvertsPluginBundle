@@ -70,6 +70,6 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
             throw new TransformationFailedException("Description field is empty!");
         }
 
-        return $this->purifier->purify($description);
+        return $this->purifier->purify(strip_tags($description));
     }
 }
