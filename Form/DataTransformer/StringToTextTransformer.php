@@ -19,7 +19,7 @@ namespace AHS\AdvertsBundle\Form\DataTransformer;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 
-class DescriptionToPurifiedTransformer implements DataTransformerInterface
+class StringToTextTransformer implements DataTransformerInterface
 {
     /**
      * HTML Purifier
@@ -33,43 +33,40 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
     public function __construct($purifierConfig = array())
     {
         $config = \HTMLPurifier_Config::createDefault();
-        $config->set('AutoFormat.Linkify', $purifierConfig['linkify']);
-        $config->set('HTML.Allowed', $purifierConfig['allowedhtml']);
         $this->purifier = new \HTMLPurifier($config);
     }
 
     /**
-     * Transforms purified description string to its original string.
+     * Transforms string to normal text without html tags.
      *
-     * @param string $description
+     * @param string $string
      *
      * @return string
      */
-    public function transform($description)
+    public function transform($string)
     {
-
-        if (null === $description) {
+        if (null === $string) {
             return "";
         }
 
-        return strip_tags($this->purifier->purify($description));
+        return strip_tags($this->purifier->purify($string));
     }
 
     /**
-     * Transforms description string to purified description string.
+     * Transforms string to purified string.
      *
-     * @param string $description
+     * @param string $string
      *
      * @return string
      *
-     * @throws TransformationFailedException if $description is null.
+     * @throws TransformationFailedException if $string is null.
      */
-    public function reverseTransform($description)
+    public function reverseTransform($string)
     {
-        if (null === $description) {
-            throw new TransformationFailedException("Description field is empty!");
+        if (null === $string) {
+            throw new TransformationFailedException("Field is empty!");
         }
 
-        return $this->purifier->purify($description);
+        return strip_tags($this->purifier->purify($string));
     }
 }
