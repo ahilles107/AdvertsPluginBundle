@@ -105,9 +105,9 @@
             <th data-dynatable-column="publication">{{ 'ads.label.publication'|trans }}</th>
             <th data-dynatable-column="price">{{ 'ads.label.price'|trans }}</th>
             <th data-dynatable-column="reads">{{ 'ads.label.reads'|trans }}</th>
-            <th data-dynatable-column="username">{{ 'ads.label.username'|trans }}</th>
-            <th data-dynatable-column="created">{{ 'ads.created'|trans }}</th>
-            <th data-dynatable-column="valid_to">{{ 'ads.label.valid_to'|trans }}</th>
+            <th data-dynatable-column="userId">{{ 'ads.label.username'|trans }}</th>
+            <th data-dynatable-column="created_at">{{ 'ads.created'|trans }}</th>
+            <th data-dynatable-column="validTo">{{ 'ads.label.valid_to'|trans }}</th>
             {% if hasPermission('plugin_classifieds_edit') or hasPermission('plugin_classifieds_delete') or hasPermission('plugin_classifieds_activate') or hasPermission('plugin_classifieds_deactivate') %}
             <th style="width: 116px;">{{ 'ads.table.actions.actions'|trans }}</th>
             {% endif %}
@@ -144,7 +144,7 @@
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4 class="modal-title">{{ 'ads.label.description'|trans }}</h4>
         </div>
-        <div class="modal-body" style="font-size: 14px;">
+        <div class="modal-body classified-description" style="font-size: 14px;">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'ads.btn.cancel'|trans }}</button>
@@ -239,7 +239,7 @@
                     }
                 }
 
-                if (column.id == 'username') {
+                if (column.id == 'userId') {
                     column.attributeWriter = function(record) {
                     	return "<a href="+record.username.href+">"+record.username.username+"</a>";
                     }
@@ -251,13 +251,13 @@
                     }
                 }
 
-                if (column.id == 'created') {
+                if (column.id == 'created_at') {
                     column.attributeWriter = function(record) {
                         return record.created.date;
                     }
                 }
 
-                if (column.id == 'valid_to') {
+                if (column.id == 'validTo') {
                     column.attributeWriter = function(record) {
                         return record.valid_to.date;
                     }

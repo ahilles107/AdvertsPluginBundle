@@ -49,11 +49,18 @@ class AnnouncementsService
     public function deleteClassified($id)
     {
         $em = $this->container->get('em');
-        $classified = $this->getRepository()
-            ->findOneById($id);
+        $classified = $this->getRepository()->findOneBy(array(
+            'id' => $id,
+            'removed' => false
+        ));
 
         if ($classified) {
-            $em->remove($classified);
+            $classified->setRemoved(true);
+
+            foreach ($classified->getImages() as $image) {
+                $this->deleteClassifiedImage($image->getId());
+            }
+
             $em->flush();
 
             return true;
@@ -99,7 +106,7 @@ class AnnouncementsService
             ->findOneById($id);
 
         if ($image) {
-            $em->remove($image);
+            $image->setRemoved(true);
             $em->flush();
 
             return true;

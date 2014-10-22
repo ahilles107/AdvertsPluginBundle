@@ -17,7 +17,6 @@
 namespace AHS\AdvertsPluginBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Category entity
@@ -42,7 +41,7 @@ class Category
     protected $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", mappedBy="category")
+     * @ORM\OneToMany(targetEntity="AHS\AdvertsPluginBundle\Entity\Announcement", mappedBy="category", cascade={"remove"})
      */
     protected $announcements;
 
@@ -77,7 +76,6 @@ class Category
     {
         return $this->slugify($this->name);
     }
-
 
     public function setName($name)
     {

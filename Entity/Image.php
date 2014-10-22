@@ -65,9 +65,16 @@ class Image
      */
     protected $created_at;
 
+    /**
+     * @ORM\Column(type="boolean", name="removed")
+     * @var string
+     */
+    protected $removed;
+
     public function __construct()
     {
         $this->setCreatedAt(new \DateTime());
+        $this->removed = false;
     }
 
     /**
@@ -160,6 +167,30 @@ class Image
     public function setThumbnailPath($thumbnailPath)
     {
         $this->thumbnailPath = $thumbnailPath;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of removed.
+     *
+     * @return string
+     */
+    public function getRemoved()
+    {
+        return $this->removed;
+    }
+
+    /**
+     * Sets the value of removed.
+     *
+     * @param string $removed the removed
+     *
+     * @return self
+     */
+    public function setRemoved($removed)
+    {
+        $this->removed = $removed;
 
         return $this;
     }
