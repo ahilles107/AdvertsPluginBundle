@@ -62,6 +62,7 @@ class FrontController extends Controller
         $em = $this->container->get('em');
         $newscoopUser = $userService->getCurrentUser();
         $limitExhausted = false;
+        $isValid = true;
 
         if (!$newscoopUser) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -160,6 +161,8 @@ class FrontController extends Controller
                         'id' => $announcement->getId(),
                     )
                 ));
+            } else {
+                $isValid = false;
             }
         }
 
@@ -171,7 +174,9 @@ class FrontController extends Controller
             $session->remove('ahs_adverts_cantadd');
         }
 
-        $session->set('announcement_photos', array());
+        if ($isValid) {
+            $session->set('announcement_photos', array());
+        }
 
         return new Response($templatesService->fetchTemplate(
             '_ahs_adverts/add.tpl',
@@ -290,7 +295,7 @@ class FrontController extends Controller
                     'announcementPhotos' => $this->processPhotos($request, $announcement),
                     'newscoopUser' => $newscoopUser
                 )
-            ), 200,array('Content-Type' => 'text/html'));
+            ), 200, array('Content-Type' => 'text/html'));
         }
 
         return new Response(

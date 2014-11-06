@@ -34,8 +34,13 @@ class ContactController extends Controller
     {
         $templatesService = $this->get('newscoop.templates.service');
         $emailService = $this->get('email');
+        $userService = $this->get('user');
+        $user = $userService->getCurrentUser();
         $em = $this->get('em');
         $status = false;
+        if (!$user) {
+            return new JsonResponse(array('status' => $status), 403);
+        }
 
         try {
             $form = $this->createForm(new ContactType(), array());
