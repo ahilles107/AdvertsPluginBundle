@@ -81,7 +81,7 @@ class Announcement
     protected $publication;
 
     /**
-     * @ORM\Column(type="float", name="price")
+     * @ORM\Column(type="float", name="price", nullable=true)
      * @var string
      */
     protected $price;

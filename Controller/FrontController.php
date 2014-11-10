@@ -62,6 +62,7 @@ class FrontController extends Controller
         $em = $this->container->get('em');
         $newscoopUser = $userService->getCurrentUser();
         $limitExhausted = false;
+        $isValid = true;
 
         if (!$newscoopUser) {
             return new RedirectResponse($this->container->get('zend_router')->assemble(array(
@@ -160,6 +161,8 @@ class FrontController extends Controller
                         'id' => $announcement->getId(),
                     )
                 ));
+            } else {
+                $isValid = false;
             }
         }
 
@@ -169,6 +172,10 @@ class FrontController extends Controller
 
         if ($session->has('ahs_adverts_cantadd')) {
             $session->remove('ahs_adverts_cantadd');
+        }
+
+        if ($isValid) {
+            $session->set('announcement_photos', array());
         }
 
         return new Response($templatesService->fetchTemplate(
@@ -214,7 +221,12 @@ class FrontController extends Controller
         ));
 
         $categories = $this->getCategories();
+        $firstImage = $announcement->getFirstImage();
+        if (!empty($firstImage)) {
+            $request->getSession()->set('announcement_photos', array(array('id' => $firstImage['id'])));
+        }
         $request->getSession()->set('announcement_id', $id);
+
         $errors = array();
         if ($request->isMethod('POST')) {
             $form->bind($request);
@@ -380,11 +392,26 @@ class FrontController extends Controller
             }
         }
 
+        $announcement = $em->getRepository('AHS\AdvertsPluginBundle\Entity\Announcement')->findOneBy(array(
+            'id' => $request->getSession()->get('announcement_id'),
+            'removed' => false
+        ));
+
+        $hasPhotos = false;
+        $images = array();
+        if ($announcement) {
+            $images = $announcement->getImages();
+        }
+
+        if (!empty($images) && count($images) > (int) ($systemPreferences->AdvertsMaxPhotos) - 1) {
+            $hasPhotos = true;
+        }
+
         $photosFromSession = $request->getSession()->get('announcement_photos', array());
-        if (count($photosFromSession) > (int) ($systemPreferences->AdvertsMaxPhotos) - 1) {
+        if (count($photosFromSession) > (int) ($systemPreferences->AdvertsMaxPhotos) - 1 || $hasPhotos) {
             $result = array(
-                'announcementPhotos' => $this->processPhotos($request),
                 'errors' => $translator->trans('ads.error.cantaddimages'),
+                'announcementPhotos' => $hasPhotos ? $this->processPhotos($request, $announcement) : $this->processPhotos($request)
             );
 
             return new Response($templatesService->fetchTemplate(

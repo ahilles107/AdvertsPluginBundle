@@ -83,14 +83,11 @@ class FrontAnnouncementType extends AbstractType
             ))
             ->add('price', null, array(
                 'constraints' => array(
-                    new Assert\NotBlank(),
                     new Assert\Range(array(
                         'min' => 0,
                     )),
-                    new Assert\Type(array(
-                        'type' => "float",
-                    ))
-                )
+                ),
+                'required' => false,
             ))
             ->add('type', 'choice', array(
                 'choices' => array(
