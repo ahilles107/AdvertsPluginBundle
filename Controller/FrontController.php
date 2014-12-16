@@ -91,7 +91,7 @@ class FrontController extends Controller
 
         $form = $this->createForm(new FrontAnnouncementType(), $announcement, array(
             'translator' => $translator,
-            'config' => $this->container->parameters['purifier'],
+            'config' => $this->container->getParameter('purifier'),
         ));
 
         $categories = $this->getCategories();
@@ -217,7 +217,7 @@ class FrontController extends Controller
 
         $form = $this->createForm(new FrontAnnouncementType(), $announcement, array(
             'translator' => $translator,
-            'config' => $this->container->parameters['purifier'],
+            'config' => $this->container->getParameter('purifier'),
         ));
 
         $categories = $this->getCategories();
