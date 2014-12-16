@@ -176,7 +176,7 @@ class AdminController extends Controller
 
         $form = $this->createForm(new AnnouncementType(), $classified, array(
             'translator' => $translator,
-            'config' => $this->container->parameters['purifier'],
+            'config' => $this->container->getParameter('purifier'),
         ));
 
         if ($request->isMethod('POST')) {
