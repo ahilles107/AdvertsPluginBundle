@@ -14,3 +14,4 @@ parameters:
         linkify: true
         allowedhtml: "a[href], p"
         targetblank: true
+        cachepath: "%application_path%/../cache"

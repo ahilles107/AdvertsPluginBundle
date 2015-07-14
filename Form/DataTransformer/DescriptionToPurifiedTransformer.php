@@ -36,6 +36,7 @@ class DescriptionToPurifiedTransformer implements DataTransformerInterface
         $config->set('AutoFormat.Linkify', $purifierConfig['linkify']);
         $config->set('HTML.Allowed', $purifierConfig['allowedhtml']);
         $config->set('HTML.TargetBlank', $purifierConfig['targetblank']);
+        $config->set('Cache.SerializerPath', $purifierConfig['cachepath']);
         $this->purifier = new \HTMLPurifier($config);
     }
 
