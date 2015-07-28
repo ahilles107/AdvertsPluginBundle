@@ -54,7 +54,7 @@ class FrontAnnouncementType extends AbstractType
         }
 
         $transformer = new DescriptionToPurifiedTransformer($options['config']);
-        $nameTransformer = new StringToTextTransformer();
+        $nameTransformer = new StringToTextTransformer($options['config']);
 
         $builder
             ->add($builder->create('name', null, array(

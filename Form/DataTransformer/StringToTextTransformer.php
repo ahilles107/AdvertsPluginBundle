@@ -33,6 +33,7 @@ class StringToTextTransformer implements DataTransformerInterface
     public function __construct($purifierConfig = array())
     {
         $config = \HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', $purifierConfig['cachepath']);
         $this->purifier = new \HTMLPurifier($config);
     }
 
